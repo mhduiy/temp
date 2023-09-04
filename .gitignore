@@ -1,0 +1,9 @@
+build/
+.vscode/
+obj-x86_64-linux-gnu/
+debian/files
+debian/deepin-passkey.substvars
+debian/debhelper-build-stamp
+debian/tmp/
+debian/.debhelper/
+debian/deepin-passkey

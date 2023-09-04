@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[D-BUS Service]
+Name=com.deepin.Passkey
+Exec=/usr/bin/false
+User=root
+SystemdService=deepin-passkey.service

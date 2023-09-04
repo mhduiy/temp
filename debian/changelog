@@ -1,0 +1,5 @@
+deepin-passkey (1.0.0) unstable; urgency=medium
+
+  * support passkey
+
+ -- Tan Feng <tanfeng@uniontech.com>  Wed, 09 Aug 2023 15:06:52 +0800
