@@ -19,12 +19,13 @@ typedef struct _CredArgs
     int pinVerification;
     int userVerification;
     int debug;
-    int verbose; // 去掉？
+    int verbose;
     int nouser;
 } CredArgs;
 
 typedef struct _CredInfo
 {
+    char *name;
     char *publicKey;
     char *keyHandle;
     char *coseType;

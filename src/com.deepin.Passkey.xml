@@ -1,5 +1,9 @@
 <node>
     <interface name='com.deepin.Passkey'>
+        <method name='Claim'>
+        </method>
+        <method name='UnClaim'>
+        </method>
         <method name='GetPinStatus'>
             <arg name='support' direction='out' type='i'/>
             <arg name='exist' direction='out' type='i'/>
@@ -24,13 +28,15 @@
             <arg name='user' direction='in' type='s'/>
             <arg name='count' direction='out' type='i'/>
         </method>
+        <method name='GetCreds'>
+            <arg name='user' direction='in' type='s'/>
+            <arg name='creds' direction='out' type='as'/>
+        </method>
         <method name='GetDeviceCount'>
             <arg name='count' direction='out' type='i'/>
         </method>
         <method name='DeviceDetect'>
             <arg name='timeout' direction='in' type='i'/>
-            <arg name='stopWhenExist' direction='in' type='i'/>
-            <arg name='stopWhenNotExist' direction='in' type='i'/>
         </method>
         <signal name='ResetStatus'>
             <arg name='finish' type='i'></arg>

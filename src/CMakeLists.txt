@@ -1,8 +1,5 @@
 set(SECURITY_COMPILE_FLAGS "-W -Wall -fstack-protector-strong -D_FORTITY_SOURCE=1 -z noexecstack -pie -fPIC -z lazy")
 
-# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-# add_compile_definitions(DK_DEBUG_MODE)
-# endif()
 add_compile_definitions(_GNU_SOURCE)
 
 set(SERVICE "deepin-passkey")

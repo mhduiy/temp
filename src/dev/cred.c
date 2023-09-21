@@ -113,11 +113,6 @@ int dpk_dev_prepare_cred(const CredArgs *const args, fido_cred_t **credRes)
         appid = origin;
     }
 
-    // if (args->verbose) {
-    //     LOG(LOG_WARNING,  "Setting origin to %s", origin);
-    //     LOG(LOG_WARNING,  "Setting appid to %s", appid);
-    // }
-
     if ((callRet = fido_cred_set_rp(cred, origin, appid)) != FIDO_OK) {
         LOG(LOG_ERR, "error: fido_cred_set_rp (%d) %s", callRet, fido_strerr(callRet));
         goto end;
@@ -133,10 +128,6 @@ int dpk_dev_prepare_cred(const CredArgs *const args, fido_cred_t **credRes)
         LOG(LOG_ERR, "random_bytes failed");
         goto end;
     }
-
-    // for (size_t i = 0; i < sizeof(userid); i++)
-    //     LOG(LOG_WARNING,  "%02x", userid[i]);
-    // LOG(LOG_WARNING,  "\n");
 
     if ((callRet = fido_cred_set_user(cred, userid, sizeof(userid), user, user, NULL)) != FIDO_OK) {
         LOG(LOG_ERR, "error: fido_cred_set_user (%d) %s", callRet, fido_strerr(callRet));
@@ -384,10 +375,24 @@ end:
 
 void dk_dev_reset_cred(CredInfo *cred)
 {
-    free(cred->keyHandle);
-    free(cred->publicKey);
-    free(cred->coseType);
-    free(cred->attributes);
+    if (cred == NULL) {
+        return;
+    }
+    if (cred->name != NULL) {
+        free(cred->name);
+    }
+    if (cred->keyHandle != NULL) {
+        free(cred->keyHandle);
+    }
+    if (cred->publicKey != NULL) {
+        free(cred->publicKey);
+    }
+    if (cred->coseType != NULL) {
+        free(cred->coseType);
+    }
+    if (cred->attributes != NULL) {
+        free(cred->attributes);
+    }
     memset(cred, 0, sizeof(*cred));
 }
 
@@ -481,8 +486,9 @@ static bool parse_native_format(const char *userName, FILE *credFile, CredInfo *
                 LOG(LOG_WARNING, "Failed to parse credential");
                 continue;
             }
+            (&creds[*credsCount])->name = strdup(credName);
             (*credsCount)++;
-            if ((*credsCount) >= DEV_NUM_MAX) {
+            if ((*credsCount) >= CRED_NUM_MAX) {
                 LOG(LOG_ERR, "Found more than %d creds, ignoring the remaining ones", DEV_NUM_MAX);
                 break;
             }
@@ -648,46 +654,6 @@ static void parse_opts(const AssertArgs *args, struct opts *opts)
         opts->pin = FIDO_OPT_OMIT;
     }
 }
-
-// static int get_device_opts(fido_dev_t *dev, int *pin, int *uv)
-// {
-//     fido_cbor_info_t *info = NULL;
-//     char *const *ptr;
-//     const bool *val;
-//     size_t len;
-
-//     *pin = *uv = -1; /* unsupported */
-
-//     if (fido_dev_is_fido2(dev)) {
-//         if ((info = fido_cbor_info_new()) == NULL || fido_dev_get_cbor_info(dev, info) != FIDO_OK) {
-//             fido_cbor_info_free(&info);
-//             return 0;
-//         }
-
-//         ptr = fido_cbor_info_options_name_ptr(info);
-//         val = fido_cbor_info_options_value_ptr(info);
-//         len = fido_cbor_info_options_len(info);
-//         for (size_t i = 0; i < len; i++) {
-//             if (strcmp(ptr[i], "clientPin") == 0) {
-//                 *pin = val[i];
-//             } else if (strcmp(ptr[i], "uv") == 0) {
-//                 *uv = val[i];
-//             }
-//         }
-//     }
-
-//     fido_cbor_info_free(&info);
-//     return 1;
-
-//     bool dpk_dev_get_info(fido_dev_t * dev, fido_cbor_info_t * *info);
-//     // options (0x04.0x04)
-//     bool dpk_dev_get_options_support_pin(fido_cbor_info_t * info, int *support);
-//     bool dpk_dev_get_options_support_uv(fido_cbor_info_t * info, int *support);
-//     bool dpk_dev_get_options_support_bio(fido_cbor_info_t * info, int *support);
-//     bool dpk_dev_get_options_support_mcuvnr(fido_cbor_info_t * info, int *support);
-//     // algorithms (0x04.0x0A)
-//     bool dpk_dev_get_support_algorithm(fido_cbor_info_t * info, int *algorithm);
-// }
 
 static int match_device_opts(fido_dev_t *dev, struct opts *opts)
 {
@@ -1098,6 +1064,7 @@ int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *creds, cons
 
                 emit_get_assert_status(args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
                 callRet = fido_dev_get_assert(authList[j], assert, pin);
+
                 if (pin) {
                     pin = NULL;
                 }
@@ -1132,9 +1099,10 @@ int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *creds, cons
             goto end;
         }
 
-        callRet = fido_dev_info_manifest(devList, 64, &nDevs);
-        if (callRet != FIDO_OK) {
-            LOG(LOG_ERR, "Unable to discover device(s), %s (%d)", fido_strerr(callRet), callRet);
+        int ret = fido_dev_info_manifest(devList, 64, &nDevs);
+        if (ret != FIDO_OK) {
+            callRet = ret;
+            LOG(LOG_ERR, "Unable to discover device(s), %s (%d)", fido_strerr(ret), ret);
             goto end;
         }
 
@@ -1151,6 +1119,8 @@ int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *creds, cons
 
         fido_assert_free(&assert);
     }
+    LOG(LOG_INFO, "All devices can not to authenticate, %s.", fido_strerr(callRet));
+
 end:
     reset_pk(&pk);
     if (assert != NULL) {

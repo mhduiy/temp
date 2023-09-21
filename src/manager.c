@@ -295,12 +295,11 @@ int dpk_manager_get_assertion(const char *userName, const char *credName, const 
     LOG(LOG_INFO, "Found %d cred of user %s, and will to authenticate.", credsCount, userName);
 
     if (args.manual == 0) {
-        if ((callRet = dk_dev_do_authentication(&args, creds, credsCount)) < 0) {
+        if ((callRet = dk_dev_do_authentication(&args, creds, credsCount)) != FIDO_OK) {
             LOG(LOG_WARNING, "do_authentication failed.");
             goto end;
         }
     } else {
-        // dk_dev_do_manual_authentication(args, creds, credsCount);
         LOG(LOG_ERR, "not support manual.");
         goto end;
     }
@@ -407,6 +406,88 @@ end:
     return callRet;
 }
 
+int dpk_manager_get_creds(const char *userName, char **creds, unsigned int *credCount)
+{
+    char *rpId = NULL;
+    CredInfo *credsInfo = NULL;
+    unsigned int credsCountTemp = 0;
+    char *credFile = NULL;
+    AssertArgs args = { 0 };
+    int callRet = FIDO_ERR_INTERNAL;
+
+    fido_init(0);
+
+    if (userName == NULL || strlen(userName) == 0 || credCount == NULL) {
+        LOG(LOG_ERR, "param invalid.");
+        goto end;
+    }
+
+    *credCount = 0;
+    if (!is_user_exist(userName)) {
+        callRet = FIDO_OK;
+        goto end;
+    }
+
+    if ((callRet = dpk_rp_get_rp_id(&rpId)) != FIDO_OK) {
+        LOG(LOG_WARNING, "failed to get rp-id");
+        goto end;
+    }
+    args.origin = rpId;
+    args.appid = args.origin;
+    args.maxDevs = CRED_NUM_MAX;
+    args.manual = 0;
+
+    credsInfo = calloc(args.maxDevs, sizeof(CredInfo));
+    if (!credsInfo) {
+        LOG(LOG_ERR, "Unable to allocate memory");
+        goto end;
+    }
+
+    if ((callRet = dk_dev_get_cred_file_path(userName, &credFile)) != FIDO_OK) {
+        LOG(LOG_ERR, "failed to get cred file path:%s (%d)", fido_strerr(callRet), callRet);
+        goto end;
+    }
+    if (credFile == NULL) {
+        LOG(LOG_ERR, "failed to get cred file path.");
+        goto end;
+    }
+    args.authFile = credFile;
+
+    LOG(LOG_INFO, "get creds for user %s %s", userName, credFile);
+
+    if ((callRet = dk_dev_get_creds_from_file(args.authFile, userName, credsInfo, &credsCountTemp)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to get devices from authentication file");
+    }
+    if (credsCountTemp == 0) {
+        LOG(LOG_INFO, "Found no creds. Aborting.");
+        callRet = FIDO_OK;
+        goto end;
+    }
+
+    for (unsigned int i = 0; i < credsCountTemp; i++) {
+        creds[i] = strdup((&credsInfo[i])->name);
+    }
+    *credCount = credsCountTemp;
+
+    LOG(LOG_INFO, "the cerd count of user %s is %d", userName, credsCountTemp);
+
+    callRet = FIDO_OK;
+end:
+    if (rpId != NULL) {
+        free(rpId);
+    }
+    if (credFile != NULL) {
+        free(credFile);
+    }
+    if (credsInfo != NULL) {
+        for (unsigned int i = 0; i < credsCountTemp; i++) {
+            dk_dev_reset_cred(&credsInfo[i]);
+        }
+        free(credsInfo);
+    }
+    return callRet;
+}
+
 int dpk_manager_get_device_count(int *count)
 {
     size_t nDevs = 0;
@@ -460,44 +541,73 @@ end:
     return callRet;
 }
 
+// timeout：检测的超时时间，限制了上限避免服务一直处于检测设备状态消耗系统资源
+// stopWhenExist：如果为1，如果存在设备时，检测立刻结束。用于等待有设备插入。
+// stopWhenNotExist：如果为1，如果不存在设备时，检测立刻结束。用于等待设备全部拔出。
 int dpk_manager_device_detect(int timeout, int stopWhenExist, int stopWhenNotExist)
 {
-    UNUSED_VALUE(timeout);
-    UNUSED_VALUE(stopWhenExist);
-    UNUSED_VALUE(stopWhenNotExist);
-    //     fido_dev_info_t *devListTemp = NULL;
-    //     size_t nDevsTemp = 0;
-    //     int callRet = STATUS_FAILED;
+    fido_dev_info_t *devListTemp = NULL;
+    size_t nDevsTemp = 0;
+    int callRet = FIDO_ERR_INTERNAL;
 
-    // fido_init(0);
+    fido_init(0);
 
-    //     if (timeout <= 0) {
-    //         callRet = STATUS_FAILED_PARAM_ERROR;
-    //         goto end;
-    //     }
+    if ((timeout <= 0 || timeout > 180) || (stopWhenExist != 0 && stopWhenExist != 1) || (stopWhenNotExist != 0 && stopWhenNotExist != 1)) {
+        callRet = FIDO_ERR_INVALID_PARAMETER;
+        goto end;
+    }
 
-    //     for (int i = 0; i < timeout; i++) {
-    //         fprintf(stderr,
-    //                 "\rNo U2F device available, please insert one now, you "
-    //                 "have %2d seconds\n",
-    //                 timeout - i);
-    //         // fflush(stderr);
-    //         thrd_sleep(&(struct timespec){ .tv_sec = 1 }, NULL);
-    //         int ret = fido_dev_info_manifest(devListTemp, DEV_NUM_MAX, &nDevsTemp);
-    //         if (ret != FIDO_OK) {
-    //             LOG(LOG_WARNING,  "\nUnable to discover device(s), %s (%d)", fido_strerr(ret), ret);
-    //             break;
-    //         }
-    //         if (nDevsTemp != 0) {
-    //             LOG(LOG_WARNING,  "\nDevice found!");
-    //             emit_device_detect_status(callRet);
-    //         } else {
-    //             //
-    //         }
-    //     }
+    size_t nDevsCurrent = 999999; // 初始一个非法值
+    for (int i = 0; i < timeout; i++) {
+        thrd_sleep(&(struct timespec){ .tv_sec = 1 }, NULL);
+        devListTemp = fido_dev_info_new(DEV_NUM_MAX);
+        if (!devListTemp) {
+            LOG(LOG_ERR, "Unable to allocate devlist");
+            goto end;
+        }
+        callRet = fido_dev_info_manifest(devListTemp, DEV_NUM_MAX, &nDevsTemp);
+        if (callRet != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s), %s (%d)", fido_strerr(callRet), callRet);
+            goto end;
+        }
 
-    //     callRet = STATUS_FAILED_TIMEOUT;
-    // end:
-    //     emit_device_detect_status(callRet);
-    return 0;
+        if (nDevsTemp != nDevsCurrent) {
+            nDevsCurrent = nDevsTemp;
+            emit_device_detect_status(SIGNAL_NOT_FINISH, nDevsCurrent);
+        }
+        LOG(LOG_DEBUG, "Detect device remain times %d, current device count %d", timeout - i, nDevsCurrent);
+
+        if (stopWhenExist > 0 && nDevsCurrent > 0) {
+            callRet = FIDO_OK;
+            goto end;
+        }
+
+        if (stopWhenNotExist > 0 && nDevsCurrent == 0) {
+            callRet = FIDO_OK;
+            goto end;
+        }
+
+        if (devListTemp != NULL) {
+            fido_dev_info_free(&devListTemp, nDevsTemp);
+            devListTemp = NULL;
+            nDevsTemp = 0;
+        }
+    }
+
+    if (stopWhenExist > 0 && nDevsCurrent == 0) {
+        callRet = FIDO_ERR_TIMEOUT;
+        goto end;
+    }
+
+    if (stopWhenNotExist > 0 && nDevsCurrent > 0) {
+        callRet = FIDO_ERR_TIMEOUT;
+        goto end;
+    }
+
+    callRet = FIDO_OK;
+end:
+    if (devListTemp != NULL) {
+        fido_dev_info_free(&devListTemp, nDevsTemp);
+    }
+    return callRet;
 }

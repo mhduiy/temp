@@ -4,6 +4,7 @@
 
 #include "service.h"
 
+#include "errcode.h"
 #include "manager.h"
 #include "servicebase.h"
 #include "servicesignal.h"
@@ -15,6 +16,133 @@
 #include <glib.h>
 
 #include <stdio.h>
+
+int service_custom_data_get(Service *srv, const gchar *key, gchar **value);
+int service_custom_data_set(Service *srv, const gchar *key, const gchar *value);
+int service_custom_data_delete(Service *srv, const gchar *key);
+
+static int do_claim(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    gchar *claim = NULL;
+    if (mc == NULL || mc->serviceData == NULL || mc->sender == NULL || strlen(mc->sender) == 0) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    Service *srv = (Service *)mc->serviceData;
+
+    if (service_custom_data_get(srv, "claim", &claim) != 0) {
+        goto end;
+    }
+    if (claim != NULL) {
+        // claimed
+        LOG(LOG_ERR, "device claimed.");
+        callRet = DEEPIN_ERR_DEVICE_CLAIMED;
+        goto end;
+    }
+    if (service_custom_data_set(srv, "claim", mc->sender) != 0) {
+        goto end;
+    }
+
+    callRet = FIDO_OK;
+end:
+    if (claim != NULL) {
+        g_free(claim);
+    }
+    return callRet;
+}
+
+static int do_unclaim(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    gchar *claim = NULL;
+    if (mc == NULL || mc->serviceData == NULL || mc->sender == NULL || strlen(mc->sender) == 0) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    Service *srv = (Service *)mc->serviceData;
+
+    if (service_custom_data_get(srv, "claim", &claim) != 0) {
+        goto end;
+    }
+    if (claim != NULL) {
+        // claimed
+        if (service_custom_data_delete(srv, "claim") != 0) {
+            goto end;
+        }
+    }
+    callRet = FIDO_OK;
+
+end:
+    if (claim != NULL) {
+        g_free(claim);
+    }
+    return callRet;
+}
+
+static int do_claim_check(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    gchar *claim = NULL;
+    if (mc == NULL || mc->serviceData == NULL || mc->sender == NULL || strlen(mc->sender) == 0) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    Service *srv = (Service *)mc->serviceData;
+
+    if (service_custom_data_get(srv, "claim", &claim) != 0) {
+        goto end;
+    }
+    if (claim != NULL) {
+        // claimed
+        if (g_strcmp0(claim, mc->sender) != 0) {
+            LOG(LOG_ERR, "device claimed.");
+            callRet = DEEPIN_ERR_DEVICE_CLAIMED;
+            goto end;
+        }
+    }
+    callRet = FIDO_OK;
+
+end:
+    if (claim != NULL) {
+        g_free(claim);
+    }
+    return callRet;
+}
+
+static int dpk_service_claim(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    if ((callRet = do_claim(mc)) != FIDO_OK) {
+        goto end;
+    }
+    g_dbus_method_invocation_return_value(mc->invocation, g_variant_new("()"));
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        gchar *retStr = g_strdup_printf("%d", callRet);
+        g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+        g_free(retStr);
+    }
+    return 0;
+}
+
+static int dpk_service_unclaim(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    if ((callRet = do_unclaim(mc)) != FIDO_OK) {
+        goto end;
+    }
+    g_dbus_method_invocation_return_value(mc->invocation, g_variant_new("()"));
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        gchar *retStr = g_strdup_printf("%d", callRet);
+        g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+        g_free(retStr);
+    }
+    return 0;
+}
 
 static int dpk_service_get_pin_status(MethodContext *mc)
 {
@@ -62,6 +190,10 @@ static int dpk_service_set_pin(MethodContext *mc)
         goto end;
     }
 
+    if ((callRet = do_claim_check(mc)) != FIDO_OK) {
+        goto end;
+    }
+
     g_variant_get(mc->parameters, "(&ss)", &oldPin, &pin);
 
     LOG(LOG_INFO, "service-called: SetPin");
@@ -96,6 +228,10 @@ static int dpk_service_reset(MethodContext *mc)
         goto end;
     }
 
+    if ((callRet = do_claim_check(mc)) != FIDO_OK) {
+        goto end;
+    }
+
     callRet = dpk_manager_reset();
     if (callRet != FIDO_OK) {
         goto end;
@@ -119,6 +255,10 @@ static int dpk_service_make_cred(MethodContext *mc)
 
     if (mc == NULL || mc->parameters == NULL) {
         LOG(LOG_ERR, "method context invalid");
+        goto end;
+    }
+
+    if ((callRet = do_claim_check(mc)) != FIDO_OK) {
         goto end;
     }
 
@@ -151,6 +291,10 @@ static int dpk_service_get_assert(MethodContext *mc)
 
     if (mc == NULL || mc->parameters == NULL) {
         LOG(LOG_ERR, "method context invalid");
+        goto end;
+    }
+
+    if ((callRet = do_claim_check(mc)) != FIDO_OK) {
         goto end;
     }
 
@@ -201,6 +345,52 @@ end:
     return 0;
 }
 
+static int dpk_service_get_creds(MethodContext *mc)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    const gchar *userName = NULL;
+
+    LOG(LOG_INFO, "service-called: GetCreds");
+
+    if (mc == NULL || mc->parameters == NULL) {
+        LOG(LOG_ERR, "method context invalid");
+        goto end;
+    }
+
+    g_variant_get(mc->parameters, "(s)", &userName);
+
+    char **creds = (char **)calloc(CRED_NUM_MAX, sizeof(char *));
+
+    unsigned int credCount = 0;
+    if ((callRet = dpk_manager_get_creds(userName, creds, &credCount)) != FIDO_OK) {
+        goto end;
+    }
+
+    GVariantBuilder *builder;
+    builder = g_variant_builder_new(G_VARIANT_TYPE("as"));
+    for (unsigned int i = 0; i < credCount; i++) {
+        if (creds[i] == NULL) {
+            continue;
+        }
+        g_variant_builder_add(builder, "s", creds[i]);
+        free(creds[i]);
+    }
+
+    g_dbus_method_invocation_return_value(mc->invocation, g_variant_new("(as)", builder));
+    g_clear_pointer(&builder, g_variant_builder_unref);
+    callRet = FIDO_OK;
+end:
+    if (creds != NULL) {
+        free(creds);
+    }
+    if (callRet != FIDO_OK) {
+        gchar *retStr = g_strdup_printf("%d", callRet);
+        g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+        g_free(retStr);
+    }
+    return 0;
+}
+
 static int dpk_service_get_device_count(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
@@ -231,25 +421,52 @@ end:
 static int dpk_service_device_detect(MethodContext *mc)
 {
     gint timeout = 0;
-    gint stopWhenExist = 0;
-    gint stopWhenNotExist = 0;
+    gboolean needSkip = FALSE;
+    gboolean needDelete = FALSE;
+    const gchar *deviceDetectKey = "device_detect_doing";
+    gchar *deviceDetectValue = NULL;
+    Service *srv = NULL;
     int callRet = FIDO_ERR_INTERNAL;
 
     LOG(LOG_INFO, "service-called: DeviceDetect");
 
-    if (mc == NULL || mc->parameters == NULL) {
+    if (mc == NULL || mc->parameters == NULL || mc->serviceData == NULL) {
         LOG(LOG_ERR, "method context invalid");
         goto end;
     }
 
-    g_variant_get(mc->parameters, "(iii)", &timeout, &stopWhenExist, &stopWhenNotExist);
+    srv = (Service *)mc->serviceData;
+    if (service_custom_data_get(srv, deviceDetectKey, &deviceDetectValue) != 0) {
+        goto end;
+    }
+    if (deviceDetectValue != NULL) {
+        // doing
+        callRet = FIDO_OK;
+        needSkip = TRUE;
+        goto end;
+    }
+    if (service_custom_data_set(srv, deviceDetectKey, "doing") != 0) {
+        goto end;
+    }
+    needDelete = TRUE;
+    g_variant_get(mc->parameters, "(i)", &timeout);
 
-    if ((callRet = dpk_manager_device_detect(timeout, stopWhenExist, stopWhenNotExist)) != FIDO_OK) {
+    if ((callRet = dpk_manager_device_detect(timeout, 0, 0)) != FIDO_OK) {
         goto end;
     }
     callRet = FIDO_OK;
 end:
-    emit_device_detect_status(SIGNAL_FINISH, callRet);
+    if (deviceDetectValue != NULL) {
+        g_free(deviceDetectValue);
+    }
+    if (!needSkip) {
+        emit_device_detect_status(SIGNAL_FINISH, callRet);
+    }
+    if (needDelete) {
+        if (srv != NULL) {
+            service_custom_data_delete(srv, deviceDetectKey);
+        }
+    }
     return 0;
 }
 
@@ -259,12 +476,15 @@ void dpk_service_start()
 
     service_init(&srv);
 
+    service_register_method(&srv, "Claim", dpk_service_claim, false);
+    service_register_method(&srv, "UnClaim", dpk_service_unclaim, false);
     service_register_method(&srv, "GetPinStatus", dpk_service_get_pin_status, false);
     service_register_method(&srv, "SetPin", dpk_service_set_pin, false);
     service_register_method(&srv, "Reset", dpk_service_reset, true);
     service_register_method(&srv, "MakeCredential", dpk_service_make_cred, true);
     service_register_method(&srv, "GetAssertion", dpk_service_get_assert, true);
     service_register_method(&srv, "GetValidCredCount", dpk_service_get_valid_cred_count, false);
+    service_register_method(&srv, "GetCreds", dpk_service_get_creds, false);
     service_register_method(&srv, "GetDeviceCount", dpk_service_get_device_count, false);
     service_register_method(&srv, "DeviceDetect", dpk_service_device_detect, true);
 

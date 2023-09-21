@@ -6,8 +6,6 @@
 
 #include <fido.h>
 
-#include <stdbool.h>
-
 int dpk_dev_devs_find_wait(fido_dev_info_t **devList, size_t *nDevs);
 int dpk_dev_devs_find_existed(fido_dev_info_t **devList, size_t *nDevs);
 int dpk_dev_get_default_dev(bool isWaitPlugin, fido_dev_t **device);

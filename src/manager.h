@@ -18,6 +18,8 @@ int dpk_manager_get_assertion(const char *userName, const char *credName, const 
 
 int dpk_manager_get_valid_cred_count(const char *userName, const char *pin, unsigned int *validCredCount);
 
+int dpk_manager_get_creds(const char *userName, char **creds, unsigned int *credCount);
+
 int dpk_manager_get_device_count(int *count);
 
 int dpk_manager_device_detect(int timeout, int stopWhenExist, int stopWhenNotExist);

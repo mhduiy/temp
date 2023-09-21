@@ -9,6 +9,7 @@
 
 #define BUFSIZE 1024
 #define DEV_NUM_MAX 24
+#define CRED_NUM_MAX 128
 
 #define UNUSED_VALUE(a) ((void)(a))
 

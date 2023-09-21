@@ -24,10 +24,10 @@ typedef struct _MethodInfo
     gboolean isAsync;
 } MethodInfo;
 
-static gboolean service_timeout_cb(gpointer userData)
+static gboolean service_timeout_cb(gpointer serviceData)
 {
     LOG(LOG_INFO, "service timeout and is about to exit...");
-    Service *srv = (Service *)userData;
+    Service *srv = (Service *)serviceData;
     if (srv == NULL) {
         LOG(LOG_ERR, "service data is invalid");
         return FALSE;
@@ -36,11 +36,11 @@ static gboolean service_timeout_cb(gpointer userData)
     return TRUE;
 }
 
-static void service_timeout_method_called_end(gpointer userData)
+static void service_timeout_method_called_end(gpointer serviceData)
 {
     gint count = 0;
     guint source = 0;
-    Service *srv = (Service *)userData;
+    Service *srv = (Service *)serviceData;
     if (srv == NULL) {
         LOG(LOG_ERR, "param invalid");
         return;
@@ -55,18 +55,18 @@ static void service_timeout_method_called_end(gpointer userData)
         return;
     }
     if (count == 0) {
-        source = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, userData);
+        source = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, serviceData);
         mtx_lock(&(srv->timeoutCallCountMtx));
         srv->timeoutSource = source;
         mtx_unlock(&(srv->timeoutCallCountMtx));
     }
 }
 
-static void service_timeout_method_called(gpointer userData)
+static void service_timeout_method_called(gpointer serviceData)
 {
     gint count = 0;
     guint source = 0;
-    Service *srv = (Service *)userData;
+    Service *srv = (Service *)serviceData;
     if (srv == NULL) {
         LOG(LOG_ERR, "param invalid");
         return;
@@ -85,14 +85,16 @@ static void service_timeout_method_called(gpointer userData)
     }
 }
 
-static MethodContext *mehtod_context_new(ServiceMethod cb, GVariant *param, GDBusMethodInvocation *invocation, gpointer userData)
+static MethodContext *mehtod_context_new(const gchar *sender, ServiceMethod cb, GVariant *param, GDBusMethodInvocation *invocation, gpointer serviceData)
 {
     MethodContext *method = (MethodContext *)calloc(1, sizeof(MethodContext));
+
+    method->sender = g_strdup(sender);
     method->cb = cb;
 
     method->parameters = g_variant_get_normal_form(param);
     method->invocation = invocation;
-    method->userData = userData;
+    method->serviceData = serviceData;
     method->callId = g_uuid_string_random();
 
     return method;
@@ -103,6 +105,12 @@ static void mehtod_context_delete(MethodContext *mc)
     if (mc == NULL) {
         return;
     }
+
+    if (mc->sender != NULL) {
+        g_free(mc->sender);
+        mc->sender = NULL;
+    }
+
     if (mc->callId != NULL) {
         g_free(mc->callId);
         mc->callId = NULL;
@@ -121,9 +129,9 @@ static int method_call(void *data)
     if (mc == NULL || mc->cb == NULL) {
         return -1;
     }
-    service_timeout_method_called(mc->userData);
+    service_timeout_method_called(mc->serviceData);
     (*(mc->cb))(mc);
-    service_timeout_method_called_end(mc->userData);
+    service_timeout_method_called_end(mc->serviceData);
 
     mehtod_context_delete(mc);
     return 0;
@@ -144,19 +152,19 @@ static int method_call_async(void *data)
     return 0;
 }
 
-static void on_name_acquired(GDBusConnection *connection, const gchar *name, gpointer userData)
+static void on_name_acquired(GDBusConnection *connection, const gchar *name, gpointer serviceData)
 {
     UNUSED_VALUE(connection);
     UNUSED_VALUE(name);
-    UNUSED_VALUE(userData);
+    UNUSED_VALUE(serviceData);
     LOG(LOG_DEBUG, "on_name_acquired has been invoked");
 }
 
-static void on_name_lost(GDBusConnection *connection, const gchar *name, gpointer userData)
+static void on_name_lost(GDBusConnection *connection, const gchar *name, gpointer serviceData)
 {
     UNUSED_VALUE(connection);
     UNUSED_VALUE(name);
-    UNUSED_VALUE(userData);
+    UNUSED_VALUE(serviceData);
     LOG(LOG_DEBUG, "on_name_lost has been invoked");
 }
 
@@ -167,14 +175,14 @@ static void handle_method(GDBusConnection *connection,
                           const gchar *methodName,
                           GVariant *parameters,
                           GDBusMethodInvocation *invocation,
-                          gpointer userData)
+                          gpointer serviceData)
 {
     UNUSED_VALUE(connection);
     UNUSED_VALUE(objectPath);
     UNUSED_VALUE(interfaceName);
     LOG(LOG_INFO, "Received call '%s' from %s", methodName, sender);
 
-    Service *srv = (Service *)userData;
+    Service *srv = (Service *)serviceData;
     if (srv == NULL || srv->methods == NULL) {
         LOG(LOG_ERR, "param invalid");
         return;
@@ -187,15 +195,15 @@ static void handle_method(GDBusConnection *connection,
     }
 
     if (info->isAsync) {
-        method_call_async(mehtod_context_new(info->cb, parameters, invocation, userData));
+        method_call_async(mehtod_context_new(sender, info->cb, parameters, invocation, serviceData));
     } else {
-        method_call(mehtod_context_new(info->cb, parameters, invocation, userData));
+        method_call(mehtod_context_new(sender, info->cb, parameters, invocation, serviceData));
     }
 
     return;
 }
 
-static void on_bus_acquired(GDBusConnection *connection, const gchar *name, gpointer userData)
+static void on_bus_acquired(GDBusConnection *connection, const gchar *name, gpointer serviceData)
 {
     UNUSED_VALUE(name);
     GError *error = NULL;
@@ -218,7 +226,7 @@ static void on_bus_acquired(GDBusConnection *connection, const gchar *name, gpoi
         return;
     }
 
-    guint registration_id = g_dbus_connection_register_object(connection, PASSKEY_SERVICE_DBUS_PATH, interface_info, &interface_vtable, userData, NULL, NULL);
+    guint registration_id = g_dbus_connection_register_object(connection, PASSKEY_SERVICE_DBUS_PATH, interface_info, &interface_vtable, serviceData, NULL, NULL);
     if (registration_id == 0) {
         LOG(LOG_ERR, "Unable to register object");
         return;
@@ -246,22 +254,31 @@ static void free_methods_value(gpointer data)
     free(info);
 }
 
+static void free_custom_data(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_free(data);
+}
+
 void service_init(Service *srv)
 {
     if (srv == NULL) {
         return;
     }
-    srv->budOwnId = 0;
+    srv->busOwnId = 0;
     srv->loop = NULL;
     srv->timeoutSource = 0;
     srv->timeoutCallCount = 0;
 
-    // srv->vtable = vtable;
     srv->methods = g_hash_table_new_full(g_str_hash, g_str_equal, free_methods_key, free_methods_value);
+    srv->customData = g_hash_table_new_full(g_str_hash, g_str_equal, free_custom_data, free_custom_data);
+    mtx_init(&(srv->customDataMtx), mtx_plain);
 
     mtx_init(&(srv->timeoutCallCountMtx), mtx_plain);
     srv->timeoutSource = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, (gpointer)srv);
-    srv->budOwnId = g_bus_own_name(G_BUS_TYPE_SYSTEM, PASSKEY_SERVICE_DBUS_NAME, G_BUS_NAME_OWNER_FLAGS_NONE, on_bus_acquired, on_name_acquired, on_name_lost, (gpointer)srv, NULL);
+    srv->busOwnId = g_bus_own_name(G_BUS_TYPE_SYSTEM, PASSKEY_SERVICE_DBUS_NAME, G_BUS_NAME_OWNER_FLAGS_NONE, on_bus_acquired, on_name_acquired, on_name_lost, (gpointer)srv, NULL);
     srv->loop = g_main_loop_new(NULL, FALSE);
 }
 
@@ -276,14 +293,18 @@ void service_unref(Service *srv)
         LOG(LOG_WARNING, "service is not exist?");
         return;
     }
+    mtx_destroy(&(srv->customDataMtx));
     mtx_destroy(&(srv->timeoutCallCountMtx));
-
     if (srv->methods != NULL) {
         g_hash_table_destroy(srv->methods);
     }
 
-    if (srv->budOwnId > 0) {
-        g_bus_unown_name(srv->budOwnId);
+    if (srv->customData != NULL) {
+        g_hash_table_destroy(srv->customData);
+    }
+
+    if (srv->busOwnId > 0) {
+        g_bus_unown_name(srv->busOwnId);
     }
 
     if (srv->loop != NULL) {
@@ -306,4 +327,44 @@ void service_register_method(Service *srv, const gchar *methodName, ServiceMetho
     info->cb = cb;
     info->isAsync = isAsync;
     g_hash_table_insert(srv->methods, g_strdup(methodName), info);
+}
+
+int service_custom_data_get(Service *srv, const gchar *key, gchar **value)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    mtx_lock(&(srv->customDataMtx));
+    gchar *v = (gchar *)g_hash_table_lookup(srv->customData, key);
+    *value = g_strdup(v);
+    mtx_unlock(&(srv->customDataMtx));
+
+    return 0;
+}
+
+int service_custom_data_set(Service *srv, const gchar *key, const gchar *value)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    mtx_lock(&(srv->customDataMtx));
+    g_hash_table_insert(srv->customData, g_strdup(key), g_strdup(value));
+    mtx_unlock(&(srv->customDataMtx));
+
+    return 0;
+}
+
+int service_custom_data_delete(Service *srv, const gchar *key)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    mtx_lock(&(srv->customDataMtx));
+    g_hash_table_remove(srv->customData, key);
+    mtx_unlock(&(srv->customDataMtx));
+
+    return 0;
 }

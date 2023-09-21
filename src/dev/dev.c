@@ -8,6 +8,7 @@
 #include "common/log.h"
 #include "servicesignal.h"
 
+#include <stdbool.h>
 #include <threads.h>
 #include <time.h>
 #include <unistd.h>

@@ -11,10 +11,14 @@
 
 typedef struct _Service
 {
-    guint budOwnId;
-    GMainLoop *loop; // 线程安全
-    // const GDBusInterfaceVTable *vtable;
+    guint busOwnId;
+    // loop线程安全
+    GMainLoop *loop;
     GHashTable *methods;
+    // individual data structure instances are not automatically locked for performance reasons.
+    // So, for example you must coordinate accesses to the same GHashTable from multiple threads.
+    GHashTable *customData;
+    mtx_t customDataMtx;
     guint timeoutSource;
     gint timeoutCallCount;
     mtx_t timeoutCallCountMtx;
@@ -25,10 +29,11 @@ typedef int (*ServiceMethod)(struct _MethodContext *mc);
 
 typedef struct _MethodContext
 {
+    gchar *sender;
     ServiceMethod cb;
     GVariant *parameters;
     GDBusMethodInvocation *invocation;
-    gpointer userData;
+    gpointer serviceData;
     gchar *callId;
 } MethodContext;
 
@@ -42,3 +47,8 @@ void service_register_method(Service *srv, const gchar *methodName, ServiceMetho
 void service_run(Service *srv);
 // 服务资源释放
 void service_unref(Service *srv);
+
+// 自定义数据函数
+int service_custom_data_get(Service *srv, const gchar *key, gchar **value);
+int service_custom_data_set(Service *srv, const gchar *key, const gchar *value);
+int service_custom_data_delete(Service *srv, const gchar *key);
