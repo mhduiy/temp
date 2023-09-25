@@ -10,3 +10,5 @@ enable_testing()
 
 add_subdirectory("src")
 add_subdirectory("misc")
+
+add_subdirectory("tests")

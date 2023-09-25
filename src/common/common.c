@@ -76,22 +76,21 @@ end:
     return success;
 }
 
-bool get_user_id(const char *userName, char **id)
+bool get_user_id_from_path(const char *userName, const char *userPath, char **id)
 {
     char path[BUFSIZE] = { 0 };
     ssize_t len;
     char *buf = NULL;
     size_t bufSize = 0;
     FILE *file = NULL;
-    const char *accountPath = "/var/lib/AccountsService/deepin/users";
     bool success = false;
 
-    if (userName == NULL) {
-        LOG(LOG_ERR, "user name is empty");
+    if (userName == NULL || userPath == NULL) {
+        LOG(LOG_ERR, "user param is invalid");
         goto end;
     }
 
-    if (snprintf(path, BUFSIZE, "%s/%s", accountPath, userName) < 0) {
+    if (snprintf(path, BUFSIZE, "%s/%s", userPath, userName) < 0) {
         LOG(LOG_ERR, "snprintf error");
         goto end;
     }
@@ -143,6 +142,12 @@ end:
         buf = NULL;
     }
     return success;
+}
+
+bool get_user_id(const char *userName, char **id)
+{
+    const char *path = "/var/lib/AccountsService/deepin/users";
+    return get_user_id_from_path(userName, path, id);
 }
 
 bool is_user_exist(const char *userName)

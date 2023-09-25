@@ -6,6 +6,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int dpk_manager_get_pin_status(int *status);
 
 int dpk_manager_set_pin(const char *pin, const char *oldPin);
@@ -25,3 +29,7 @@ int dpk_manager_get_device_count(int *count);
 int dpk_manager_device_detect(int timeout, int stopWhenExist, int stopWhenNotExist);
 
 int dpk_manager_test();
+
+#ifdef __cplusplus
+}
+#endif

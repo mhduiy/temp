@@ -7,4 +7,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int dpk_rp_get_rp_id(char **rpId);
+
+#ifdef __cplusplus
+}
+#endif

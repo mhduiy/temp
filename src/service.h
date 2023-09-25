@@ -4,4 +4,12 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void dpk_service_start();
+
+#ifdef __cplusplus
+}
+#endif

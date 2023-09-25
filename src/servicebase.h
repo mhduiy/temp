@@ -9,6 +9,10 @@
 
 #include <threads.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct _Service
 {
     guint busOwnId;
@@ -52,3 +56,7 @@ void service_unref(Service *srv);
 int service_custom_data_get(Service *srv, const gchar *key, gchar **value);
 int service_custom_data_set(Service *srv, const gchar *key, const gchar *value);
 int service_custom_data_delete(Service *srv, const gchar *key);
+
+#ifdef __cplusplus
+}
+#endif

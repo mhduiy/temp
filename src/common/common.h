@@ -7,6 +7,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define BUFSIZE 1024
 #define DEV_NUM_MAX 24
 #define CRED_NUM_MAX 128
@@ -17,4 +21,9 @@ bool random_bytes(void *buf, size_t cnt);
 bool read_file_line(const char *path, char **val);
 
 bool get_user_id(const char *userName, char **id);
+bool get_user_id_from_path(const char *userName, const char *userPath, char **id);
 bool is_user_exist(const char *userName);
+
+#ifdef __cplusplus
+}
+#endif
