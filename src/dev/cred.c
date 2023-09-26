@@ -957,7 +957,7 @@ end:
     return callRet;
 }
 
-int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount)
+int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount)
 {
     fido_assert_t *assert = NULL;
     fido_dev_info_t *devList = NULL;
@@ -1062,7 +1062,7 @@ int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *creds, cons
                     }
                 }
 
-                emit_get_assert_status(args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+                emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
                 callRet = fido_dev_get_assert(authList[j], assert, pin);
 
                 if (pin) {

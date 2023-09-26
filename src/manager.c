@@ -101,7 +101,7 @@ end:
 // 如果明确拒绝用户存在，则验证器返回CTAP2_ERR_OPERATION_DENIED
 // 如果发生用户操作超时，验证器将返回CTAP2_ERR_USER_ACTION_TIMEOUT。
 // 如果请求是在通电10秒后发出的，则验证器返回CTAP2_ERR_NOT_ALLOWED。
-int dpk_manager_reset()
+int dpk_manager_reset(MethodContext *mc)
 {
     fido_dev_t *dev = NULL;
     int callRet = FIDO_ERR_INTERNAL;
@@ -117,7 +117,7 @@ int dpk_manager_reset()
         goto end;
     }
     LOG(LOG_DEBUG, "will to reset!");
-    emit_reset_status(SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+    emit_reset_status(mc, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
     callRet = fido_dev_reset(dev);
     if (callRet != FIDO_OK) {
         fido_dev_cancel(dev);
@@ -135,7 +135,7 @@ end:
 }
 
 //  注册，生产证书
-int dpk_manager_make_cred(const char *userName, const char *credName, const char *pin)
+int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *credName, const char *pin)
 {
     fido_dev_t *dev = NULL;
     fido_cbor_info_t *info = NULL;
@@ -195,7 +195,7 @@ int dpk_manager_make_cred(const char *userName, const char *credName, const char
         goto end;
     }
 
-    emit_make_cred_status(userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+    emit_make_cred_status(mc, userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
     if ((callRet = dpk_dev_make_cred(&args, dev, cred, info, pin)) != FIDO_OK) {
         LOG(LOG_ERR, "create cred failed");
         goto end;
@@ -232,7 +232,7 @@ end:
     return callRet;
 }
 
-int dpk_manager_get_assertion(const char *userName, const char *credName, const char *pin)
+int dpk_manager_get_assertion(MethodContext *mc, const char *userName, const char *credName, const char *pin)
 {
     int callRet = FIDO_ERR_INTERNAL;
     char *rpId = NULL;
@@ -295,7 +295,7 @@ int dpk_manager_get_assertion(const char *userName, const char *credName, const 
     LOG(LOG_INFO, "Found %d cred of user %s, and will to authenticate.", credsCount, userName);
 
     if (args.manual == 0) {
-        if ((callRet = dk_dev_do_authentication(&args, creds, credsCount)) != FIDO_OK) {
+        if ((callRet = dk_dev_do_authentication(mc, &args, creds, credsCount)) != FIDO_OK) {
             LOG(LOG_WARNING, "do_authentication failed.");
             goto end;
         }
@@ -544,7 +544,7 @@ end:
 // timeout：检测的超时时间，限制了上限避免服务一直处于检测设备状态消耗系统资源
 // stopWhenExist：如果为1，如果存在设备时，检测立刻结束。用于等待有设备插入。
 // stopWhenNotExist：如果为1，如果不存在设备时，检测立刻结束。用于等待设备全部拔出。
-int dpk_manager_device_detect(int timeout, int stopWhenExist, int stopWhenNotExist)
+int dpk_manager_device_detect(MethodContext *mc, int timeout, int stopWhenExist, int stopWhenNotExist)
 {
     fido_dev_info_t *devListTemp = NULL;
     size_t nDevsTemp = 0;
@@ -573,7 +573,7 @@ int dpk_manager_device_detect(int timeout, int stopWhenExist, int stopWhenNotExi
 
         if (nDevsTemp != nDevsCurrent) {
             nDevsCurrent = nDevsTemp;
-            emit_device_detect_status(SIGNAL_NOT_FINISH, nDevsCurrent);
+            emit_device_detect_status(mc, SIGNAL_NOT_FINISH, nDevsCurrent);
         }
         LOG(LOG_DEBUG, "Detect device remain times %d, current device count %d", timeout - i, nDevsCurrent);
 

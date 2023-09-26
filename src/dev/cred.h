@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "serviceframe/servicebase.h"
+
 #include <fido.h>
 
 #ifdef __cplusplus
@@ -81,7 +83,7 @@ void dk_dev_reset_cred(CredInfo *cred);
 
 // 认证
 int dk_dev_has_valid_cred_count(const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount, unsigned int *validCredsCount);
-int dk_dev_do_authentication(const AssertArgs *args, const CredInfo *devices, const unsigned int credsCount);
+int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const CredInfo *devices, const unsigned int credsCount);
 
 #ifdef __cplusplus
 }

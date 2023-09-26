@@ -15,17 +15,22 @@ extern "C" {
 
 typedef struct _Service
 {
+    // bus信息
     guint busOwnId;
+    GDBusConnection *connection;
+    gchar *busName;
+    gchar *busInterface;
+    gchar *busPath;
     // loop线程安全
     GMainLoop *loop;
+    // 注册的方法
     GHashTable *methods;
-    // individual data structure instances are not automatically locked for performance reasons.
-    // So, for example you must coordinate accesses to the same GHashTable from multiple threads.
-    GHashTable *customData;
-    mtx_t customDataMtx;
+    // 空闲退出
     guint timeoutSource;
     gint timeoutCallCount;
     mtx_t timeoutCallCountMtx;
+    // ServiceBase不维护customData，由服务实例本身维护。该数据是可选的。
+    gpointer customData;
 } Service;
 
 struct _MethodContext;
@@ -42,7 +47,8 @@ typedef struct _MethodContext
 } MethodContext;
 
 // dbus服务初始化，vtable是dbus接口的处理表
-void service_init(Service *srv);
+int service_init(Service *srv, const gchar *busName, gpointer customData);
+int service_register_interface(Service *srv, const gchar *path, const gchar *interface, const gchar *interfaceXml);
 // 注册method处理函数, 需要实现ServiceMethod
 // 同步方法，使用GDBusMethodInvocation直接应答
 // 异步方法，无需应答，如果需要通过信号通知结果
@@ -51,11 +57,6 @@ void service_register_method(Service *srv, const gchar *methodName, ServiceMetho
 void service_run(Service *srv);
 // 服务资源释放
 void service_unref(Service *srv);
-
-// 自定义数据函数
-int service_custom_data_get(Service *srv, const gchar *key, gchar **value);
-int service_custom_data_set(Service *srv, const gchar *key, const gchar *value);
-int service_custom_data_delete(Service *srv, const gchar *key);
 
 #ifdef __cplusplus
 }

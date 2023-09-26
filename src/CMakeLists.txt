@@ -17,6 +17,7 @@ execute_process(COMMAND sh -c ${CMAKE_CURRENT_SOURCE_DIR}/xml2str.sh
 file(GLOB_RECURSE SRCS
     "*.c"
     "common/*.c"
+    "frame/*.c"
     "decode/*.c"
     "dev/*.c"
     "rp/*.c"

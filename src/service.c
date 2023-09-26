@@ -6,7 +6,7 @@
 
 #include "errcode.h"
 #include "manager.h"
-#include "servicebase.h"
+#include "serviceframe/servicebase.h"
 #include "servicesignal.h"
 
 #include <common/common.h>
@@ -17,10 +17,95 @@
 
 #include <stdio.h>
 
-int service_custom_data_get(Service *srv, const gchar *key, gchar **value);
-int service_custom_data_set(Service *srv, const gchar *key, const gchar *value);
-int service_custom_data_delete(Service *srv, const gchar *key);
+const gchar *PASSKEY_SERVICE_DBUS_NAME = "com.deepin.Passkey";
+const gchar *PASSKEY_SERVICE_DBUS_PATH = "/com/deepin/Passkey";
+const gchar *PASSKEY_SERVICE_DBUS_INTERFACE = "com.deepin.Passkey";
+// 源自xml生成的文件
+extern const gchar *PASSKEY_SERVICE_DBUS_XML_DATA;
 
+typedef struct _PasskeyServiceData
+{
+    // customData 提供一个string->string的kv结构
+    // individual data structure instances are not automatically locked for performance reasons.
+    // So, for example you must coordinate accesses to the same GHashTable from multiple threads.
+    GHashTable *customData;
+    mtx_t customDataMtx;
+} PasskeyServiceData;
+
+int service_custom_data_get(Service *srv, const gchar *key, gchar **value)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->customDataMtx));
+    gchar *v = (gchar *)g_hash_table_lookup(passkeyData->customData, key);
+    *value = g_strdup(v);
+    mtx_unlock(&(passkeyData->customDataMtx));
+
+    return 0;
+}
+
+int service_custom_data_set(Service *srv, const gchar *key, const gchar *value)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->customDataMtx));
+    g_hash_table_insert(passkeyData->customData, g_strdup(key), g_strdup(value));
+    mtx_unlock(&(passkeyData->customDataMtx));
+
+    return 0;
+}
+
+int service_custom_data_delete(Service *srv, const gchar *key)
+{
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return -1;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->customDataMtx));
+    g_hash_table_remove(passkeyData->customData, key);
+    mtx_unlock(&(passkeyData->customDataMtx));
+
+    return 0;
+}
+
+static void free_custom_data(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_free(data);
+}
+
+int service_passkey_data_init(PasskeyServiceData *passkeyData)
+{
+    if (passkeyData == NULL) {
+        return -1;
+    }
+    passkeyData->customData = g_hash_table_new_full(g_str_hash, g_str_equal, free_custom_data, free_custom_data);
+    mtx_init(&(passkeyData->customDataMtx), mtx_plain);
+    return 0;
+}
+
+int service_passkey_data_free(PasskeyServiceData *passkeyData)
+{
+    if (passkeyData == NULL) {
+        return -1;
+    }
+    mtx_destroy(&(passkeyData->customDataMtx));
+    if (passkeyData->customData != NULL) {
+        g_hash_table_destroy(passkeyData->customData);
+    }
+    return 0;
+}
+
+// 使用PasskeyServiceData的kv结构，实现全局claim处理
 static int do_claim(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
@@ -110,7 +195,7 @@ end:
     return callRet;
 }
 
-static int dpk_service_claim(MethodContext *mc)
+static int dpk_service_api_claim(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     if ((callRet = do_claim(mc)) != FIDO_OK) {
@@ -127,7 +212,7 @@ end:
     return 0;
 }
 
-static int dpk_service_unclaim(MethodContext *mc)
+static int dpk_service_api_unclaim(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     if ((callRet = do_unclaim(mc)) != FIDO_OK) {
@@ -144,7 +229,7 @@ end:
     return 0;
 }
 
-static int dpk_service_get_pin_status(MethodContext *mc)
+static int dpk_service_api_get_pin_status(MethodContext *mc)
 {
     int status = 0;
     int callRet = FIDO_ERR_INTERNAL;
@@ -179,7 +264,7 @@ end:
     return 0;
 }
 
-static int dpk_service_set_pin(MethodContext *mc)
+static int dpk_service_api_set_pin(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     const gchar *pin = NULL;
@@ -218,7 +303,7 @@ end:
     return 0;
 }
 
-static int dpk_service_reset(MethodContext *mc)
+static int dpk_service_api_reset(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     LOG(LOG_INFO, "service-called: Reset");
@@ -232,7 +317,7 @@ static int dpk_service_reset(MethodContext *mc)
         goto end;
     }
 
-    callRet = dpk_manager_reset();
+    callRet = dpk_manager_reset(mc);
     if (callRet != FIDO_OK) {
         goto end;
     }
@@ -240,11 +325,11 @@ static int dpk_service_reset(MethodContext *mc)
     callRet = FIDO_OK;
 
 end:
-    emit_reset_status(SIGNAL_FINISH, callRet);
+    emit_reset_status(mc, SIGNAL_FINISH, callRet);
     return 0;
 }
 
-static int dpk_service_make_cred(MethodContext *mc)
+static int dpk_service_api_make_cred(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     const gchar *userName = NULL;
@@ -270,17 +355,17 @@ static int dpk_service_make_cred(MethodContext *mc)
 
     LOG(LOG_INFO, "service make cred by %s:%s", userName, credName);
 
-    if ((callRet = dpk_manager_make_cred(userName, credName, pin)) != FIDO_OK) {
+    if ((callRet = dpk_manager_make_cred(mc, userName, credName, pin)) != FIDO_OK) {
         goto end;
     }
 
     callRet = FIDO_OK;
 end:
-    emit_make_cred_status(userName, SIGNAL_FINISH, callRet);
+    emit_make_cred_status(mc, userName, SIGNAL_FINISH, callRet);
     return 0;
 }
 
-static int dpk_service_get_assert(MethodContext *mc)
+static int dpk_service_api_get_assert(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     const gchar *userName = NULL;
@@ -305,17 +390,17 @@ static int dpk_service_get_assert(MethodContext *mc)
     }
 
     LOG(LOG_INFO, "service get assert by %s:%s", userName, credName);
-    if ((callRet = dpk_manager_get_assertion(userName, credName, pin)) != FIDO_OK) {
+    if ((callRet = dpk_manager_get_assertion(mc, userName, credName, pin)) != FIDO_OK) {
         goto end;
     }
 
     callRet = FIDO_OK;
 end:
-    emit_get_assert_status(userName, SIGNAL_FINISH, callRet);
+    emit_get_assert_status(mc, userName, SIGNAL_FINISH, callRet);
     return 0;
 }
 
-static int dpk_service_get_valid_cred_count(MethodContext *mc)
+static int dpk_service_api_get_valid_cred_count(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     const gchar *userName = NULL;
@@ -345,7 +430,7 @@ end:
     return 0;
 }
 
-static int dpk_service_get_creds(MethodContext *mc)
+static int dpk_service_api_get_creds(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     const gchar *userName = NULL;
@@ -391,7 +476,7 @@ end:
     return 0;
 }
 
-static int dpk_service_get_device_count(MethodContext *mc)
+static int dpk_service_api_get_device_count(MethodContext *mc)
 {
     int callRet = FIDO_ERR_INTERNAL;
     int count = 0;
@@ -418,7 +503,7 @@ end:
     return 0;
 }
 
-static int dpk_service_device_detect(MethodContext *mc)
+static int dpk_service_api_device_detect(MethodContext *mc)
 {
     gint timeout = 0;
     gboolean needSkip = FALSE;
@@ -451,7 +536,7 @@ static int dpk_service_device_detect(MethodContext *mc)
     needDelete = TRUE;
     g_variant_get(mc->parameters, "(i)", &timeout);
 
-    if ((callRet = dpk_manager_device_detect(timeout, 0, 0)) != FIDO_OK) {
+    if ((callRet = dpk_manager_device_detect(mc, timeout, 0, 0)) != FIDO_OK) {
         goto end;
     }
     callRet = FIDO_OK;
@@ -460,7 +545,7 @@ end:
         g_free(deviceDetectValue);
     }
     if (!needSkip) {
-        emit_device_detect_status(SIGNAL_FINISH, callRet);
+        emit_device_detect_status(mc, SIGNAL_FINISH, callRet);
     }
     if (needDelete) {
         if (srv != NULL) {
@@ -473,23 +558,32 @@ end:
 void dpk_service_start()
 {
     Service srv;
+    // 初始化PasskeyServiceData， 用于管理服务全局数据
+    PasskeyServiceData passkeyData;
+    service_passkey_data_init(&passkeyData);
+    if (service_init(&srv, PASSKEY_SERVICE_DBUS_NAME, &passkeyData) < 0) {
+        return;
+    }
 
-    service_init(&srv);
+    if (service_register_interface(&srv, PASSKEY_SERVICE_DBUS_PATH, PASSKEY_SERVICE_DBUS_INTERFACE, PASSKEY_SERVICE_DBUS_XML_DATA) < 0) {
+        return;
+    }
 
-    service_register_method(&srv, "Claim", dpk_service_claim, false);
-    service_register_method(&srv, "UnClaim", dpk_service_unclaim, false);
-    service_register_method(&srv, "GetPinStatus", dpk_service_get_pin_status, false);
-    service_register_method(&srv, "SetPin", dpk_service_set_pin, false);
-    service_register_method(&srv, "Reset", dpk_service_reset, true);
-    service_register_method(&srv, "MakeCredential", dpk_service_make_cred, true);
-    service_register_method(&srv, "GetAssertion", dpk_service_get_assert, true);
-    service_register_method(&srv, "GetValidCredCount", dpk_service_get_valid_cred_count, false);
-    service_register_method(&srv, "GetCreds", dpk_service_get_creds, false);
-    service_register_method(&srv, "GetDeviceCount", dpk_service_get_device_count, false);
-    service_register_method(&srv, "DeviceDetect", dpk_service_device_detect, true);
+    service_register_method(&srv, "Claim", dpk_service_api_claim, false);
+    service_register_method(&srv, "UnClaim", dpk_service_api_unclaim, false);
+    service_register_method(&srv, "GetPinStatus", dpk_service_api_get_pin_status, false);
+    service_register_method(&srv, "SetPin", dpk_service_api_set_pin, false);
+    service_register_method(&srv, "Reset", dpk_service_api_reset, true);
+    service_register_method(&srv, "MakeCredential", dpk_service_api_make_cred, true);
+    service_register_method(&srv, "GetAssertion", dpk_service_api_get_assert, true);
+    service_register_method(&srv, "GetValidCredCount", dpk_service_api_get_valid_cred_count, false);
+    service_register_method(&srv, "GetCreds", dpk_service_api_get_creds, false);
+    service_register_method(&srv, "GetDeviceCount", dpk_service_api_get_device_count, false);
+    service_register_method(&srv, "DeviceDetect", dpk_service_api_device_detect, true);
 
     service_run(&srv); // in loop, and end when exit
 
+    service_passkey_data_free(&passkeyData);
     service_unref(&srv);
 
     return;

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "servicebase.h"
+#include "serviceframe/servicebase.h"
 
 #include "common/common.h"
 #include "common/log.h"
@@ -10,12 +10,6 @@
 #include <stdio.h>
 
 #define SERVICE_TIMEOUT 180
-
-const gchar *PASSKEY_SERVICE_DBUS_NAME = "com.deepin.Passkey";
-const gchar *PASSKEY_SERVICE_DBUS_PATH = "/com/deepin/Passkey";
-const gchar *PASSKEY_SERVICE_DBUS_INTERFACE = "com.deepin.Passkey";
-// 源自xml生成的文件
-extern const gchar *PASSKEY_SERVICE_DBUS_XML_DATA;
 
 typedef struct _MethodInfo
 {
@@ -143,7 +137,7 @@ static int method_call_async(void *data)
     if (method == NULL || method->cb == NULL || method->invocation == NULL || method->callId == NULL) {
         return -1;
     }
-    g_dbus_method_invocation_return_value(method->invocation, g_variant_new("()"));
+    g_dbus_method_invocation_return_value(method->invocation, g_variant_new("(s)", method->callId));
 
     thrd_t thr;
     thrd_create(&thr, method_call, method);
@@ -203,36 +197,6 @@ static void handle_method(GDBusConnection *connection,
     return;
 }
 
-static void on_bus_acquired(GDBusConnection *connection, const gchar *name, gpointer serviceData)
-{
-    UNUSED_VALUE(name);
-    GError *error = NULL;
-    GDBusNodeInfo *introspection_data;
-    GDBusInterfaceInfo *interface_info;
-
-    GDBusInterfaceVTable interface_vtable = {
-        .method_call = handle_method,
-    };
-
-    introspection_data = g_dbus_node_info_new_for_xml(PASSKEY_SERVICE_DBUS_XML_DATA, &error);
-    if (error != NULL) {
-        LOG(LOG_ERR, "Unable to create introspection data: %s", error->message);
-        return;
-    }
-
-    interface_info = g_dbus_node_info_lookup_interface(introspection_data, PASSKEY_SERVICE_DBUS_INTERFACE);
-    if (interface_info == NULL) {
-        LOG(LOG_ERR, "Unable to lookup interface info");
-        return;
-    }
-
-    guint registration_id = g_dbus_connection_register_object(connection, PASSKEY_SERVICE_DBUS_PATH, interface_info, &interface_vtable, serviceData, NULL, NULL);
-    if (registration_id == 0) {
-        LOG(LOG_ERR, "Unable to register object");
-        return;
-    }
-}
-
 static void free_methods_key(gpointer data)
 {
     if (data == NULL) {
@@ -254,32 +218,82 @@ static void free_methods_value(gpointer data)
     free(info);
 }
 
-static void free_custom_data(gpointer data)
+int service_register_interface(Service *srv, const gchar *path, const gchar *interface, const gchar *interfaceXml)
 {
-    if (data == NULL) {
-        return;
+    GError *error = NULL;
+    GDBusNodeInfo *introspection_data;
+    GDBusInterfaceInfo *interface_info;
+    int ret = -1;
+
+    GDBusInterfaceVTable interface_vtable = {
+        .method_call = handle_method,
+    };
+
+    introspection_data = g_dbus_node_info_new_for_xml(interfaceXml, &error);
+    if (error != NULL) {
+        LOG(LOG_ERR, "Unable to create introspection data: %s", error->message);
+        goto end;
     }
-    g_free(data);
+
+    interface_info = g_dbus_node_info_lookup_interface(introspection_data, interface);
+    if (interface_info == NULL) {
+        LOG(LOG_ERR, "Unable to lookup interface info");
+        goto end;
+    }
+
+    guint registration_id = g_dbus_connection_register_object(srv->connection, path, interface_info, &interface_vtable, (gpointer)srv, NULL, NULL);
+    if (registration_id == 0) {
+        LOG(LOG_ERR, "Unable to register object");
+        goto end;
+    }
+    ret = 0;
+
+end:
+    if (error != NULL) {
+        g_error_free(error);
+        if (introspection_data != NULL) {
+            g_dbus_node_info_unref(introspection_data);
+        }
+    }
+    return ret;
 }
 
-void service_init(Service *srv)
+int service_init(Service *srv, const gchar *busName, gpointer customData)
 {
+    GError *error = NULL;
+    int ret = -1;
+
     if (srv == NULL) {
-        return;
+        goto end;
     }
     srv->busOwnId = 0;
     srv->loop = NULL;
     srv->timeoutSource = 0;
     srv->timeoutCallCount = 0;
+    srv->customData = customData;
 
     srv->methods = g_hash_table_new_full(g_str_hash, g_str_equal, free_methods_key, free_methods_value);
-    srv->customData = g_hash_table_new_full(g_str_hash, g_str_equal, free_custom_data, free_custom_data);
-    mtx_init(&(srv->customDataMtx), mtx_plain);
 
     mtx_init(&(srv->timeoutCallCountMtx), mtx_plain);
     srv->timeoutSource = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, (gpointer)srv);
-    srv->busOwnId = g_bus_own_name(G_BUS_TYPE_SYSTEM, PASSKEY_SERVICE_DBUS_NAME, G_BUS_NAME_OWNER_FLAGS_NONE, on_bus_acquired, on_name_acquired, on_name_lost, (gpointer)srv, NULL);
+
+    srv->connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
+    if (error != NULL) {
+        LOG(LOG_ERR, "Unable to get bus connection: %s", error->message);
+        goto end;
+    }
+    srv->busOwnId = g_bus_own_name_on_connection(srv->connection, busName, G_BUS_NAME_OWNER_FLAGS_NONE, on_name_acquired, on_name_lost, (gpointer)srv, NULL);
+    if (srv->busOwnId == 0) {
+        goto end;
+    }
     srv->loop = g_main_loop_new(NULL, FALSE);
+
+    ret = 0;
+end:
+    if (error != NULL) {
+        g_error_free(error);
+    }
+    return ret;
 }
 
 void service_run(Service *srv)
@@ -293,18 +307,18 @@ void service_unref(Service *srv)
         LOG(LOG_WARNING, "service is not exist?");
         return;
     }
-    mtx_destroy(&(srv->customDataMtx));
+
     mtx_destroy(&(srv->timeoutCallCountMtx));
     if (srv->methods != NULL) {
         g_hash_table_destroy(srv->methods);
     }
 
-    if (srv->customData != NULL) {
-        g_hash_table_destroy(srv->customData);
-    }
-
     if (srv->busOwnId > 0) {
         g_bus_unown_name(srv->busOwnId);
+    }
+
+    if (srv->connection != NULL) {
+        g_object_unref(srv->connection);
     }
 
     if (srv->loop != NULL) {
@@ -327,44 +341,4 @@ void service_register_method(Service *srv, const gchar *methodName, ServiceMetho
     info->cb = cb;
     info->isAsync = isAsync;
     g_hash_table_insert(srv->methods, g_strdup(methodName), info);
-}
-
-int service_custom_data_get(Service *srv, const gchar *key, gchar **value)
-{
-    if (srv == NULL || srv->customData == NULL) {
-        LOG(LOG_ERR, "param invalid");
-        return -1;
-    }
-    mtx_lock(&(srv->customDataMtx));
-    gchar *v = (gchar *)g_hash_table_lookup(srv->customData, key);
-    *value = g_strdup(v);
-    mtx_unlock(&(srv->customDataMtx));
-
-    return 0;
-}
-
-int service_custom_data_set(Service *srv, const gchar *key, const gchar *value)
-{
-    if (srv == NULL || srv->customData == NULL) {
-        LOG(LOG_ERR, "param invalid");
-        return -1;
-    }
-    mtx_lock(&(srv->customDataMtx));
-    g_hash_table_insert(srv->customData, g_strdup(key), g_strdup(value));
-    mtx_unlock(&(srv->customDataMtx));
-
-    return 0;
-}
-
-int service_custom_data_delete(Service *srv, const gchar *key)
-{
-    if (srv == NULL || srv->customData == NULL) {
-        LOG(LOG_ERR, "param invalid");
-        return -1;
-    }
-    mtx_lock(&(srv->customDataMtx));
-    g_hash_table_remove(srv->customData, key);
-    mtx_unlock(&(srv->customDataMtx));
-
-    return 0;
 }
