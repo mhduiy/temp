@@ -31,6 +31,7 @@ public:
     void preInitialize(bool sync = false, FrameProxyInterface::PushType = FrameProxyInterface::PushType::Normal) override;
     const QString name() const override;
     const QString displayName() const override;
+    QIcon icon() const override;
     void active() override;
     void deactive() override;
     QString path() const override { return MAINWINDOW; }

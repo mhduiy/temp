@@ -65,6 +65,11 @@ const QString PasskeyModule::displayName() const
     return tr("Passkey");
 }
 
+QIcon PasskeyModule::icon() const
+{
+    return QIcon(IconPixmapPath);
+}
+
 void PasskeyModule::active()
 {
     Q_EMIT m_worker->requestActive();

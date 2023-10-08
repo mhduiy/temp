@@ -57,6 +57,7 @@ enum SetPinDialogStyle {
     SetFailedStyle
 };
 
+const QString IconPixmapPath = ":/passkey/themes/light/icons/icon_passkey.svg";
 const QString InsertPixmapPath = ":/passkey/themes/light/icons/page_insert.svg";
 const QString IdentifyPixmapPath = ":/passkey/themes/light/icons/page_identify.svg";
 const QString TouchPixmapPath = ":/passkey/themes/light/icons/page_touch.svg";
