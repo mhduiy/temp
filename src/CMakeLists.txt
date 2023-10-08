@@ -1,2 +1,2 @@
 add_subdirectory("service")
-add_subdirectory("dde-control-center-plugin")
+add_subdirectory("dcc-passkey-plugin")

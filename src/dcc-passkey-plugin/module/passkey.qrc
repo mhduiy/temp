@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/passkey">
+        <file>themes/light/icons/page_identify.svg</file>
+        <file>themes/light/icons/page_insert.svg</file>
+        <file>themes/light/icons/page_touch.svg</file>
+        <file>themes/light/icons/page_unregistered.svg</file>
+        <file>themes/light/icons/page_unknown.svg</file>
+        <file>themes/light/icons/set_password.svg</file>
+    </qresource>
+</RCC>

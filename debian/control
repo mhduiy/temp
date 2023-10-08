@@ -9,6 +9,16 @@ Build-Depends:
  libfido2-dev,
  libssl-dev,
  libgtest-dev,
+ libdtkwidget-dev (>=5.4.19),
+ libdtkcore-dev (>=5.4.14),
+ libdtkcore5-bin (>=5.4.14),
+ libdtkgui-dev (>=5.4.13),
+ libdframeworkdbus-dev (>=5.4.6),
+ libgsettings-qt-dev,
+ libdbusmenu-qt5-dev,
+ qtbase5-dev,
+ qttools5-dev-tools,
+ dde-control-center-dev,
 Standards-Version: 4.1.3
 Homepage: https://www.deepin.org
 
@@ -19,3 +29,12 @@ Depends:
  ${shlibs:Depends},
 Description: deepin passkey service.
  This is a project to support Passkey.
+
+Package: dcc-passkey-plugin
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ deepin-passkey,
+Description: deepin desktop-environment - dcc plugin for passkey
+ Dcc plugin for passkey of deepin desktop-environment
