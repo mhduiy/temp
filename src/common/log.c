@@ -25,7 +25,7 @@ void log_print(const char *id, int priority, const char *function, const int lin
             break;
         }
         vsnprintf(buf + len, 1024 - len, format, ap);
-        syslog(priority, buf);
+        syslog(priority, "%s", buf);
     } while (0);
     closelog();
     va_end(ap);
