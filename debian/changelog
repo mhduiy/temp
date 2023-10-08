@@ -1,3 +1,9 @@
+deepin-passkey (1.0.1) unstable; urgency=medium
+
+  * add dcc plugin for passkey
+
+ -- chujiaqi <chujiaqi@uniontech.com>  Sun, 08 Oct 2023 18:00:51 +0800
+
 deepin-passkey (1.0.0) unstable; urgency=medium
 
   * support passkey
