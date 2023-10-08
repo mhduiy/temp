@@ -4,7 +4,7 @@
 
 #include "service.h"
 
-#include "errcode.h"
+#include "common/errcode.h"
 #include "manager.h"
 #include "serviceframe/servicebase.h"
 #include "servicesignal.h"

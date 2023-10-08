@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(GTest REQUIRED)
 
-message(${PROJECT_SOURCE_DIR})
-
 file(GLOB_RECURSE TEST_SRCS
     "${PROJECT_SOURCE_DIR}/src/common/*.c"
     "*.cpp"

@@ -2,7 +2,7 @@
 
 #include "global_test_env.h"
 
-class TestDecode : public testing::Test
+class TestServiceDecode : public testing::Test
 {
 public:
     void SetUp() override { ASSERT_NE(TestEnv::testWorkDir, ""); }
