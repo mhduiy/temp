@@ -7,6 +7,7 @@
 #include <QBoxLayout>
 
 #include <DFontSizeManager>
+#include <DHiDPIHelper>
 
 PromptWidget::PromptWidget(QWidget *parent)
     : QWidget(parent)
@@ -89,9 +90,9 @@ PromptWidget::~PromptWidget()
 {
 }
 
-void PromptWidget::setPixmap(const QPixmap &pixmap)
+void PromptWidget::setPixmap(const QString &path)
 {
-    m_picLabel->setPixmap(pixmap);
+    m_picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(path));
 }
 
 void PromptWidget::setPromptInfo(const QString &text, const QString &tip, bool needSpinner)

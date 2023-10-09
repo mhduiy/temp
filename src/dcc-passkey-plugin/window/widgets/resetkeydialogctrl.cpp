@@ -13,6 +13,7 @@
 #include <QPushButton>
 
 #include <DFontSizeManager>
+#include <DHiDPIHelper>
 
 const QString DialogTitle = QObject::tr("重置密钥");
 
@@ -208,7 +209,7 @@ void ResetKeyDialogCtrl::initInsertDialogUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(InsertPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(InsertPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
@@ -262,7 +263,7 @@ void ResetKeyDialogCtrl::initIdentifyingDeviceUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(InsertPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(InsertPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
@@ -332,7 +333,7 @@ void ResetKeyDialogCtrl::initFirstTouchDialogUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(TouchPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(TouchPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
@@ -386,7 +387,7 @@ void ResetKeyDialogCtrl::initSecondTouchDialogUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(TouchPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(TouchPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
@@ -439,7 +440,7 @@ void ResetKeyDialogCtrl::initFailedDialogUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(UnknownPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(UnknownPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);

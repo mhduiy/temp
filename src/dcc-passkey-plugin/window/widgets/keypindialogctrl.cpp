@@ -10,6 +10,7 @@
 
 #include <DFontSizeManager>
 #include <DLabel>
+#include <DHiDPIHelper>
 
 const QString ChangeBtnText = QObject::tr("更 改");
 const QString SetBtnText = QObject::tr("设 置");
@@ -66,7 +67,7 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
     layout->setAlignment(Qt::AlignTop);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(SetPasswordPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(SetPasswordPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     picLabel->setAlignment(Qt::AlignHCenter);
@@ -167,7 +168,7 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
     layout->setAlignment(Qt::AlignTop);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(SetPasswordPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(SetPasswordPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     picLabel->setAlignment(Qt::AlignHCenter);
@@ -287,7 +288,7 @@ void KeyPinDialogCtrl::initFailedDialogUI()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(QPixmap(UnknownPixmapPath));
+    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(UnknownPixmapPath));
     picLabel->setFixedHeight(180);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
@@ -305,6 +306,7 @@ void KeyPinDialogCtrl::initFailedDialogUI()
 
     m_failedDialog->addContent(widget);
     m_failedDialog->setOnButtonClickedClose(false);
+    m_failedDialog->setFixedSize(400, 500);
 }
 
 void KeyPinDialogCtrl::setPasswordEditAttribute(DPasswordEdit *edit)

@@ -24,7 +24,7 @@ public:
     explicit PromptWidget(QWidget *parent = nullptr);
     ~PromptWidget() override;
 
-    void setPixmap(const QPixmap &pixmap);
+    void setPixmap(const QString &path);
     void setPromptInfo(const QString &text, const QString &tip, bool needSpinner = false);
     void setOperateBtn(const QString &text, bool needBtn = false, bool showLink = false);
 

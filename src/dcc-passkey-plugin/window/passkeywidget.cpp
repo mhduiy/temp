@@ -92,7 +92,7 @@ void PasskeyWidget::refreshUI()
             m_promptMonitorTimer->start();
         }
         const QPair<PromptType, PromptInfo> &info = m_model->promptPageInfo();
-        m_promptPage->setPixmap(QPixmap(info.second.iconPath));
+        m_promptPage->setPixmap(info.second.iconPath);
         m_promptPage->setPromptInfo(info.second.promptMsg, info.second.tipMsg, info.second.needSpinner);
         m_promptPage->setOperateBtn(info.second.operateBtnText, info.second.needBtn, info.second.showLink);
     } else if (pageIndex == StackedPageIndex::Manage) {
