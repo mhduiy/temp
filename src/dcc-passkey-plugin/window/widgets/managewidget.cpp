@@ -25,8 +25,8 @@ ManageWidget::ManageWidget(QWidget *parent)
     TranslucentFrame* contentWidget = new TranslucentFrame(this);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
 
-    //~ contents_path /passkey/密钥管理 //TODO: cjq
-    DLabel *keyManageLabel = new DLabel(tr("密钥管理"), this);
+    //~ contents_path /passkey/Passkey Manage
+    DLabel *keyManageLabel = new DLabel(tr("Passkey Manage"), this);
     DFontSizeManager::instance()->bind(keyManageLabel, DFontSizeManager::T5, QFont::DemiBold);
     keyManageLabel->setContentsMargins(10, 0, 0, 0);
     contentLayout->addWidget(keyManageLabel);
@@ -35,7 +35,6 @@ ManageWidget::ManageWidget(QWidget *parent)
     SettingsGroup *keyManageGroup = new SettingsGroup(contentWidget);
 
     TitleAuthorizedItem *pin = new TitleAuthorizedItem(keyManageGroup);
-    //~ contents_path /passkey/安全密钥PIN
     pin->setTitle(tr("安全密钥PIN"));
     pin->setValueForegroundRole(QColor(255, 0, 0));
     pin->setButtonText(ChangePinText);
@@ -53,7 +52,6 @@ ManageWidget::ManageWidget(QWidget *parent)
     keyManageGroup->appendItem(pin);
 
     TitleAuthorizedItem *resetKey = new TitleAuthorizedItem(keyManageGroup);
-    //~ contents_path /passkey/安全密钥PIN
     resetKey->setTitle(tr("重置密钥"));
     resetKey->setValueForegroundRole(QColor(255, 0, 0));
     resetKey->setButtonText(tr("重 置"));

@@ -42,9 +42,9 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Qt5DBus_LIBRARIES}
 )
 
-file(GLOB TS_FILES "translations/*.ts")
+file(GLOB TS_FILES "trans/translations/*.ts")
 qt5_add_translation(QM_FILES ${TS_FILES})
 add_custom_target(translations ALL DEPENDS ${QM_FILES})
-install(FILES ${QM_FILES} DESTINATION share/${PLUGIN_NAME}/translations)
+install(FILES ${QM_FILES} DESTINATION share/dcc-passkey-plugin/translations)
 
 install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-control-center/modules)

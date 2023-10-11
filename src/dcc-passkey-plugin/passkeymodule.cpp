@@ -22,7 +22,9 @@ PasskeyModule::PasskeyModule(QObject *parent)
     , m_worker(nullptr)
     , m_workerThread(nullptr)
 {
-
+    QTranslator *translator = new QTranslator(this);
+    translator->load(QString("/usr/share/dcc-passkey-plugin/translations/dcc-passkey-plugin_%1.qm").arg(QLocale::system().name()));
+    QCoreApplication::installTranslator(translator);
 }
 
 PasskeyModule::~PasskeyModule()
@@ -121,16 +123,14 @@ int PasskeyModule::load(const QString &path)
 void PasskeyModule::addChildPageTrans() const
 {
     if (m_frameProxy != nullptr) {
-        m_frameProxy->addChildPageTrans("密钥管理", tr("密钥管理"));
-        m_frameProxy->addChildPageTrans("安全密钥PIN", tr("安全密钥PIN"));
-        m_frameProxy->addChildPageTrans("重置密钥", tr("重置密钥"));
+        m_frameProxy->addChildPageTrans("Passkey Manage", tr("Passkey Manage"));
     }
 }
 
 void PasskeyModule::initSearchData()
 {
     const QString &module = displayName();
-    const QString &passkeyManage = tr("密钥管理");
+    const QString &passkeyManage = tr("Passkey Manage");
     const QString &hideModuleFlag = "hideModule";
     static bool visible = false;
 
@@ -151,9 +151,7 @@ void PasskeyModule::initSearchData()
             visible = show;
             m_frameProxy->setModuleVisible(module, visible);
             m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, tr("密钥管理"), visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, tr("安全密钥PIN"), visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, tr("重置密钥"), visible);
+            m_frameProxy->setDetailVisible(module, passkeyManage, tr("Passkey Manage"), visible);
             m_frameProxy->updateSearchData(module);
         }
     });
@@ -162,9 +160,7 @@ void PasskeyModule::initSearchData()
         visible = func_is_visible(hideModuleFlag);
         m_frameProxy->setModuleVisible(module, visible);
         m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, tr("密钥管理"), visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, tr("安全密钥PIN"), visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, tr("重置密钥"), visible);
+        m_frameProxy->setDetailVisible(module, passkeyManage, tr("Passkey Manage"), visible);
     };
 
     func_process_all();
