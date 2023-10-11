@@ -1,0 +1,16 @@
+{
+    "magic": "dsg.config.meta",
+    "version": "1.0",
+    "contents": {
+        "dccPasskeyPluginHideStatus": {
+            "value": true,
+            "serial": 0,
+            "flags": ["global"],
+            "name": "Dcc Passkey Plugin Hide",
+            "name[zh_CN]": "",
+            "description": "控制中心中是否显示安全密钥模块: \n值为True时不显示。\n值为False时显示。",
+            "permissions": "readwrite",
+            "visibility": "private"
+        }
+    }
+}

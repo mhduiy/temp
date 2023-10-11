@@ -9,6 +9,8 @@
 #include "module/common.h"
 #include "gsettingwatcher.h"
 
+#include <DConfig>
+
 DCORE_USE_NAMESPACE
 
 Q_LOGGING_CATEGORY(DCC_PASSKEY, "dcc.passkey")
@@ -33,6 +35,17 @@ PasskeyModule::~PasskeyModule()
 
 void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pushtype)
 {
+    bool hide = true;
+    DConfig *config = DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin");
+    if ((config && config->isValid())) {
+        hide = config->value("dccPasskeyPluginHideStatus", true).toBool();
+    }
+    if (hide) {
+        qCInfo(DCC_PASSKEY) << displayName() << " is disabled";
+        setAvailable(false);
+        return;
+    }
+
     Q_UNUSED(sync);
     Q_UNUSED(pushtype);
 
@@ -152,7 +165,7 @@ void PasskeyModule::initSearchData()
         m_frameProxy->setDetailVisible(module, passkeyManage, tr("密钥管理"), visible);
         m_frameProxy->setDetailVisible(module, passkeyManage, tr("安全密钥PIN"), visible);
         m_frameProxy->setDetailVisible(module, passkeyManage, tr("重置密钥"), visible);
-     };
+    };
 
     func_process_all();
 }
