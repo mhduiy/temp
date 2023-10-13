@@ -18,6 +18,7 @@ Build-Depends:
  libgsettings-qt-dev,
  libdbusmenu-qt5-dev,
  qtbase5-dev,
+ qttools5-dev,
  qttools5-dev-tools,
  dde-control-center-dev,
 Standards-Version: 4.1.3
