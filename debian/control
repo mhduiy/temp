@@ -8,6 +8,7 @@ Build-Depends:
  pkg-config,
  libfido2-dev,
  libssl-dev,
+ libglib2.0-dev,
  libgtest-dev,
  libdtkwidget-dev (>=5.4.19),
  libdtkcore-dev (>=5.4.14),
