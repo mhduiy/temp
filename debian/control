@@ -24,6 +24,14 @@ Build-Depends:
 Standards-Version: 4.1.3
 Homepage: https://www.deepin.org
 
+Package: dde-passkey-environment
+Architecture: any
+Depends:
+ deepin-passkey,
+ dcc-passkey-plugin,
+Description: dde passkey.
+ This is a package used to install the passkey environment for dde.
+
 Package: deepin-passkey
 Architecture: any
 Depends:
