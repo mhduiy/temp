@@ -93,3 +93,24 @@ end:
         g_error_free(error);
     }
 }
+
+void emit_device_select_status(MethodContext *mc, int finish, int status)
+{
+    GError *error = NULL;
+    if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
+        LOG(LOG_WARNING, "emit 'DeviceSelect' signal error: service-data is invalid.");
+        goto end;
+    }
+    Service *srv = (Service *)mc->serviceData;
+    if (srv->connection == NULL) {
+        LOG(LOG_WARNING, "emit 'DeviceSelect' signal error: service-data is invalid.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceSelect", g_variant_new("(sii)", mc->callId, finish, status), &error);
+end:
+    if (error != NULL) {
+        LOG(LOG_WARNING, "emit signal error: %s", error->message);
+        g_error_free(error);
+    }
+}

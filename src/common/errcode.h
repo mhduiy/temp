@@ -12,6 +12,8 @@ extern "C" {
 // 3 deepin自定义错误码，优先使用1和2
 
 #define DEEPIN_ERR_DEVICE_CLAIMED -10011
+#define DEEPIN_ERR_DEVICE_NOT_FOUND -10021
+#define DEEPIN_ERR_DEVICE_OPEN -10022
 
 #ifdef __cplusplus
 }

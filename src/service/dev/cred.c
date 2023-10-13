@@ -461,7 +461,7 @@ static bool parse_native_format(const char *userName, FILE *credFile, CredInfo *
             buf[len - 1] = '\0';
         }
 
-        LOG(LOG_INFO, "Read %zu bytes(%s)", len, buf);
+        LOG(LOG_DEBUG, "Read %zu bytes(%s)", len, buf);
         user = strtok_r(buf, ":", &credential);
         if (credential[0] == ':') {
             credName = strtok_r(NULL, ":", &credential);
@@ -481,7 +481,7 @@ static bool parse_native_format(const char *userName, FILE *credFile, CredInfo *
         }
         // credName暂时不使用，根据后续需求规划，需要证书命名，先预留
         if (strcmp(userName, user) == 0) {
-            LOG(LOG_INFO, "cred matched user: %s", user);
+            LOG(LOG_DEBUG, "cred matched user: %s", user);
             if (!parse_native_credential(credential, &creds[*credsCount])) {
                 LOG(LOG_WARNING, "Failed to parse credential");
                 continue;
@@ -890,81 +890,26 @@ end:
     return success;
 }
 
-static int get_authenticators(const AssertArgs *args, const fido_dev_info_t *devList, size_t devListLen, fido_assert_t *assert, const int rk, fido_dev_t **authList)
+static int do_get_assert_check_cred_is_valid(fido_dev_t *dev, fido_assert_t *assert)
 {
-    const fido_dev_info_t *di = NULL;
-    fido_dev_t *dev = NULL;
     int callRet = FIDO_ERR_INTERNAL;
-
-    LOG(LOG_DEBUG, "Working with %zu authenticator(s)", devListLen);
-    size_t i = 0;
-    size_t j = 0;
-    for (; i < devListLen; i++) {
-        LOG(LOG_DEBUG, "Checking whether key exists in authenticator %zu", i);
-
-        di = fido_dev_info_ptr(devList, i);
-        if (!di) {
-            LOG(LOG_DEBUG, "Unable to get device pointer");
-            continue;
-        }
-
-        LOG(LOG_DEBUG, "Authenticator path: %s", fido_dev_info_path(di));
-
-        dev = fido_dev_new();
-        if (!dev) {
-            LOG(LOG_DEBUG, "Unable to allocate device type");
-            continue;
-        }
-        const char *devPath = fido_dev_info_path(di);
-        callRet = fido_dev_open(dev, devPath);
-        if (callRet != FIDO_OK) {
-            LOG(LOG_DEBUG, "Failed to open authenticator: %s (%d)", fido_strerr(callRet), callRet);
-            fido_dev_free(&dev);
-            dev = NULL;
-            continue;
-        }
-
-        if (rk || args->noDetect) {
-            // resident credential or noDetect: try all authenticators
-            authList[j++] = dev;
-        } else {
-            callRet = fido_dev_get_assert(dev, assert, NULL);
-            if ((!fido_dev_is_fido2(dev) && callRet == FIDO_ERR_USER_PRESENCE_REQUIRED) || (fido_dev_is_fido2(dev) && callRet == FIDO_OK)) {
-                authList[j++] = dev;
-                LOG(LOG_DEBUG, "Found key in authenticator %s", devPath);
-                callRet = FIDO_OK;
-                goto end;
-            }
-            LOG(LOG_DEBUG, "Key not found in authenticator %s", devPath);
-
-            fido_dev_close(dev);
-            fido_dev_free(&dev);
-            dev = NULL;
-        }
+    if (dev == NULL || assert == NULL) {
+        return callRet;
     }
 
-    if (j == 0) {
-        LOG(LOG_ERR, "Key not found");
-        goto end;
+    callRet = fido_dev_get_assert(dev, assert, NULL);
+    if ((!fido_dev_is_fido2(dev) && callRet == FIDO_ERR_USER_PRESENCE_REQUIRED) || (fido_dev_is_fido2(dev) && callRet == FIDO_OK)) {
+        LOG(LOG_DEBUG, "dev is valid by check cred");
+        callRet = FIDO_OK;
     }
 
-    callRet = FIDO_OK;
-end:
-    if (callRet != FIDO_OK && dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
-    }
     return callRet;
 }
 
-int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount)
+int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount, fido_dev_t *dev)
 {
     fido_assert_t *assert = NULL;
-    fido_dev_info_t *devList = NULL;
-    fido_dev_t **authList = NULL;
     int cued = 0;
-    size_t nDevs = 0;
-    size_t nDevsPrev = 0;
     struct opts opts;
     struct pk pk;
     const char *pin = NULL;
@@ -974,29 +919,11 @@ int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const Cr
 
     memset(&pk, 0, sizeof(pk));
 
-    if ((callRet = dpk_dev_devs_find_existed(&devList, &nDevs)) != FIDO_OK) {
-        LOG(LOG_ERR, "Unable to discover device(s)");
-        goto end;
-    }
-    if (nDevs == 0) {
-        LOG(LOG_ERR, "Unable to discover device(s)");
-        callRet = FIDO_ERR_NOTFOUND;
-        goto end;
-    }
-    nDevsPrev = nDevs;
-
-    LOG(LOG_DEBUG, "Device max index is %zu", nDevs);
-
-    authList = calloc(64 + 1, sizeof(fido_dev_t*));
-    if (!authList) {
-        LOG(LOG_ERR, "Unable to allocate authenticator list");
-        goto end;
-    }
-
     if (args->noDetect) {
         LOG(LOG_WARNING, "noDetect option specified, suitable key detection will be skipped");
     }
 
+    // 逐个证书进行认证
     for (unsigned int i = 0; i < credsCount; i++) {
         callRet = FIDO_ERR_INTERNAL;
         LOG(LOG_DEBUG, "Attempting authentication with device number %d", i + 1);
@@ -1021,160 +948,109 @@ int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const Cr
             continue;
         }
 
-        callRet = get_authenticators(args, devList, nDevs, assert, is_resident(creds[i].keyHandle), authList);
-        if (callRet == FIDO_OK) {
-            for (size_t j = 0; authList[j] != NULL; j++) {
-                callRet = match_device_opts(authList[j], &opts);
-                if (callRet != FIDO_OK) {
-                    // 此处错误属于认证器错误，continue开始下一个认证器
-                    LOG(LOG_INFO, "skipping authenticator, %s", fido_strerr(callRet));
-                    continue;
-                }
-
-                if (!set_opts(&opts, assert)) {
-                    // 此处错误属于认证器错误，continue开始下一个认证器
-                    LOG(LOG_INFO, "authenticator error and try another, failed to set opts");
-                    continue;
-                }
-
-                if (!set_cdh(assert)) {
-                    // 此处错误属于认证器错误，continue开始下一个认证器
-                    LOG(LOG_INFO, "authenticator error and try another, failed to set cdh.");
-                    continue;
-                }
-
-                if (opts.pin == FIDO_OPT_TRUE) {
-                    pin = args->pin;
-                    // 此处错误属于证书错误，break退出该证书的认证，开始下一个证书
-                    if (pin == NULL) {
-                        LOG(LOG_INFO, "cred error and try another, need pin, but input pin is null.");
-                        break;
-                    }
-                    if (strlen(pin) == 0) {
-                        LOG(LOG_INFO, "cred error and try another, need pin, but input pin is emtpy");
-                        break;
-                    }
-                }
-                if (opts.up == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
-                    if (args->manual == 0 && args->cue && !cued) {
-                        cued = 1;
-                        // converse(pamh, PAM_TEXT_INFO, args->cuePrompt != NULL ? args->cuePrompt : "Please touch the device.");
-                    }
-                }
-
-                emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
-                callRet = fido_dev_get_assert(authList[j], assert, pin);
-
-                if (pin) {
-                    pin = NULL;
-                }
-                if (callRet != FIDO_OK) {
-                    // 此处错误属于认证器错误，continue开始下一个认证器
-                    LOG(LOG_INFO, "authenticator error and try another, failed to get assert:%s", fido_strerr(callRet));
-                    continue;
-                }
-                if (opts.pin == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
-                    callRet = fido_assert_set_uv(assert, FIDO_OPT_TRUE);
-                    if (callRet != FIDO_OK) {
-                        // 此处错误属于认证器错误，continue开始下一个认证器
-                        LOG(LOG_INFO, "authenticator error and try another, failed to set uv:%s", fido_strerr(callRet));
-                        continue;
-                    }
-                }
-                callRet = fido_assert_verify(assert, 0, pk.type, pk.ptr);
-                if (callRet == FIDO_OK) {
-                    // 只要有一个成功，跳过其他证书和认证器的认证，结束流程
-                    goto end;
+        // 设备认证
+        do {
+            if (is_resident(creds[i].keyHandle) || args->noDetect) {
+                LOG(LOG_INFO, "resident credential or noDetect: try the device without check.");
+            } else {
+                if (do_get_assert_check_cred_is_valid(dev, assert) != FIDO_OK) {
+                    LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
+                    break;
                 }
             }
-        } else {
-            LOG(LOG_INFO, "Device for this keyhandle is not present");
+
+            callRet = match_device_opts(dev, &opts);
+            if (callRet != FIDO_OK) {
+                LOG(LOG_INFO, "skipping authenticator, %s", fido_strerr(callRet));
+                break;
+            }
+
+            if (!set_opts(&opts, assert)) {
+                LOG(LOG_INFO, "authenticator error and try another, failed to set opts");
+                break;
+            }
+
+            if (!set_cdh(assert)) {
+                LOG(LOG_INFO, "authenticator error and try another, failed to set cdh.");
+                break;
+            }
+
+            if (opts.pin == FIDO_OPT_TRUE) {
+                pin = args->pin;
+                if (pin == NULL) {
+                    LOG(LOG_INFO, "cred error and try another, need pin, but input pin is null.");
+                    break;
+                }
+                if (strlen(pin) == 0) {
+                    LOG(LOG_INFO, "cred error and try another, need pin, but input pin is emtpy");
+                    break;
+                }
+            }
+            if (opts.up == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
+                if (args->manual == 0 && args->cue && !cued) {
+                    cued = 1;
+                    // converse(pamh, PAM_TEXT_INFO, args->cuePrompt != NULL ? args->cuePrompt : "Please touch the device.");
+                }
+            }
+
+            emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+            callRet = fido_dev_get_assert(dev, assert, pin);
+
+            if (pin) {
+                pin = NULL;
+            }
+            if (callRet != FIDO_OK) {
+                LOG(LOG_INFO, "authenticator error and try another, failed to get assert:%s", fido_strerr(callRet));
+                break;
+            }
+            if (opts.pin == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
+                callRet = fido_assert_set_uv(assert, FIDO_OPT_TRUE);
+                if (callRet != FIDO_OK) {
+                    LOG(LOG_INFO, "authenticator error and try another, failed to set uv:%s", fido_strerr(callRet));
+                    break;
+                }
+            }
+            callRet = fido_assert_verify(assert, 0, pk.type, pk.ptr);
+            if (callRet == FIDO_OK) {
+                // 只要有一个成功，跳过其他证书和认证器的认证，结束流程
+                goto end;
+            }
+
+        } while (0);
+
+        if (assert != NULL) {
+            fido_assert_free(&assert);
+            assert = NULL;
         }
-
-        fido_dev_info_free(&devList, nDevs);
-
-        devList = fido_dev_info_new(64);
-        if (!devList) {
-            LOG(LOG_ERR, "Unable to allocate devlist");
-            goto end;
-        }
-
-        int ret = fido_dev_info_manifest(devList, 64, &nDevs);
-        if (ret != FIDO_OK) {
-            callRet = ret;
-            LOG(LOG_ERR, "Unable to discover device(s), %s (%d)", fido_strerr(ret), ret);
-            goto end;
-        }
-
-        if (nDevs > nDevsPrev) {
-            LOG(LOG_INFO, "Devices max_index has changed: %zu (was %zu). Starting over", nDevs, nDevsPrev);
-            nDevsPrev = nDevs;
-            i = 0;
-        }
-
-        for (size_t j = 0; authList[j] != NULL; j++) {
-            fido_dev_close(authList[j]);
-            fido_dev_free(&authList[j]);
-        }
-
-        fido_assert_free(&assert);
     }
-    LOG(LOG_INFO, "All devices can not to authenticate, %s.", fido_strerr(callRet));
+    if (callRet == FIDO_OK) {
+        callRet = FIDO_ERR_INTERNAL;
+    }
+    LOG(LOG_INFO, "All creds can not to authenticate, %s.", fido_strerr(callRet));
 
 end:
     reset_pk(&pk);
     if (assert != NULL) {
         fido_assert_free(&assert);
     }
-    if (devList != NULL) {
-        fido_dev_info_free(&devList, nDevs);
-    }
-    if (authList) {
-        for (size_t j = 0; authList[j] != NULL; j++) {
-            fido_dev_close(authList[j]);
-            fido_dev_free(&authList[j]);
-        }
-        free(authList);
-    }
+
     return callRet;
 }
 
-int dk_dev_has_valid_cred_count(const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount, unsigned int *validCredsCount)
+int dk_dev_has_valid_cred_count(const AssertArgs *args, const CredInfo *creds, const unsigned int credsCount, fido_dev_t *dev, unsigned int *validCredsCount)
 {
     fido_assert_t *assert = NULL;
-    fido_dev_info_t *devList = NULL;
-    fido_dev_t **authList = NULL;
     int callRet = FIDO_ERR_INTERNAL;
-    size_t nDevs = 0;
     struct opts opts;
     struct pk pk;
 
     init_opts(&opts);
     memset(&pk, 0, sizeof(pk));
 
-    devList = fido_dev_info_new(args->maxDevs);
-    if (!devList) {
-        LOG(LOG_ERR, "Unable to allocate devlist");
+    if (args == NULL || creds == NULL || validCredsCount == NULL) {
         goto end;
     }
-
-    callRet = fido_dev_info_manifest(devList, args->maxDevs, &nDevs);
-    if (callRet != FIDO_OK) {
-        LOG(LOG_ERR, "Unable to discover device(s), %s (%d)", fido_strerr(callRet), callRet);
-        goto end;
-    }
-
-    LOG(LOG_DEBUG, "Device max index is %zu", nDevs);
-
-    authList = calloc(64 + 1, sizeof(fido_dev_t*));
-    if (!authList) {
-        LOG(LOG_ERR, "Unable to allocate authenticator list");
-        goto end;
-    }
-
-    if (args->noDetect) {
-        LOG(LOG_WARNING, "noDetect option specified, suitable key detection will be skipped");
-    }
+    *validCredsCount = 0;
 
     unsigned int validCred = 0;
 
@@ -1194,23 +1070,18 @@ int dk_dev_has_valid_cred_count(const AssertArgs *args, const CredInfo *creds, c
             LOG(LOG_ERR, "Failed to parse public key");
             goto end;
         }
-        callRet = get_authenticators(args, devList, nDevs, assert, is_resident(creds[i].keyHandle), authList);
-        if (callRet == FIDO_OK) {
-            LOG(LOG_DEBUG, "valid cred");
-            validCred++;
-        } else {
-            LOG(LOG_DEBUG, "invalid cred");
-        }
 
-        for (size_t j = 0; authList[j] != NULL; j++) {
-            fido_dev_close(authList[j]);
-            fido_dev_free(&authList[j]);
+        if (do_get_assert_check_cred_is_valid(dev, assert) == FIDO_OK) {
+            validCred++;
+            LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
         }
 
         if (assert != NULL) {
             fido_assert_free(&assert);
+            assert = NULL;
         }
     }
+    LOG(LOG_DEBUG, "valid cred count:%d", validCred);
     *validCredsCount = validCred;
     callRet = FIDO_OK;
 end:
@@ -1218,16 +1089,6 @@ end:
 
     if (assert != NULL) {
         fido_assert_free(&assert);
-    }
-    if (devList != NULL) {
-        fido_dev_info_free(&devList, nDevs);
-    }
-    if (authList) {
-        for (size_t j = 0; authList[j] != NULL; j++) {
-            fido_dev_close(authList[j]);
-            fido_dev_free(&authList[j]);
-        }
-        free(authList);
     }
 
     return callRet;

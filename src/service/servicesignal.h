@@ -21,6 +21,8 @@ void emit_make_cred_status(MethodContext *mc, const char *user, int finish, int 
 
 void emit_get_assert_status(MethodContext *mc, const char *user, int finish, int status);
 
+void emit_device_select_status(MethodContext *mc, int finish, int status);
+
 #ifdef __cplusplus
 }
 #endif

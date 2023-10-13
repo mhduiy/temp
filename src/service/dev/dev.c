@@ -17,7 +17,7 @@
 #define FREQUENCY 1
 
 // 寻找设备，如果没有插入的设备则等待，有超时时间
-int dpk_dev_devs_find_wait(fido_dev_info_t **devList, size_t *nDevs)
+int dpk_dev_info_find_wait(fido_dev_info_t **devList, size_t *nDevs)
 {
     fido_dev_info_t *devListTemp = NULL;
     size_t nDevsTemp = 0;
@@ -75,7 +75,7 @@ end:
 }
 
 // 寻找当前已插入的设备
-int dpk_dev_devs_find_existed(fido_dev_info_t **devList, size_t *nDevs)
+int dpk_dev_info_find_existed(fido_dev_info_t **devList, size_t *nDevs)
 {
     fido_dev_info_t *devListTemp = NULL;
     size_t nDevsTemp = 0;
@@ -116,33 +116,18 @@ end:
 
 // 从设备列表中选择一个设备。方式是获取默认设备，目前简单设计，默认是获取第一个设备
 // 该方式支持不存在插入的设备时，等待设备插入立即识别
-int dpk_dev_get_default_dev(bool isWaitPlugin, fido_dev_t **device)
+int dpk_dev_open_default_dev(fido_dev_info_t *devList, size_t nDevs, fido_dev_t **device)
 {
-    size_t nDevs = 0;
-    fido_dev_info_t *devList = NULL;
     const fido_dev_info_t *di = NULL;
     const char *path = NULL;
     fido_dev_t *dev = NULL;
     int callRet = FIDO_ERR_INTERNAL;
 
-    if (device == NULL) {
+    if (device == NULL || devList == NULL || nDevs == 0) {
         LOG(LOG_ERR, "param invalid");
         goto end;
     }
 
-    if (isWaitPlugin) {
-        if ((callRet = dpk_dev_devs_find_wait(&devList, &nDevs)) != FIDO_OK) {
-            goto end;
-        }
-    } else {
-        if ((callRet = dpk_dev_devs_find_existed(&devList, &nDevs)) != FIDO_OK) {
-            goto end;
-        }
-    }
-
-    if (nDevs == 0) {
-        goto end;
-    }
     di = fido_dev_info_ptr(devList, 0); // 默认第一个设备
     if (!di) {
         LOG(LOG_ERR, "error: fido_dev_info_ptr failed");
@@ -166,9 +151,6 @@ int dpk_dev_get_default_dev(bool isWaitPlugin, fido_dev_t **device)
     *device = dev;
     callRet = FIDO_OK;
 end:
-    if (devList != NULL) {
-        fido_dev_info_free(&devList, nDevs);
-    }
     if (dev != NULL && callRet != FIDO_OK) {
         fido_dev_close(dev);
         fido_dev_free(&dev);
@@ -176,13 +158,63 @@ end:
     return callRet;
 }
 
+int dpk_dev_open_all_dev(fido_dev_info_t *devInfoList, size_t nDevInfos, fido_dev_t **devices, size_t devSize)
+{
+    const fido_dev_info_t *di = NULL;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    LOG(LOG_DEBUG, "open %zu authenticator(s)", nDevInfos);
+    size_t i = 0;
+    size_t j = 0;
+    for (; i < nDevInfos; i++) {
+        LOG(LOG_DEBUG, "open authenticator %zu", i);
+
+        di = fido_dev_info_ptr(devInfoList, i);
+        if (!di) {
+            LOG(LOG_DEBUG, "Unable to get device pointer");
+            continue;
+        }
+
+        const char *devPath = fido_dev_info_path(di);
+        LOG(LOG_DEBUG, "authenticator path: %s", devPath);
+
+        fido_dev_t *dev = fido_dev_new();
+        if (!dev) {
+            LOG(LOG_DEBUG, "Unable to allocate device type");
+            continue;
+        }
+        do {
+            callRet = fido_dev_open(dev, devPath);
+            if (callRet != FIDO_OK) {
+                LOG(LOG_DEBUG, "Failed to open authenticator: %s (%d)", fido_strerr(callRet), callRet);
+                fido_dev_free(&dev);
+                dev = NULL;
+                break;
+            }
+
+            if (j >= devSize) {
+                LOG(LOG_DEBUG, "Failed to open authenticator: %s (%d)", fido_strerr(callRet), callRet);
+                fido_dev_free(&dev);
+                dev = NULL;
+                break;
+            }
+        } while (0);
+
+        if (dev != NULL) {
+            devices[j++] = dev;
+        }
+    }
+
+    callRet = FIDO_OK;
+
+    return callRet;
+}
+
 // authenticatorSelection (0x0B)的支持
 // 从设备列表中选择一个设备。选择方式是交互式的，通过用户去通过在场证明的方式选择设备，存在阻塞
 // 该方式只支持已插入的设备
-int dpk_dev_dev_select(fido_dev_t **dev)
+int dpk_dev_select_dev(fido_dev_info_t *devList, size_t nDevs, fido_dev_t **dev)
 {
-    size_t nDevs = 0;
-    fido_dev_info_t *devList = NULL;
     fido_dev_t **devTab; // 识别到的设备都创建对象
     size_t nOpen = 0;
     struct timespec tsStart;
@@ -200,10 +232,6 @@ int dpk_dev_dev_select(fido_dev_t **dev)
     }
     *dev = NULL;
 
-    if ((callRet = dpk_dev_devs_find_existed(&devList, &nDevs)) != FIDO_OK) {
-        LOG(LOG_ERR, "dev find error.");
-        goto end;
-    }
     LOG(LOG_DEBUG, "found %ld authenticators.", nDevs);
     if (devList == NULL || nDevs == 0) {
         LOG(LOG_ERR, "can not find authenticators.");
@@ -320,6 +348,7 @@ int dpk_dev_dev_select(fido_dev_t **dev)
 end:
     LOG(LOG_DEBUG, "dev select finish, ret code:%d", callRet);
     if (devTab != NULL) {
+        // 终止其他设备的在场证明
         for (size_t i = 0; i < nDevs; i++) {
             if (devTab[i] && devTab[i] != *dev) {
                 fido_dev_cancel(devTab[i]);
@@ -329,8 +358,6 @@ end:
         }
         free(devTab);
     }
-    if (devList != NULL) {
-        fido_dev_info_free(&devList, nDevs);
-    }
+
     return callRet;
 }

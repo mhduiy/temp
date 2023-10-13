@@ -5,14 +5,14 @@
 #include "manager.h"
 
 #include "common/common.h"
+#include "common/errcode.h"
 #include "common/log.h"
 #include "dev/cred.h"
 #include "dev/dev.h"
 #include "dev/info.h"
 #include "rp/rp.h"
+#include "servicedata.h"
 #include "servicesignal.h"
-
-#include <fido.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -21,67 +21,187 @@
 #include <sys/stat.h>
 #include <threads.h>
 
-int dpk_manager_get_pin_status(int *status)
+// 获取选中设备，封装了检测，使用该函数，对获取到的“findDev”，需要使用service_selected_device_use_end
+static int dpk_manager_find_device_by_select(MethodContext *mc, fido_dev_t **findDev)
 {
     fido_dev_t *dev = NULL;
+    Service *srv = NULL;
+    fido_cbor_info_t *info = NULL;
     int callRet = FIDO_ERR_INTERNAL;
+
+    LOG(LOG_INFO, "to find selected device");
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
+    if (service_selected_device_use_start(srv, mc->sender, &dev) < 0) {
+        goto end;
+    }
+
+    if (dev == NULL) {
+        // 如果是不存在selected的设备，那么不认为是出错，而是认为没有select设备
+        callRet = FIDO_OK;
+        goto end;
+    }
+
+    if ((info = fido_cbor_info_new()) == NULL) {
+        LOG(LOG_ERR, "fido_cbor_info_new failed");
+        goto end;
+    }
+    callRet = fido_dev_get_cbor_info(dev, info);
+    if (callRet != FIDO_OK) {
+        LOG(LOG_WARNING, "fido_dev_get_cbor_info ret (%d) %s", callRet, fido_strerr(callRet)); // FIDO_ERR_TX
+        goto end;
+    }
+    LOG(LOG_INFO, "find device by select.");
+
+    *findDev = dev;
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        // 屏蔽内部错误码，使用统一错误码，便于区分
+        callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+        if (dev != NULL) {
+            service_selected_device_use_end(srv, mc->sender, dev);
+        }
+        service_selected_device_delete(srv, mc->sender);
+    }
+    if (info != NULL) {
+        fido_cbor_info_free(&info);
+    }
+
+    return callRet;
+}
+
+int dpk_manager_get_pin_status(MethodContext *mc, int *status)
+{
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_t *defaultDev = NULL;
+    fido_dev_t *currentDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevs = 0;
+    int callRet = FIDO_ERR_INTERNAL;
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
-    if ((callRet = dpk_dev_get_default_dev(false, &dev)) != FIDO_OK) {
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
     }
-    if (dev == NULL) {
-        goto end;
+    if (selectedDev == NULL) {
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+        if (nDevs == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_default_dev(devInfoList, nDevs, &defaultDev)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        if (defaultDev == NULL) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        currentDev = defaultDev;
+    } else {
+        currentDev = selectedDev;
     }
     *status = 0;
-    if (fido_dev_supports_pin(dev)) {
+    if (fido_dev_supports_pin(currentDev)) {
         *status = *status | 0x10;
     }
-    if (fido_dev_has_pin(dev)) {
+    if (fido_dev_has_pin(currentDev)) {
         *status = *status | 0x1;
     }
 
-    LOG(LOG_DEBUG, "get pin status %x", *status);
+    LOG(LOG_WARNING, "get pin status %x", *status);
 
     callRet = FIDO_OK;
 end:
-    if (dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
+    if (defaultDev != NULL) {
+        fido_dev_close(defaultDev);
+        fido_dev_free(&defaultDev);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevs);
+    }
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
     }
     return callRet;
 }
 
-int dpk_manager_set_pin(const char *pin, const char *oldPin)
+int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
 {
-    fido_dev_t *dev = NULL;
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_t *defaultDev = NULL;
+    fido_dev_t *currentDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevs = 0;
     int callRet = FIDO_ERR_INTERNAL;
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
-    if ((callRet = dpk_dev_get_default_dev(false, &dev)) != FIDO_OK) {
-        LOG(LOG_WARNING, "can not find dev");
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
     }
-    if (dev == NULL) {
-        LOG(LOG_WARNING, "can not find dev");
-        goto end;
+    if (selectedDev == NULL) {
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+        if (nDevs == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_default_dev(devInfoList, nDevs, &defaultDev)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        if (defaultDev == NULL) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        currentDev = defaultDev;
+    } else {
+        currentDev = selectedDev;
     }
 
-    if (!fido_dev_supports_pin(dev)) {
+    if (!fido_dev_supports_pin(currentDev)) {
         LOG(LOG_WARNING, "is not support pin");
         callRet = FIDO_ERR_UNSUPPORTED_OPTION;
         goto end;
     }
 
-    if (fido_dev_has_pin(dev) && oldPin == NULL) {
+    if (fido_dev_has_pin(currentDev) && oldPin == NULL) {
         LOG(LOG_WARNING, "pin is existed, need old pin");
         callRet = FIDO_ERR_INVALID_PARAMETER;
         goto end;
     }
 
-    callRet = fido_dev_set_pin(dev, pin, oldPin);
+    callRet = fido_dev_set_pin(currentDev, pin, oldPin);
     if (callRet != FIDO_OK) {
         LOG(LOG_ERR, "error: fido_dev_set_pin (%d) %s", callRet, fido_strerr(callRet));
         goto end;
@@ -89,9 +209,15 @@ int dpk_manager_set_pin(const char *pin, const char *oldPin)
     LOG(LOG_INFO, "set pin success.");
     callRet = FIDO_OK;
 end:
-    if (dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
+    if (defaultDev != NULL) {
+        fido_dev_close(defaultDev);
+        fido_dev_free(&defaultDev);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevs);
+    }
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
     }
     return callRet;
 }
@@ -103,47 +229,97 @@ end:
 // 如果请求是在通电10秒后发出的，则验证器返回CTAP2_ERR_NOT_ALLOWED。
 int dpk_manager_reset(MethodContext *mc)
 {
-    fido_dev_t *dev = NULL;
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_t *defaultDev = NULL;
+    fido_dev_t *currentDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevs = 0;
     int callRet = FIDO_ERR_INTERNAL;
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
-    if ((callRet = dpk_dev_get_default_dev(false, &dev)) != FIDO_OK) {
-        callRet = FIDO_ERR_NOTFOUND;
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
     }
-    if (dev == NULL) {
-        callRet = FIDO_ERR_NOTFOUND;
-        goto end;
+    if (selectedDev == NULL) {
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+        if (nDevs == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_default_dev(devInfoList, nDevs, &defaultDev)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        if (defaultDev == NULL) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        currentDev = defaultDev;
+        GList *list = NULL;
+        list = g_list_append(list, defaultDev);
+        service_deal_devices_add_list(srv, mc->sender, mc->callId, list);
+    } else {
+        currentDev = selectedDev;
     }
+
     LOG(LOG_DEBUG, "will to reset!");
     emit_reset_status(mc, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
-    callRet = fido_dev_reset(dev);
+    callRet = fido_dev_reset(currentDev);
     if (callRet != FIDO_OK) {
-        fido_dev_cancel(dev);
+        fido_dev_cancel(currentDev);
         LOG(LOG_WARNING, "error: fido_dev_reset (%d) %s", callRet, fido_strerr(callRet));
         goto end;
     }
     LOG(LOG_INFO, "reset success!");
     callRet = FIDO_OK;
 end:
-    if (dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
     }
+    if (defaultDev != NULL) {
+        service_deal_devices_delete_list(srv, mc->sender, mc->callId);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevs);
+    }
+
     return callRet;
 }
 
 //  注册，生产证书
 int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *credName, const char *pin)
 {
-    fido_dev_t *dev = NULL;
     fido_cbor_info_t *info = NULL;
     fido_cred_t *cred = NULL;
     char *rpId = NULL;
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_t *defaultDev = NULL;
+    fido_dev_t *currentDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevInfos = 0;
     CredArgs args = { 0 };
     int algorithm = 0;
     int callRet = FIDO_ERR_INTERNAL;
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
@@ -153,18 +329,37 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
     }
 
     // 1 dev
-    if ((callRet = dpk_dev_get_default_dev(false, &dev)) != FIDO_OK) {
-        LOG(LOG_WARNING, "failed to find dev");
-        callRet = FIDO_ERR_NOTFOUND;
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
     }
-    if (dev == NULL) {
-        LOG(LOG_WARNING, "failed to find dev");
-        callRet = FIDO_ERR_NOTFOUND;
-        goto end;
+    if (selectedDev == NULL) {
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevInfos)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+        if (nDevInfos == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_default_dev(devInfoList, nDevInfos, &defaultDev)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        if (defaultDev == NULL) {
+            LOG(LOG_ERR, "Unable to open default device");
+            goto end;
+        }
+        currentDev = defaultDev;
+        GList *list = NULL;
+        list = g_list_append(list, defaultDev);
+        service_deal_devices_add_list(srv, mc->sender, mc->callId, list);
+    } else {
+        currentDev = selectedDev;
     }
     // 2 info
-    if ((callRet = dpk_dev_get_info(dev, &info)) != FIDO_OK) {
+    if ((callRet = dpk_dev_get_info(currentDev, &info)) != FIDO_OK) {
         LOG(LOG_WARNING, "failed to get dev-info");
         goto end;
     }
@@ -196,7 +391,7 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
     }
 
     emit_make_cred_status(mc, userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
-    if ((callRet = dpk_dev_make_cred(&args, dev, cred, info, pin)) != FIDO_OK) {
+    if ((callRet = dpk_dev_make_cred(&args, currentDev, cred, info, pin)) != FIDO_OK) {
         LOG(LOG_ERR, "create cred failed");
         goto end;
     }
@@ -221,14 +416,19 @@ end:
     if (cred != NULL) {
         fido_cred_free(&cred);
     }
-    if (dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
-    }
+
     if (rpId != NULL) {
         free(rpId);
     }
-
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
+    }
+    if (defaultDev != NULL) {
+        service_deal_devices_delete_list(srv, mc->sender, mc->callId);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevInfos);
+    }
     return callRet;
 }
 
@@ -240,6 +440,17 @@ int dpk_manager_get_assertion(MethodContext *mc, const char *userName, const cha
     unsigned int credsCount = 0;
     char *credFile = NULL;
     AssertArgs args = { 0 };
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevs = 0;
+    fido_dev_t **openDevList = NULL;
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
@@ -279,6 +490,7 @@ int dpk_manager_get_assertion(MethodContext *mc, const char *userName, const cha
 
     LOG(LOG_INFO, "Requesting authentication for user %s", userName);
 
+    // 寻找证书
     if ((callRet = dk_dev_get_cred_file_path(userName, &credFile)) != FIDO_OK) {
         LOG(LOG_ERR, "failed to get cred file path:%s (%d)", fido_strerr(callRet), callRet);
         goto end;
@@ -294,17 +506,73 @@ int dpk_manager_get_assertion(MethodContext *mc, const char *userName, const cha
     }
     LOG(LOG_INFO, "Found %d cred of user %s, and will to authenticate.", credsCount, userName);
 
-    if (args.manual == 0) {
-        if ((callRet = dk_dev_do_authentication(mc, &args, creds, credsCount)) != FIDO_OK) {
-            LOG(LOG_WARNING, "do_authentication failed.");
-            goto end;
-        }
-    } else {
-        LOG(LOG_ERR, "not support manual.");
+    // 寻找设备
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
     }
 
-    LOG(LOG_INFO, "user %s authenticate success!!", userName);
+    if (selectedDev == NULL) {
+        // 没有选择设备，开启所有设备的认证
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+        if (nDevs == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+        openDevList = calloc(nDevs, sizeof(fido_dev_t *));
+        if (!openDevList) {
+            LOG(LOG_ERR, "Unable to allocate authenticator list");
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_all_dev(devInfoList, nDevs, openDevList, nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open device(s)");
+            goto end;
+        }
+
+        GList *list = NULL;
+        for (size_t i = 0; i < nDevs; i++) {
+            if (openDevList[i] == NULL) {
+                continue;
+            }
+            list = g_list_append(list, openDevList[i]);
+        }
+        service_deal_devices_add_list(srv, mc->sender, mc->callId, list);
+    } else {
+        nDevs = 1;
+        openDevList = calloc(nDevs, sizeof(fido_dev_t *));
+        if (!openDevList) {
+            LOG(LOG_ERR, "Unable to allocate authenticator list");
+            goto end;
+        }
+        openDevList[0] = selectedDev;
+    }
+
+    emit_get_assert_status(mc, userName, SIGNAL_NOT_FINISH, DEEPIN_ERR_DEVICE_OPEN);
+
+    bool isSuccess = false;
+    for (size_t i = 0; i < nDevs; i++) {
+        if (args.manual == 0) {
+            callRet = dk_dev_do_authentication(mc, &args, creds, credsCount, openDevList[i]);
+            if (callRet == FIDO_OK) {
+                isSuccess = true;
+                break;
+            }
+        } else {
+            LOG(LOG_ERR, "not support manual.");
+            goto end;
+        }
+    }
+
+    if (isSuccess) {
+        LOG(LOG_INFO, "user %s authenticate success.", userName);
+    } else {
+        LOG(LOG_INFO, "user %s authenticate fail.", userName);
+        goto end;
+    }
 
     callRet = FIDO_OK;
 end:
@@ -320,17 +588,41 @@ end:
         }
         free(creds);
     }
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevs);
+    }
+    if (openDevList != NULL) {
+        if (selectedDev == NULL) {
+            service_deal_devices_delete_list(srv, mc->sender, mc->callId);
+        }
+        free(openDevList);
+    }
     return callRet;
 }
 
-int dpk_manager_get_valid_cred_count(const char *userName, const char *pin, unsigned int *validCredCount)
+int dpk_manager_get_valid_cred_count(MethodContext *mc, const char *userName, const char *pin, unsigned int *validCredCount)
 {
     char *rpId = NULL;
     CredInfo *creds = NULL;
     unsigned int credsCount = 0;
     char *credFile = NULL;
+    fido_dev_t *selectedDev = NULL;
+    fido_dev_info_t *devInfoList = NULL;
+    size_t nDevs = 0;
+    fido_dev_t **openDevList = NULL;
     AssertArgs args = { 0 };
     int callRet = FIDO_ERR_INTERNAL;
+
+    Service *srv = NULL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+    srv = (Service *)mc->serviceData;
 
     fido_init(0);
 
@@ -382,9 +674,57 @@ int dpk_manager_get_valid_cred_count(const char *userName, const char *pin, unsi
         goto end;
     }
 
-    callRet = dk_dev_has_valid_cred_count(&args, creds, credsCount, validCredCount);
-    if (callRet != FIDO_OK) {
+    // 寻找设备
+    if ((callRet = dpk_manager_find_device_by_select(mc, &selectedDev)) != FIDO_OK) {
+        LOG(LOG_WARNING, "Unable to use selected device.");
         goto end;
+    }
+
+    if (selectedDev == NULL) {
+        // 没有选择设备，开启所有设备的认证
+        LOG(LOG_INFO, "Unable to use selected device and to search devices.");
+        if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            goto end;
+        }
+
+        if (nDevs == 0) {
+            LOG(LOG_ERR, "Unable to discover device(s)");
+            callRet = DEEPIN_ERR_DEVICE_NOT_FOUND;
+            goto end;
+        }
+
+        openDevList = calloc(nDevs, sizeof(fido_dev_t *));
+        if (!openDevList) {
+            LOG(LOG_ERR, "Unable to allocate authenticator list");
+            goto end;
+        }
+        if ((callRet = dpk_dev_open_all_dev(devInfoList, nDevs, openDevList, nDevs)) != FIDO_OK) {
+            LOG(LOG_ERR, "Unable to open device(s)");
+            goto end;
+        }
+    } else {
+        nDevs = 1;
+        openDevList = calloc(nDevs, sizeof(fido_dev_t *));
+        if (!openDevList) {
+            LOG(LOG_ERR, "Unable to allocate authenticator list");
+            goto end;
+        }
+        openDevList[0] = selectedDev;
+    }
+
+    LOG(LOG_INFO, "to check creds.");
+
+    for (size_t i = 0; i < nDevs; i++) {
+        if (openDevList[i] == NULL) {
+            continue;
+        }
+        unsigned int count;
+        callRet = dk_dev_has_valid_cred_count(&args, creds, credsCount, openDevList[i], &count);
+        if (callRet != FIDO_OK) {
+            goto end;
+        }
+        *validCredCount += count;
     }
 
     LOG(LOG_INFO, "the valid cerd count of user %s is %d", userName, *validCredCount);
@@ -402,6 +742,23 @@ end:
             dk_dev_reset_cred(&creds[i]);
         }
         free(creds);
+    }
+    if (selectedDev != NULL) {
+        service_selected_device_use_end(srv, mc->sender, selectedDev);
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevs);
+    }
+    if (openDevList != NULL) {
+        if (selectedDev == NULL) {
+            for (size_t i = 0; i < nDevs; i++) {
+                if (openDevList[i] != NULL) {
+                    fido_dev_close(openDevList[i]);
+                    fido_dev_free(&openDevList[i]);
+                }
+            }
+        }
+        free(openDevList);
     }
     return callRet;
 }
@@ -496,7 +853,7 @@ int dpk_manager_get_device_count(int *count)
 
     fido_init(0);
 
-    if ((callRet = dpk_dev_devs_find_existed(&devList, &nDevs)) != FIDO_OK) {
+    if ((callRet = dpk_dev_info_find_existed(&devList, &nDevs)) != FIDO_OK) {
         if (callRet == FIDO_ERR_NOTFOUND) {
             callRet = FIDO_OK;
             nDevs = 0;
@@ -514,14 +871,26 @@ end:
     return callRet;
 }
 
-int dpk_manager_test()
+int dpk_manager_select(MethodContext *mc)
 {
+    Service *srv = NULL;
     fido_dev_t *dev = NULL;
+    size_t nDevInfos = 0;
+    fido_dev_info_t *devInfoList = NULL;
     int callRet = FIDO_ERR_INTERNAL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
 
     fido_init(0);
 
-    if ((callRet = dpk_dev_dev_select(&dev)) != FIDO_OK) {
+    if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevInfos)) != FIDO_OK) {
+        goto end;
+    }
+
+    if ((callRet = dpk_dev_select_dev(devInfoList, nDevInfos, &dev)) != FIDO_OK) {
         LOG(LOG_WARNING, "dev select erorr");
         goto end;
     }
@@ -531,11 +900,55 @@ int dpk_manager_test()
 
     LOG(LOG_WARNING, "dev select success");
 
+    srv = (Service *)mc->serviceData;
+    // 重复select，直接覆盖，上次选中的设备会在hash_table中释放
+    if (service_selected_device_add(srv, mc->sender, dev) < 0) {
+        callRet = FIDO_ERR_INTERNAL;
+        goto end;
+    }
+
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        if (dev != NULL) {
+            fido_dev_close(dev);
+            fido_dev_free(&dev);
+        }
+    }
+    if (devInfoList != NULL) {
+        fido_dev_info_free(&devInfoList, nDevInfos);
+    }
+    return callRet;
+}
+
+// 取消选中
+int dpk_manager_select_close(MethodContext *mc)
+{
+    Service *srv = NULL;
+    fido_dev_t *dev = NULL;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    if (mc == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+
+    fido_init(0);
+
+    srv = (Service *)mc->serviceData;
+    if (service_selected_device_use_start(srv, mc->sender, &dev) < 0) {
+        callRet = FIDO_ERR_INTERNAL;
+        goto end;
+    }
+    if (dev != NULL) {
+        fido_dev_close(dev);
+        service_selected_device_delete(srv, mc->sender);
+    }
+
     callRet = FIDO_OK;
 end:
     if (dev != NULL) {
-        fido_dev_close(dev);
-        fido_dev_free(&dev);
+        service_selected_device_use_end(srv, mc->sender, dev);
     }
 
     return callRet;
@@ -609,5 +1022,46 @@ end:
     if (devListTemp != NULL) {
         fido_dev_info_free(&devListTemp, nDevsTemp);
     }
+    return callRet;
+}
+
+int dpk_manager_devices_close(MethodContext *mc, const char *callId)
+{
+    Service *srv = NULL;
+    GList *devList = NULL;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    if (mc == NULL || mc->serviceData == NULL || callId == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+
+    fido_init(0);
+
+    srv = (Service *)mc->serviceData;
+
+    if (strlen(callId) == 0) {
+        callRet = FIDO_ERR_UNSUPPORTED_OPTION;
+        goto end;
+    } else {
+        service_deal_devices_list_use_start(srv, mc->sender, callId, &devList);
+        if (devList == NULL) {
+            goto end;
+        }
+        for (size_t i = 0; i < g_list_length(devList); i++) {
+            fido_dev_t *dev = (fido_dev_t *)g_list_nth_data(devList, i);
+            if (dev != NULL) {
+                fido_dev_cancel(dev);
+                fido_dev_close(dev);
+            }
+        }
+    }
+
+    callRet = FIDO_OK;
+end:
+    if (devList != NULL) {
+        service_deal_devices_list_use_end(srv, mc->sender, callId, devList);
+    }
+
     return callRet;
 }

@@ -4,7 +4,9 @@ obj-x86_64-linux-gnu/
 debian/files
 debian/deepin-passkey.substvars
 debian/debhelper-build-stamp
+debian/dcc-passkey-plugin.substvars
 debian/tmp/
 debian/.debhelper/
 debian/deepin-passkey
+debian/dcc-passkey-plugin
 .cache
