@@ -17,3 +17,8 @@ file(GLOB DCONFIG_FILES
     "dsg-configs/org.deepin.dde.passkey.dcc-plugin.json"
 )
 install(FILES ${DCONFIG_FILES} DESTINATION share/dsg/configs/org.deepin.dde.passkey/)
+
+file(GLOB POLKIT_FILES
+    "polkit/com.deepin.dde.passkey.dcc-plugin.policy"
+)
+install(FILES ${POLKIT_FILES} DESTINATION share/polkit-1/actions/)

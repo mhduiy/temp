@@ -7,11 +7,13 @@
 #include <qdbusconnection.h>
 #include <qdbusinterface.h>
 #include <qloggingcategory.h>
+#include <polkit-qt5-1/PolkitQt1/Authority>
 
 #include <QDBusPendingReply>
 #include <QDebug>
 #include <QDBusConnection>
-#include <sys/socket.h>
+
+using namespace PolkitQt1;
 
 // libfido2上游错误码(<=0)
 #define FIDO_OK             0       // 成功，在异步调用的信号中，收到该码意味着异步结束
@@ -216,18 +218,27 @@ void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &ne
 
 void PasskeyWorker::makeCredential()
 {
-    m_needPromptMonitor = false;
+    // 鉴权后才允许注册设备
+    connect(Authority::instance(), &Authority::checkAuthorizationFinished, this, [this](Authority::Result authenticationResult) {
+        disconnect(Authority::instance(), nullptr, this, nullptr);
+        if (Authority::Result::Yes != authenticationResult) {
+            return;
+        }
 
-    // 注册设备，生成证书
-    QDBusPendingReply<QString> reply = m_passkeyInter->MakeCredential(getCurrentUser(), "", "");
-    reply.waitForFinished();
-    if (reply.isValid()) {
-        m_currentId = reply;
-        qCDebug(DCC_PASSKEY) << "MakeCredential: id = " << m_currentId;
-    } else {
-        m_currentId = IdErrorFlag;
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is MakeCredential.";
-    }
+        m_needPromptMonitor = false;
+
+        // 注册设备，生成证书
+        QDBusPendingReply<QString> reply = m_passkeyInter->MakeCredential(getCurrentUser(), "", "");
+        reply.waitForFinished();
+        if (reply.isValid()) {
+            m_currentId = reply;
+            qCDebug(DCC_PASSKEY) << "MakeCredential: id = " << m_currentId;
+        } else {
+            m_currentId = IdErrorFlag;
+            qCWarning(DCC_PASSKEY) << "Call method 'MakeCredential' failed, error message: " << reply.error().message();
+        }
+    });
+    Authority::instance()->checkAuthorization("com.deepin.dde.passkey.dcc-plugin.register", UnixProcessSubject(getpid()), Authority::AllowUserInteraction);
 }
 
 // 注册设备信号处理

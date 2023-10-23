@@ -53,7 +53,7 @@ void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pusht
 
     m_model = new PasskeyModel(this);
 
-    m_worker  = QSharedPointer<PasskeyWorker>(new PasskeyWorker(m_model));
+    m_worker = QSharedPointer<PasskeyWorker>(new PasskeyWorker(m_model));
     m_workerThread = QSharedPointer<QThread>(new QThread);
     m_worker->moveToThread(m_workerThread.get());
     m_workerThread->start(QThread::LowPriority);

@@ -13,6 +13,7 @@ find_package(Qt5 COMPONENTS Core Widgets DBus Svg LinguistTools REQUIRED)
 find_package(DdeControlCenter REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(DtkWidget REQUIRED)
+find_package(PolkitQt5-1)
 
 pkg_check_modules(DFrameworkDBus REQUIRED dframeworkdbus)
 pkg_check_modules(QGSettings REQUIRED gsettings-qt)
@@ -40,6 +41,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${DFrameworkDBus_LIBRARIES}
     ${QGSettings_LIBRARIES}
     ${Qt5DBus_LIBRARIES}
+    PolkitQt5-1::Agent
 )
 
 file(GLOB TS_FILES "trans/translations/*.ts")
