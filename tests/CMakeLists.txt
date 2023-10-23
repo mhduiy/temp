@@ -6,9 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 find_package(GTest REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
+
 
 file(GLOB_RECURSE TEST_SRCS
     "${PROJECT_SOURCE_DIR}/src/common/*.c"
+    "${PROJECT_SOURCE_DIR}/src/decode/*.c"
     "*.cpp"
 )
 
@@ -21,8 +25,10 @@ target_include_directories(${TEST_NAME} PUBLIC
 )
 target_link_libraries(${TEST_NAME} PRIVATE
     ${GTEST_LIBRARIES}
+    PkgConfig::OPENSSL
     -lpthread
     -ldl
+    -lssl
 )
 
 add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} "--gtest_output=xml:${PROJECT_BINARY_DIR}/ut-test-report.xml")

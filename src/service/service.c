@@ -562,6 +562,78 @@ end:
     return 0;
 }
 
+static int dpk_service_api_encrypt_key(MethodContext *mc)
+{
+    char *publicKey = NULL;
+    int type = 0;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    LOG(LOG_INFO, "service-called: EncryptKey");
+
+    if (mc == NULL || mc->parameters == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "method context invalid");
+        goto end;
+    }
+
+    g_variant_get(mc->parameters, "(i)", &type);
+
+    if ((callRet = dpk_manager_encrypt_get_public(mc, type, &publicKey)) != FIDO_OK) {
+        LOG(LOG_ERR, "get public key failed.");
+        goto end;
+    }
+
+    if (publicKey == NULL) {
+        LOG(LOG_ERR, "get public key failed..");
+        goto end;
+    }
+    LOG(LOG_INFO, "service-called: EncryptKey success.");
+    g_dbus_method_invocation_return_value(mc->invocation, g_variant_new("(s)", publicKey));
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        gchar *retStr = g_strdup_printf("%d", callRet);
+        g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+        g_free(retStr);
+    }
+    if (publicKey != NULL) {
+        free(publicKey);
+    }
+    return 0;
+}
+
+static int dpk_service_api_set_symmetric_key(MethodContext *mc)
+{
+    const gchar *key = NULL;
+    int keyType = 0;
+    int encType = 0;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    LOG(LOG_INFO, "service-called: SetSymmetricKey");
+
+    if (mc == NULL || mc->parameters == NULL || mc->serviceData == NULL) {
+        LOG(LOG_ERR, "method context invalid");
+        goto end;
+    }
+
+    g_variant_get(mc->parameters, "(iis)", &encType, &keyType, &key);
+
+    if ((callRet = dpk_manager_encrypt_set_symmetric_key(mc, encType, keyType, key)) != FIDO_OK) {
+        LOG(LOG_ERR, "set symmetric key failed.");
+        goto end;
+    }
+
+    LOG(LOG_INFO, "service-called: SetSymmetricKey success.");
+    g_dbus_method_invocation_return_value(mc->invocation, g_variant_new("()"));
+    callRet = FIDO_OK;
+end:
+    if (callRet != FIDO_OK) {
+        gchar *retStr = g_strdup_printf("%d", callRet);
+        g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+        g_free(retStr);
+    }
+    return 0;
+}
+
 void dpk_service_start()
 {
     Service srv;
@@ -590,6 +662,8 @@ void dpk_service_start()
     service_register_method(&srv, "DeviceSelect", dpk_service_api_device_select, true);
     service_register_method(&srv, "DeviceSelectClose", dpk_service_api_device_select_close, false);
     service_register_method(&srv, "DeviceClose", dpk_service_api_device_close, false);
+    service_register_method(&srv, "EncryptKey", dpk_service_api_encrypt_key, false);
+    service_register_method(&srv, "SetSymmetricKey", dpk_service_api_set_symmetric_key, false);
 
     service_run(&srv); // in loop, and end when exit
 

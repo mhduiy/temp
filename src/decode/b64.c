@@ -20,10 +20,10 @@ int b64_encode(const void *ptr, size_t len, char **out)
     char *b64_ptr = NULL;
     long b64_len;
     int n;
-    int ok = 0;
+    int ok = -1;
 
     if (ptr == NULL || out == NULL || len > INT_MAX) {
-        return (0);
+        goto end;
     }
 
     *out = NULL;
@@ -61,7 +61,7 @@ int b64_encode(const void *ptr, size_t len, char **out)
     }
 
     memcpy(*out, b64_ptr, (size_t)b64_len);
-    ok = 1;
+    ok = 0;
 
 end:
     if (bio_b64 != NULL) {
@@ -80,7 +80,7 @@ int b64_decode(const char *in, void **ptr, size_t *len)
     size_t alloc_len;
     void *ptrTemp = NULL;
     int n;
-    int ok = 0;
+    int ok = -1;
 
     if (in == NULL || ptr == NULL || len == NULL || strlen(in) > INT_MAX) {
         goto end;
@@ -115,7 +115,7 @@ int b64_decode(const char *in, void **ptr, size_t *len)
 
     *ptr = ptrTemp;
     *len = (size_t)n;
-    ok = 1;
+    ok = 0;
 
 end:
     if (bio_b64 != NULL) {
@@ -125,7 +125,7 @@ end:
         BIO_free(bio_mem);
     }
 
-    if (!ok && ptrTemp != NULL) {
+    if (ok < 0 && ptrTemp != NULL) {
         free(ptrTemp);
     }
 

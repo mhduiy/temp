@@ -296,11 +296,11 @@ int dk_dev_save_cred(const CredArgs *const args, const fido_cred_t *const cred)
         LOG(LOG_ERR, "error: fido_cred_pubkey_len returned 0");
         goto end;
     }
-    if (!b64_encode(kh, kh_len, &khB64)) {
+    if (b64_encode(kh, kh_len, &khB64) < 0) {
         LOG(LOG_ERR, "error: failed to encode key handle");
         goto end;
     }
-    if (!b64_encode(pk, pk_len, &pkB64)) {
+    if (b64_encode(pk, pk_len, &pkB64) < 0) {
         LOG(LOG_ERR, "error: failed to encode public key");
         goto end;
     }
@@ -735,7 +735,7 @@ static int prepare_assert(const AssertArgs *args, const CredInfo *cred, const st
         LOG(LOG_INFO, "Credential is resident");
     } else {
         LOG(LOG_INFO, "Key handle: %s", cred->keyHandle);
-        if (!b64_decode(cred->keyHandle, (void **)&buf, &buf_len)) {
+        if (b64_decode(cred->keyHandle, (void **)&buf, &buf_len) < 0) {
             LOG(LOG_ERR, "Failed to decode key handle");
             goto end;
         }
@@ -832,7 +832,7 @@ static bool parse_pk(int old, const char *type, const char *pk, struct pk *out)
             goto end;
         }
     } else {
-        if (!b64_decode(pk, (void **)&buf, &buf_len)) {
+        if (b64_decode(pk, (void **)&buf, &buf_len) < 0) {
             LOG(LOG_ERR, "Failed to decode public key");
             goto end;
         }

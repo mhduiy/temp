@@ -7,6 +7,8 @@
 #include "common/common.h"
 #include "common/errcode.h"
 #include "common/log.h"
+#include "decode/b64.h"
+#include "decode/decode.h"
 #include "dev/cred.h"
 #include "dev/dev.h"
 #include "dev/info.h"
@@ -153,12 +155,68 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
     size_t nDevs = 0;
     int callRet = FIDO_ERR_INTERNAL;
     Service *srv = NULL;
+    int symKeyType = 0;
+    unsigned char *symKey = NULL;
+    unsigned char *newPinB64Dec = NULL;
+    int newPinB64DecLen = 0;
+    unsigned char *oldPinB64Dec = NULL;
+    int oldPinB64DecLen = 0;
+    unsigned char *newPinDec = NULL;
+    int newPinDecLen = 0;
+    unsigned char *oldPinDec = NULL;
+    int oldPinDecLen = 0;
 
     if (mc == NULL || mc->serviceData == NULL) {
         LOG(LOG_ERR, "param invalid");
         goto end;
     }
     srv = (Service *)mc->serviceData;
+
+    if (service_client_sym_key_get(srv, mc->sender, &symKeyType, &symKey) < 0) {
+        LOG(LOG_ERR, "failed to get client(%s) sym key, and stop to set pin.", mc->sender);
+        goto end;
+    }
+    if (symKey == NULL) {
+        LOG(LOG_ERR, "client(%s) sym key is not exist, and stop to set pin.", mc->sender);
+        goto end;
+    }
+
+    if (pin != NULL) {
+        if (b64_decode(pin, (void **)&newPinB64Dec, (size_t *)&newPinB64DecLen) < 0) {
+            LOG(LOG_ERR, "fail to decode new pin by b64.");
+            goto end;
+        }
+        if (newPinB64Dec == NULL) {
+            LOG(LOG_ERR, "fail to get new pin by b64.");
+            goto end;
+        }
+        if (dp_sym_key_decrypt(symKeyType, symKey, (unsigned char *)newPinB64Dec, newPinB64DecLen, &newPinDec, &newPinDecLen) < 0) {
+            LOG(LOG_ERR, "failed to decrypt new pin.");
+            goto end;
+        }
+        if (newPinDec == NULL) {
+            LOG(LOG_ERR, "failed to decrypt new pin.");
+            goto end;
+        }
+    }
+    if (oldPin != NULL) {
+        if (b64_decode(oldPin, (void **)&oldPinB64Dec, (size_t *)&oldPinB64DecLen) < 0) {
+            LOG(LOG_ERR, "fail to decode new pin by b64.");
+            goto end;
+        }
+        if (oldPinB64Dec == NULL) {
+            LOG(LOG_ERR, "fail to get old pin by b64.");
+            goto end;
+        }
+        if (dp_sym_key_decrypt(symKeyType, symKey, (unsigned char *)oldPinB64Dec, oldPinB64DecLen, &oldPinDec, &oldPinDecLen) < 0) {
+            LOG(LOG_ERR, "failed to decrypt old pin.");
+            goto end;
+        }
+        if (oldPinDec == NULL) {
+            LOG(LOG_ERR, "failed to decrypt old pin.");
+            goto end;
+        }
+    }
 
     fido_init(0);
 
@@ -195,13 +253,13 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
         goto end;
     }
 
-    if (fido_dev_has_pin(currentDev) && oldPin == NULL) {
+    if (fido_dev_has_pin(currentDev) && oldPinDec == NULL) {
         LOG(LOG_WARNING, "pin is existed, need old pin");
         callRet = FIDO_ERR_INVALID_PARAMETER;
         goto end;
     }
 
-    callRet = fido_dev_set_pin(currentDev, pin, oldPin);
+    callRet = fido_dev_set_pin(currentDev, (char *)newPinDec, (char *)oldPinDec);
     if (callRet != FIDO_OK) {
         LOG(LOG_ERR, "error: fido_dev_set_pin (%d) %s", callRet, fido_strerr(callRet));
         goto end;
@@ -218,6 +276,21 @@ end:
     }
     if (selectedDev != NULL) {
         service_selected_device_use_end(srv, mc->sender, selectedDev);
+    }
+    if (symKey != NULL) {
+        free(symKey);
+    }
+    if (oldPinDec != NULL) {
+        free(oldPinDec);
+    }
+    if (newPinDec != NULL) {
+        free(newPinDec);
+    }
+    if (newPinB64Dec != NULL) {
+        free(newPinB64Dec);
+    }
+    if (oldPinB64Dec != NULL) {
+        free(oldPinB64Dec);
     }
     return callRet;
 }
@@ -274,6 +347,7 @@ int dpk_manager_reset(MethodContext *mc)
     } else {
         currentDev = selectedDev;
     }
+    emit_reset_status(mc, SIGNAL_NOT_FINISH, DEEPIN_ERR_DEVICE_OPEN);
 
     LOG(LOG_DEBUG, "will to reset!");
     emit_reset_status(mc, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
@@ -358,6 +432,8 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
     } else {
         currentDev = selectedDev;
     }
+    emit_make_cred_status(mc, userName, SIGNAL_NOT_FINISH, DEEPIN_ERR_DEVICE_OPEN);
+
     // 2 info
     if ((callRet = dpk_dev_get_info(currentDev, &info)) != FIDO_OK) {
         LOG(LOG_WARNING, "failed to get dev-info");
@@ -1063,5 +1139,130 @@ end:
         service_deal_devices_list_use_end(srv, mc->sender, callId, devList);
     }
 
+    return callRet;
+}
+
+int dpk_manager_encrypt_get_public(MethodContext *mc, int type, char **publicKey)
+{
+    Service *srv = NULL;
+    unsigned char *priKey = NULL;
+    unsigned char *pubKey = NULL;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    if (mc == NULL || mc->serviceData == NULL || publicKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+
+    srv = (Service *)mc->serviceData;
+
+    if (dp_asym_key_check_support(type) < 0) {
+        LOG(LOG_ERR, "asym-key type is not supported.");
+        goto end;
+    }
+
+    if (service_service_asym_key_get(srv, type, &priKey) < 0) {
+        goto end;
+    }
+    if (priKey == NULL) {
+        // 不存在则新建
+        if (dp_asym_key_create_private(type, &priKey) < 0) {
+            goto end;
+        }
+        if (priKey == NULL) {
+            goto end;
+        }
+        if (service_service_asym_key_set(srv, type, priKey) < 0) {
+            goto end;
+        }
+    }
+
+    if (dp_asym_key_private_to_public(type, priKey, &pubKey) < 0) {
+        goto end;
+    }
+    if (pubKey == NULL) {
+        goto end;
+    }
+
+    *publicKey = (char *)pubKey;
+
+    callRet = FIDO_OK;
+end:
+    if (priKey != NULL) {
+        free(priKey);
+    }
+    if (callRet != FIDO_OK && pubKey != NULL) {
+        free(pubKey);
+    }
+    return callRet;
+}
+
+int dpk_manager_encrypt_set_symmetric_key(MethodContext *mc, int encType, int keyType, const char *encKey)
+{
+    Service *srv = NULL;
+    unsigned char *priKey = NULL;
+    unsigned char *symKey = NULL;
+    size_t symKeyLen = 0;
+    unsigned char *clientKey = NULL;
+    int clientKeyLen = 0;
+    int callRet = FIDO_ERR_INTERNAL;
+
+    if (mc == NULL || mc->serviceData == NULL || encKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        goto end;
+    }
+
+    srv = (Service *)mc->serviceData;
+
+    if (dp_asym_key_check_support(encType) < 0) {
+        LOG(LOG_ERR, "asym-key type is not supported.");
+        goto end;
+    }
+
+    if (dp_sym_key_check_support(keyType) < 0) {
+        LOG(LOG_ERR, "sym-key type is not supported.");
+        goto end;
+    }
+
+    if (b64_decode(encKey, (void **)&symKey, &symKeyLen) < 0) {
+        LOG(LOG_ERR, "failed to decode sym-key from b64.");
+        goto end;
+    }
+    if (symKey == NULL || symKeyLen <= 0) {
+        LOG(LOG_ERR, "failed to decode sym-key from b64.");
+        goto end;
+    }
+
+    if (service_service_asym_key_get(srv, encType, &priKey) < 0) {
+        LOG(LOG_ERR, "failed to get service asym-key.");
+        goto end;
+    }
+    if (priKey == NULL) {
+        // 服务密钥必须存在
+        LOG(LOG_ERR, "service asym-key is not exist.");
+        goto end;
+    }
+
+    if (dp_asym_key_decrypt(encType, priKey, symKey, symKeyLen, &clientKey, &clientKeyLen) < 0) {
+        LOG(LOG_ERR, "failed to decrypt client sym-key.");
+        goto end;
+    }
+
+    if (service_client_sym_key_set(srv, mc->sender, keyType, clientKey) < 0) {
+        LOG(LOG_ERR, "failed to save client sym-key.");
+        goto end;
+    }
+
+    callRet = FIDO_OK;
+end:
+    if (priKey != NULL) {
+        free(priKey);
+    }
+    if (clientKey != NULL) {
+        free(clientKey);
+    }
+    if (symKey != NULL) {
+        free(symKey);
+    }
     return callRet;
 }

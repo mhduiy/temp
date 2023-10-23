@@ -21,6 +21,12 @@ typedef struct
     GList *devList;
 } DealDeviceData;
 
+typedef struct
+{
+    int type;
+    unsigned char *key;
+} ClientSymKey;
+
 int service_custom_data_get(Service *srv, const gchar *key, gchar **value)
 {
     int ret = -1;
@@ -550,6 +556,190 @@ static void free_deal_devices_value(gpointer data)
     }
 }
 
+int service_service_asym_key_get(Service *srv, int type, unsigned char **asymKey)
+{
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || asymKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->serviceAsymKeyMtx));
+    do {
+        if (passkeyData->customData == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        gchar buf[64] = { 0 };
+        snprintf(buf, 64, "%d", type);
+        unsigned char *v = (unsigned char *)g_hash_table_lookup(passkeyData->serviceAsymKey, buf);
+        *asymKey = (unsigned char *)g_strdup((gchar *)v);
+        ret = 0;
+    } while (0);
+
+    mtx_unlock(&(passkeyData->serviceAsymKeyMtx));
+
+    return ret;
+}
+
+int service_service_asym_key_set(Service *srv, int type, const unsigned char *asymKey)
+{
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || asymKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->serviceAsymKeyMtx));
+    do {
+        if (passkeyData->serviceAsymKey == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        gchar buf[64] = { 0 };
+        snprintf(buf, 64, "%d", type);
+        g_hash_table_insert(passkeyData->serviceAsymKey, g_strdup(buf), g_strdup((gchar *)asymKey));
+        ret = 0;
+    } while (0);
+    mtx_unlock(&(passkeyData->serviceAsymKeyMtx));
+
+    return ret;
+}
+
+int service_service_asym_key_delete(Service *srv, int type)
+{
+    LOG(LOG_DEBUG, "to delete service asym key.");
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->serviceAsymKeyMtx));
+    do {
+        if (passkeyData->serviceAsymKey == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        gchar buf[64] = { 0 };
+        snprintf(buf, 64, "%d", type);
+        g_hash_table_remove(passkeyData->serviceAsymKey, buf);
+        ret = 0;
+    } while (0);
+
+    mtx_unlock(&(passkeyData->serviceAsymKeyMtx));
+
+    return ret;
+}
+
+static void free_service_asym_key(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_free(data);
+}
+
+int service_client_sym_key_get(Service *srv, const gchar *sender, int *type, unsigned char **symKey)
+{
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || sender == NULL || symKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->clientSymKeyMtx));
+    do {
+        if (passkeyData->clientSymKey == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        ClientSymKey *symKeyData = (ClientSymKey *)g_hash_table_lookup(passkeyData->clientSymKey, sender);
+        if (symKeyData != NULL) {
+            *symKey = (unsigned char *)g_strdup((gchar *)symKeyData->key);
+            *type = symKeyData->type;
+        }
+        ret = 0;
+    } while (0);
+
+    mtx_unlock(&(passkeyData->clientSymKeyMtx));
+
+    return ret;
+}
+
+int service_client_sym_key_set(Service *srv, const gchar *sender, int type, const unsigned char *symKey)
+{
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || sender == NULL || symKey == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->clientSymKeyMtx));
+    do {
+        if (passkeyData->clientSymKey == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        ClientSymKey *symKeyData = (ClientSymKey *)calloc(1, sizeof(ClientSymKey));
+        if (symKeyData == NULL) {
+            break;
+        }
+        symKeyData->type = type;
+        symKeyData->key = (unsigned char *)g_strdup((gchar *)symKey);
+        g_hash_table_insert(passkeyData->clientSymKey, g_strdup(sender), symKeyData);
+        ret = 0;
+    } while (0);
+    mtx_unlock(&(passkeyData->clientSymKeyMtx));
+
+    return ret;
+}
+
+int service_client_sym_key_delete(Service *srv, const gchar *sender)
+{
+    LOG(LOG_DEBUG, "to delete client sym key.");
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || sender == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+    mtx_lock(&(passkeyData->clientSymKeyMtx));
+    do {
+        if (passkeyData->clientSymKey == NULL) {
+            LOG(LOG_ERR, "passkey data is invalid.");
+            break;
+        }
+        g_hash_table_remove(passkeyData->clientSymKey, sender);
+        ret = 0;
+    } while (0);
+
+    mtx_unlock(&(passkeyData->clientSymKeyMtx));
+
+    return ret;
+}
+
+static void free_client_sym_key(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_free(data);
+}
+
+static void free_client_sym_key_value(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    ClientSymKey *key = (ClientSymKey *)data;
+    if (key->key != NULL) {
+        free(key->key);
+    }
+    free(key);
+}
+
 int service_passkey_data_init(PasskeyServiceData *passkeyData)
 {
     if (passkeyData == NULL) {
@@ -563,6 +753,12 @@ int service_passkey_data_init(PasskeyServiceData *passkeyData)
 
     passkeyData->dealDevices = g_hash_table_new_full(g_str_hash, g_str_equal, free_deal_devices_key, free_deal_devices_value);
     mtx_init(&(passkeyData->dealDevicesMtx), mtx_plain);
+
+    passkeyData->serviceAsymKey = g_hash_table_new_full(g_str_hash, g_str_equal, free_service_asym_key, free_service_asym_key);
+    mtx_init(&(passkeyData->serviceAsymKeyMtx), mtx_plain);
+
+    passkeyData->clientSymKey = g_hash_table_new_full(g_str_hash, g_str_equal, free_client_sym_key, free_client_sym_key_value);
+    mtx_init(&(passkeyData->clientSymKeyMtx), mtx_plain);
 
     return 0;
 }
@@ -585,6 +781,16 @@ int service_passkey_data_free(PasskeyServiceData *passkeyData)
     mtx_destroy(&(passkeyData->dealDevicesMtx));
     if (passkeyData->dealDevices != NULL) {
         g_hash_table_destroy(passkeyData->dealDevices);
+    }
+
+    mtx_destroy(&(passkeyData->serviceAsymKeyMtx));
+    if (passkeyData->serviceAsymKey != NULL) {
+        g_hash_table_destroy(passkeyData->serviceAsymKey);
+    }
+
+    mtx_destroy(&(passkeyData->clientSymKeyMtx));
+    if (passkeyData->clientSymKey != NULL) {
+        g_hash_table_destroy(passkeyData->clientSymKey);
     }
 
     return 0;

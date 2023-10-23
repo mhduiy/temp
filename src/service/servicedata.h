@@ -37,6 +37,14 @@ typedef struct _PasskeyServiceData
     // 调用独立设备的列表
     GHashTable *dealDevices;
     mtx_t dealDevicesMtx;
+
+    // 服务非对称密钥, type->key
+    GHashTable *serviceAsymKey;
+    mtx_t serviceAsymKeyMtx;
+
+    // 客户端对称密钥, sender->key, 调用方退出(TODO)
+    GHashTable *clientSymKey;
+    mtx_t clientSymKeyMtx;
 } PasskeyServiceData;
 
 // 使用PasskeyServiceData前必须先init
@@ -64,6 +72,15 @@ int service_deal_devices_list_use_end(Service *srv, const gchar *sender, const g
 int service_deal_devices_add_list(Service *srv, const gchar *sender, const gchar *callId, GList *devList);
 int service_deal_devices_delete(Service *srv, const gchar *sender);
 int service_deal_devices_delete_list(Service *srv, const gchar *sender, const gchar *callId);
+
+// PasskeyServiceData.serviceKey
+int service_service_asym_key_get(Service *srv, int type, unsigned char **asymKey);
+int service_service_asym_key_set(Service *srv, int type, const unsigned char *asymKey);
+int service_service_asym_key_delete(Service *srv, int type);
+// PasskeyServiceData.clientKey
+int service_client_sym_key_get(Service *srv, const gchar *sender, int *type, unsigned char **symKey);
+int service_client_sym_key_set(Service *srv, const gchar *sender, int type, const unsigned char *symKey);
+int service_client_sym_key_delete(Service *srv, const gchar *sender);
 
 #ifdef __cplusplus
 }

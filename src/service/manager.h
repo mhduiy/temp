@@ -38,6 +38,10 @@ int dpk_manager_select_close(MethodContext *mc);
 
 int dpk_manager_devices_close(MethodContext *mc, const char *callId);
 
+int dpk_manager_encrypt_get_public(MethodContext *mc, int type, char **publicKey);
+
+int dpk_manager_encrypt_set_symmetric_key(MethodContext *mc, int encType, int keyType, const char *key);
+
 #ifdef __cplusplus
 }
 #endif

@@ -17,8 +17,8 @@ execute_process(COMMAND sh -c "${CMAKE_CURRENT_SOURCE_DIR}/xml2str.sh ${PROJECT_
 file(GLOB_RECURSE SRCS
     "*.c"
     "${PROJECT_SOURCE_DIR}/src/common/*.c"
+    "${PROJECT_SOURCE_DIR}/src/decode/*.c"
     "serviceframe/*.c"
-    "decode/*.c"
     "dev/*.c"
     "rp/*.c"
     ${CMAKE_CURRENT_BINARY_DIR}/com.deepin.Passkey.c
