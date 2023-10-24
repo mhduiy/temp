@@ -4,9 +4,12 @@
 
 #include "passkeyworker.h"
 #include "common.h"
-#include <qdbusconnection.h>
-#include <qdbusinterface.h>
-#include <qloggingcategory.h>
+#include "decode/decode.h"
+#include "decode/evp.h"
+#include "decode/sm2.h"
+#include "decode/b64.h"
+#include "decode/sm4.h"
+#include "common/errcode.h"
 #include <polkit-qt5-1/PolkitQt1/Authority>
 
 #include <QDBusPendingReply>
@@ -15,11 +18,6 @@
 
 using namespace PolkitQt1;
 
-// libfido2上游错误码(<=0)
-#define FIDO_OK             0       // 成功，在异步调用的信号中，收到该码意味着异步结束
-#define FIDO_ERR_RX         -2      // 过程中设备拔掉
-#define FIDO_ERR_NOTFOUND   -10     // 未找到设备
-
 // FIDO协议约定的错误码(>=0)
 #define FIDO_ERR_USER_ACTION_PENDING    0x23    // 提示用户要操作设备了，比如触碰
 #define FIDO_ERR_USER_ACTION_TIMEOUT    0x2f    // 操作设备超时
@@ -27,6 +25,7 @@ using namespace PolkitQt1;
 
 const QString DisplayManagerService("org.freedesktop.DisplayManager");
 const QString IdErrorFlag("ID_ERR");
+const QString PublicKeyErrorFlag("KEY_ERR");
 
 const QMap<PromptType, PromptInfo> AllPromptInfo {
     { PromptType::Insert, {InsertPixmapPath, false, QObject::tr("请插入安全密钥"), "", "", false, false} },
@@ -47,6 +46,7 @@ PasskeyWorker::PasskeyWorker(PasskeyModel* model, QObject* parent)
     , m_currentType(PromptType::Count)
     , m_resetAssertion(false)
     , m_currentId(IdErrorFlag)
+    , m_needCloseDevice(false)
 {
 }
 
@@ -140,6 +140,14 @@ void PasskeyWorker::activate()
     }
 }
 
+void PasskeyWorker::deactivate()
+{
+    if (m_needCloseDevice) {
+        qCDebug(DCC_PASSKEY) << "Close passkey device with id " << m_currentId;
+        deviceClose(m_currentId);
+    }
+}
+
 void PasskeyWorker::handlePromptOperate(const QString &operate)
 {
     if (operate != m_model->promptPageInfo().second.operateBtnText) {
@@ -213,7 +221,114 @@ void PasskeyWorker::handleResetPasskeyMonitor()
 
 void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &newPin)
 {
-    setPin(oldPin, newPin);
+    QString publicKey;
+    unsigned char *genKey;
+    EVP_PKEY *pubEvpPKey = nullptr;
+    unsigned char *encData = nullptr;
+    size_t encDataLen = 0;
+    char *pkB64 = nullptr;
+
+    unsigned char *oldPinEcbData = nullptr;
+    int oldPinEcbDataLen = 0;
+    char *oldPinB64 = nullptr;
+
+    unsigned char *newPinEcbData = nullptr;
+    int newPinEcbDataLen = 0;
+    char *newPinB64 = nullptr;
+
+    // PIN加密
+    bool success = false;
+    do {
+        // 1. 获取服务器公钥
+        publicKey = encryptKey(DP_SUPPORT_SM2_SM3);
+        if (publicKey == PublicKeyErrorFlag) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 1";
+            break;
+        }
+
+        // 2. 生成DP_SUPPORT_SM4_ECB对称密钥
+        genKey = dp_gen_symmetric_key_16();
+        if (dp_sm2_public_key_create_by_string((unsigned char *)publicKey.toStdString().c_str(), &pubEvpPKey) < 0) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 2";
+            break;
+        }
+
+        // 3. 用服务器公钥加密对称密钥，并转成base64格式
+        if (dp_sm2_encrypt(pubEvpPKey, genKey, strlen((char *)genKey), &encData, &encDataLen) < 0) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 3";
+            break;
+        }
+        if (b64_encode(encData, encDataLen, &pkB64) < 0) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 4";
+            break;
+        }
+
+        // 4. 发送对称密钥到服务
+        if (!setSymmetricKey(DP_SUPPORT_SM2_SM3, DP_SUPPORT_SM4_ECB, pkB64)) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 5";
+            break;
+        }
+
+        // 5. 通过对称密钥加密旧PIN码，并转为base64格式
+        if (!oldPin.isEmpty()) {
+            if (dp_sm4_ecb_encrypt(genKey, (unsigned char *)oldPin.toStdString().c_str(), oldPin.toStdString().length(),
+                                &oldPinEcbData, &oldPinEcbDataLen) < 0) {
+                qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 6";
+                break;
+            }
+            if (b64_encode(oldPinEcbData, oldPinEcbDataLen, &oldPinB64) < 0) {
+                qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 7";
+                break;
+            }
+        }
+
+        // 6. 通过对称密钥加密新PIN码，并转为base64格式
+        if (dp_sm4_ecb_encrypt(genKey, (unsigned char *)newPin.toStdString().c_str(), strlen(newPin.toStdString().c_str()),
+                            &newPinEcbData, &newPinEcbDataLen) < 0) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 8";
+            break;
+        }
+        if (b64_encode(newPinEcbData, newPinEcbDataLen, &newPinB64) < 0) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 9";
+            break;
+        }
+
+        success = true;
+
+    } while(0);
+
+    // 加密成功则设置PIN，失败则提示
+    if (success) {
+        setPin(QString(oldPinB64), QString(newPinB64));
+    } else {
+        m_model->setSetPinDialogStyle(SetPinDialogStyle::SetFailedStyle);
+        Q_EMIT m_model->refreshSetPinDialogStyle();
+    }
+
+    if (genKey != nullptr) {
+        free(genKey);
+    }
+    if (pubEvpPKey != nullptr) {
+        EVP_PKEY_free(pubEvpPKey);
+    }
+    if (encData != nullptr) {
+        free(encData);
+    }
+    if (pkB64 != nullptr) {
+        free(pkB64);
+    }
+    if (oldPinEcbData != nullptr) {
+        free(oldPinEcbData);
+    }
+    if (oldPinB64 != nullptr) {
+        free(oldPinB64);
+    }
+    if (newPinEcbData != nullptr) {
+        free(newPinEcbData);
+    }
+    if (newPinB64 != nullptr) {
+        free(newPinB64);
+    }
 }
 
 void PasskeyWorker::makeCredential()
@@ -259,6 +374,9 @@ void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user
         if (result == FIDO_ERR_USER_ACTION_PENDING) {
             // 触碰设备
             updatePromptInfo(PromptType::Touch);
+        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+            // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
+            m_needCloseDevice = true;
         } else if (result == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 操作设备超时
             updatePromptInfo(PromptType::Timeout);
@@ -267,6 +385,7 @@ void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user
             updatePromptInfo(PromptType::Unknown);
         }
     } else {
+        m_needCloseDevice = false;
         if (result == FIDO_OK) {
             // 成功
             updateManageInfo();
@@ -294,7 +413,7 @@ void PasskeyWorker::updateManageInfo()
     m_model->setCurrentPage(StackedPageIndex::Manage);
     const QDBusPendingReply<int, int> &status = getPinStatus();
     if (!status.isValid()) {
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is GetPinStatus.";
+        qCWarning(DCC_PASSKEY) << "Call method 'GetPinStatus' failed, error message: " << status.error().message();
         m_model->setManagePageInfo({false , false});
         return;
     }
@@ -306,10 +425,6 @@ void PasskeyWorker::updateManageInfo()
     m_model->setSetPinDialogStyle(info.existPin ? SetPinDialogStyle::ChangePinStyle : SetPinDialogStyle::SetPinStyle);
 }
 
-void PasskeyWorker::deactivate()
-{
-}
-
 QString PasskeyWorker::getCurrentUser()
 {
     return m_login1Inter->property("Name").toString();
@@ -317,10 +432,11 @@ QString PasskeyWorker::getCurrentUser()
 
 int PasskeyWorker::getDeviceCount()
 {
+    m_needCloseDevice = false;
     QDBusPendingReply<int> reply = m_passkeyInter->GetDeviceCount();
     reply.waitForFinished();
     if (!reply.isValid()) {
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is GetDeviceCount.";
+        qCWarning(DCC_PASSKEY) << "Call method 'GetDeviceCount' failed, error message: " << reply.error().message();
         return -1;
     }
     return reply;
@@ -328,10 +444,11 @@ int PasskeyWorker::getDeviceCount()
 
 int PasskeyWorker::getUserValidCredentialCount()
 {
+    m_needCloseDevice = false;
     QDBusPendingReply<int> reply = m_passkeyInter->GetValidCredCount(getCurrentUser());
     reply.waitForFinished();
     if (!reply.isValid()) {
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is GetValidCredCount.";
+        qCWarning(DCC_PASSKEY) << "Call method 'GetValidCredCount' failed, error message: " << reply.error().message();
         return -1;
     }
     return reply;
@@ -339,6 +456,7 @@ int PasskeyWorker::getUserValidCredentialCount()
 
 QDBusPendingReply<int, int> PasskeyWorker::getPinStatus()
 {
+    m_needCloseDevice = false;
     // reply.argumentAt(0): support - 1表示支持pin；0不支持pin。
     // reply.argumentAt(1): exist - 1表示pin已设置；0表示pin未设置，如果要使用pin需要先设置pin。
     QDBusPendingReply<int, int> reply = m_passkeyInter->GetPinStatus();
@@ -348,6 +466,7 @@ QDBusPendingReply<int, int> PasskeyWorker::getPinStatus()
 
 void PasskeyWorker::getAssertion()
 {
+    m_needCloseDevice = false;
     m_needPromptMonitor = false;
 
     // 认证设备
@@ -358,7 +477,7 @@ void PasskeyWorker::getAssertion()
         qCDebug(DCC_PASSKEY) << "GetAssertion: id = " << m_currentId;
     } else {
         m_currentId = IdErrorFlag;
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is GetAssertion.";
+        qCWarning(DCC_PASSKEY) << "Call method 'GetAssertion' failed, error message: " << reply.error().message();
     }
 }
 
@@ -383,11 +502,15 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
         } else if (result == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 操作设备超时
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
+        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+            // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
+            m_needCloseDevice = true;
         } else {
             // 其余错误都按未知错误处理
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Unknown);
         }
     } else {
+        m_needCloseDevice = false;
         if (result == FIDO_OK) {
             // 成功
             m_resetAssertion ? reset() : updateManageInfo();
@@ -403,6 +526,7 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
 
 void PasskeyWorker::reset()
 {
+    m_needCloseDevice = false;
     m_needPromptMonitor = false;
 
     QDBusPendingReply<QString> reply = m_passkeyInter->Reset();
@@ -412,7 +536,7 @@ void PasskeyWorker::reset()
         qCDebug(DCC_PASSKEY) << "Reset: id = " << m_currentId;
     } else {
         m_currentId = IdErrorFlag;
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is Reset.";
+        qCWarning(DCC_PASSKEY) << "Call method 'Reset' failed, error message: " << reply.error().message();
     }
 }
 
@@ -430,11 +554,15 @@ void PasskeyWorker::requestResetStatus(const QString &id, int finish, int result
         if (result == FIDO_ERR_USER_ACTION_PENDING) {
             // 触碰设备
             m_model->setResetDialogStyle(ResetDialogStyle::SecondTouchStyle);
+        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+            // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
+            m_needCloseDevice = true;
         } else {
             // 其余错误都按未知错误处理
             m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false);
         }
     } else {
+        m_needCloseDevice = false;
         if (result == FIDO_OK) {
             // 成功
             m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, true);
@@ -447,13 +575,55 @@ void PasskeyWorker::requestResetStatus(const QString &id, int finish, int result
 
 void PasskeyWorker::setPin(const QString &oldPin, const QString &newPin)
 {
+    m_needCloseDevice = false;
     QDBusPendingReply<> reply = m_passkeyInter->SetPin(oldPin, newPin);
     reply.waitForFinished();
     if (reply.isError()) {
         m_model->setSetPinDialogStyle(SetPinDialogStyle::SetFailedStyle);
         Q_EMIT m_model->refreshSetPinDialogStyle();
-        qCWarning(DCC_PASSKEY) << "Passkey dbus service reply error ! Method is setPin.";
+        qCWarning(DCC_PASSKEY) << "Call method 'SetPin' failed, error message: " << reply.error().message();
     } else {
         updateManageInfo();
+        qCDebug(DCC_PASSKEY) << "Passkey set pin completed .";
+    }
+}
+
+QString PasskeyWorker::encryptKey(int keyType)
+{
+    m_needPromptMonitor = false;
+
+    QDBusPendingReply<QString> reply = m_passkeyInter->EncryptKey(keyType);
+    reply.waitForFinished();
+    if (reply.isValid()) {
+        return reply;
+    } else {
+        qCWarning(DCC_PASSKEY) << "Call method 'EncryptKey' failed, error message: " << reply.error().message();
+        return PublicKeyErrorFlag;
+    }
+}
+
+bool PasskeyWorker::setSymmetricKey(int encryptType, int keyType, const QString &key)
+{
+    QDBusPendingReply<> reply = m_passkeyInter->SetSymmetricKey(encryptType, keyType, key);
+    reply.waitForFinished();
+    if (reply.isError()) {
+        qCWarning(DCC_PASSKEY) << "Call method 'SetSymmetricKey' failed, error message: " << reply.error().message();
+        return false;
+    }
+    return true;
+}
+
+void PasskeyWorker::deviceClose(const QString &id)
+{
+    m_needCloseDevice = false;
+    if (m_currentId == IdErrorFlag) {
+        return;
+    }
+
+    // getAssertion认证，接收到DEEPIN_ERR_DEVICE_OPEN信号，提示用户触摸设备时，可以调用该接口结束流程
+    QDBusPendingReply<> reply = m_passkeyInter->DeviceClose(id);
+    reply.waitForFinished();
+    if (reply.isError()) {
+        qCWarning(DCC_PASSKEY) << "Call method 'DeviceClose' failed, error message: " << reply.error().message();
     }
 }

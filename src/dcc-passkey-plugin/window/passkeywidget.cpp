@@ -61,6 +61,7 @@ void PasskeyWidget::setModel(const PasskeyModel *model, const PasskeyWorker *wor
         m_resetPasskeyMonitorTimer->stop();
     });
     connect(this, &PasskeyWidget::requestSetKeyPin, m_worker, &PasskeyWorker::handleSetPasskeyPin);
+    connect(this, &PasskeyWidget::destroyed, m_worker, &PasskeyWorker::deactivate);
 
     m_promptMonitorTimer->setInterval(1000);
     m_promptMonitorTimer->setSingleShot(false);
@@ -188,9 +189,7 @@ void PasskeyWidget::showResetKeyDialog(const ResetDialogStyle &style, bool statu
         });
         connect(m_resetKeyDialogCtrl, &ResetKeyDialogCtrl::requestStopReset, this, [this] (bool success) {
             m_resetPasskeyMonitorTimer->stop();
-            if (success) {
-                Q_EMIT m_worker->requestActive();
-            }
+            success ? Q_EMIT m_worker->requestActive() : Q_EMIT m_worker->requestDeactivate();
         });
     }
 

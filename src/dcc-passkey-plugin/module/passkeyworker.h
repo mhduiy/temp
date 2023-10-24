@@ -29,6 +29,7 @@ public:
 Q_SIGNALS:
     void requestInit();
     void requestActive();
+    void requestDeactivate();
     void resetPasskeyMonitorCompleted();
 
 public Q_SLOTS:
@@ -55,6 +56,9 @@ private:
     void getAssertion();
     void reset();
     void setPin(const QString &oldPin, const QString &newPin);
+    void deviceClose(const QString &id);
+    QString encryptKey(int keyType);
+    bool setSymmetricKey(int encryptType, int keyType, const QString &key);
 
 private:
     PasskeyModel *m_model;
@@ -67,4 +71,5 @@ private:
 
     bool m_resetAssertion; // 区分正常认证和重置认证
     QString m_currentId; // 异步通信中确定id
+    bool m_needCloseDevice; // 需要关闭设备
 };

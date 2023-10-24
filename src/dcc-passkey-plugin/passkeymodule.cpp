@@ -59,6 +59,7 @@ void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pusht
     m_workerThread->start(QThread::LowPriority);
     connect(m_worker.get(), &PasskeyWorker::requestInit, m_worker.get(), &PasskeyWorker::init);
     connect(m_worker.get(), &PasskeyWorker::requestActive, m_worker.get(), &PasskeyWorker::activate);
+    connect(m_worker.get(), &PasskeyWorker::requestDeactivate, m_worker.get(), &PasskeyWorker::deactivate);
     Q_EMIT m_worker->requestInit();
 
     addChildPageTrans();
@@ -87,6 +88,7 @@ QIcon PasskeyModule::icon() const
 
 void PasskeyModule::active()
 {
+    m_worker->updatePromptInfo(PromptType::Insert);
     Q_EMIT m_worker->requestActive();
 
     m_widget = new PasskeyWidget();
