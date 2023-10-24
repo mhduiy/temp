@@ -639,7 +639,11 @@ void dpk_service_start()
     Service srv;
     // 初始化PasskeyServiceData， 用于管理服务全局数据
     PasskeyServiceData passkeyData;
-    service_passkey_data_init(&passkeyData);
+
+    if (service_passkey_data_init(&passkeyData) < 0) {
+        return;
+    }
+
     if (service_init(&srv, PASSKEY_SERVICE_DBUS_NAME, &passkeyData) < 0) {
         return;
     }
@@ -647,6 +651,8 @@ void dpk_service_start()
     if (service_register_interface(&srv, PASSKEY_SERVICE_DBUS_PATH, PASSKEY_SERVICE_DBUS_INTERFACE, PASSKEY_SERVICE_DBUS_XML_DATA) < 0) {
         return;
     }
+
+    service_passkey_data_listen(&passkeyData, srv.connection);
 
     service_register_method(&srv, "Claim", dpk_service_api_claim, false);
     service_register_method(&srv, "UnClaim", dpk_service_api_unclaim, false);
@@ -667,6 +673,7 @@ void dpk_service_start()
 
     service_run(&srv); // in loop, and end when exit
 
+    service_passkey_data_listen_end(&passkeyData, srv.connection);
     service_passkey_data_free(&passkeyData);
     service_unref(&srv);
 

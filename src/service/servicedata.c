@@ -206,14 +206,14 @@ int service_selected_device_add(Service *srv, const gchar *sender, fido_dev_t *d
     return ret;
 }
 
-int service_selected_device_delete(Service *srv, const gchar *sender)
+int service_selected_device_delete_by_date(PasskeyServiceData *passkeyData, const gchar *sender)
 {
     int ret = -1;
-    if (srv == NULL || srv->customData == NULL || sender == NULL) {
+    if (passkeyData || sender == NULL) {
         LOG(LOG_ERR, "param invalid");
         return ret;
     }
-    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+
     mtx_lock(&(passkeyData->selectedDeviceMtx));
     do {
         if (passkeyData->selectedDevice == NULL) {
@@ -235,6 +235,19 @@ int service_selected_device_delete(Service *srv, const gchar *sender)
     mtx_unlock(&(passkeyData->selectedDeviceMtx));
 
     return ret;
+}
+
+int service_selected_device_delete(Service *srv, const gchar *sender)
+{
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || sender == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+
+    return service_selected_device_delete_by_date(passkeyData, sender);
 }
 
 static void free_selected_device_key(gpointer data)
@@ -696,15 +709,15 @@ int service_client_sym_key_set(Service *srv, const gchar *sender, int type, cons
     return ret;
 }
 
-int service_client_sym_key_delete(Service *srv, const gchar *sender)
+static int service_client_sym_key_delete_by_data(PasskeyServiceData *passkeyData, const gchar *sender)
 {
     LOG(LOG_DEBUG, "to delete client sym key.");
     int ret = -1;
-    if (srv == NULL || srv->customData == NULL || sender == NULL) {
+    if (passkeyData == NULL || sender == NULL) {
         LOG(LOG_ERR, "param invalid");
         return ret;
     }
-    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+
     mtx_lock(&(passkeyData->clientSymKeyMtx));
     do {
         if (passkeyData->clientSymKey == NULL) {
@@ -718,6 +731,20 @@ int service_client_sym_key_delete(Service *srv, const gchar *sender)
     mtx_unlock(&(passkeyData->clientSymKeyMtx));
 
     return ret;
+}
+
+int service_client_sym_key_delete(Service *srv, const gchar *sender)
+{
+    LOG(LOG_DEBUG, "to delete client sym key.");
+    int ret = -1;
+    if (srv == NULL || srv->customData == NULL || sender == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return ret;
+    }
+
+    PasskeyServiceData *passkeyData = (PasskeyServiceData *)srv->customData;
+
+    return service_client_sym_key_delete_by_data(passkeyData, sender);
 }
 
 static void free_client_sym_key(gpointer data)
@@ -745,6 +772,9 @@ int service_passkey_data_init(PasskeyServiceData *passkeyData)
     if (passkeyData == NULL) {
         return -1;
     }
+
+    passkeyData->listenDBusNameOwnerChangedId = 0;
+
     passkeyData->customData = g_hash_table_new_full(g_str_hash, g_str_equal, free_custom_data, free_custom_data);
     mtx_init(&(passkeyData->customDataMtx), mtx_plain);
 
@@ -768,6 +798,7 @@ int service_passkey_data_free(PasskeyServiceData *passkeyData)
     if (passkeyData == NULL) {
         return -1;
     }
+
     mtx_destroy(&(passkeyData->customDataMtx));
     if (passkeyData->customData != NULL) {
         g_hash_table_destroy(passkeyData->customData);
@@ -793,5 +824,67 @@ int service_passkey_data_free(PasskeyServiceData *passkeyData)
         g_hash_table_destroy(passkeyData->clientSymKey);
     }
 
+    return 0;
+}
+
+static void service_passkey_data_listen_sender_exit(
+        GDBusConnection *connection, const gchar *senderName, const gchar *objectPath, const gchar *interfaceName, const gchar *signalName, GVariant *parameters, gpointer userData)
+{
+    UNUSED_VALUE(connection);
+    UNUSED_VALUE(senderName);
+    UNUSED_VALUE(objectPath);
+    UNUSED_VALUE(interfaceName);
+    UNUSED_VALUE(signalName);
+
+    const gchar *name = NULL;
+    const gchar *owner = NULL;
+    const gchar *newOwner = NULL;
+
+    g_variant_get(parameters, "(sss)", &name, &owner, &newOwner);
+    if (name == NULL || owner == NULL || newOwner == NULL || userData == NULL) {
+        LOG(LOG_WARNING, "passkey data listen, param is invalid.");
+        return;
+    }
+
+    if (strlen(name) > 0 && strlen(owner) && strlen(newOwner) == 0) {
+        LOG(LOG_INFO, "sender(%s) exit and to clear data.", name);
+
+        PasskeyServiceData *passkeyData = (PasskeyServiceData *)userData;
+        // 调用方退出，清空调用方生成的对称密钥
+        service_client_sym_key_delete_by_data(passkeyData, name);
+        // 调用方退出，清空调用方选择的设备连接
+        service_selected_device_delete_by_date(passkeyData, name);
+    }
+}
+
+int service_passkey_data_listen(PasskeyServiceData *passkeyData, GDBusConnection *connection)
+{
+    if (passkeyData == NULL || connection == NULL) {
+        return -1;
+    }
+    gint id = g_dbus_connection_signal_subscribe(connection,
+                                                 "org.freedesktop.DBus",
+                                                 "org.freedesktop.DBus",
+                                                 "NameOwnerChanged",
+                                                 "/org/freedesktop/DBus",
+                                                 NULL,
+                                                 G_DBUS_SIGNAL_FLAGS_NONE,
+                                                 service_passkey_data_listen_sender_exit,
+                                                 passkeyData,
+                                                 NULL);
+
+    passkeyData->listenDBusNameOwnerChangedId = id;
+    return 0;
+}
+
+int service_passkey_data_listen_end(PasskeyServiceData *passkeyData, GDBusConnection *connection)
+{
+    if (passkeyData == NULL || connection == NULL) {
+        return -1;
+    }
+
+    if (passkeyData->listenDBusNameOwnerChangedId > 0) {
+        g_dbus_connection_signal_unsubscribe(connection, passkeyData->listenDBusNameOwnerChangedId);
+    }
     return 0;
 }

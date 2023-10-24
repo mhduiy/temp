@@ -30,7 +30,7 @@ typedef struct _PasskeyServiceData
     mtx_t customDataMtx;
 
     // CTAP设备选择功能
-    // 释放场景， 1-设备错误， 2-主动取消设备选择， 3-调用方退出(TODO)
+    // 释放场景， 1-设备错误， 2-主动取消设备选择， 3-调用方退出
     GHashTable *selectedDevice;
     mtx_t selectedDeviceMtx;
 
@@ -42,14 +42,18 @@ typedef struct _PasskeyServiceData
     GHashTable *serviceAsymKey;
     mtx_t serviceAsymKeyMtx;
 
-    // 客户端对称密钥, sender->key, 调用方退出(TODO)
+    // 客户端对称密钥, sender->key
     GHashTable *clientSymKey;
     mtx_t clientSymKeyMtx;
+
+    gint listenDBusNameOwnerChangedId;
 } PasskeyServiceData;
 
 // 使用PasskeyServiceData前必须先init
 int service_passkey_data_init(PasskeyServiceData *passkeyData);
 int service_passkey_data_free(PasskeyServiceData *passkeyData);
+int service_passkey_data_listen(PasskeyServiceData *passkeyData, GDBusConnection *connection);
+int service_passkey_data_listen_end(PasskeyServiceData *passkeyData, GDBusConnection *connection);
 
 // PasskeyServiceData.customData
 int service_custom_data_get(Service *srv, const gchar *key, gchar **value);

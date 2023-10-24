@@ -11,9 +11,9 @@
 extern "C" {
 #endif
 
-int b64_encode(const void *, size_t, char **);
-int b64_decode(const char *, void **, size_t *);
-char *normal_b64(const char *websafe_b64);
+int b64_encode(const void *in, size_t inLen, char **out);
+int b64_decode(const char *in, void **out, size_t *outLen);
+char *normal_b64(const char *safeB64);
 
 #ifdef __cplusplus
 }

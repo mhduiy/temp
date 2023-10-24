@@ -28,7 +28,6 @@ target_link_libraries(${TEST_NAME} PRIVATE
     PkgConfig::OPENSSL
     -lpthread
     -ldl
-    -lssl
 )
 
 add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} "--gtest_output=xml:${PROJECT_BINARY_DIR}/ut-test-report.xml")

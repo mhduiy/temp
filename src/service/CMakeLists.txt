@@ -7,6 +7,7 @@ set(SERVICE "deepin-passkey")
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0 gio-2.0 gobject-2.0 gio-unix-2.0) # gdbus
 pkg_check_modules(Fido REQUIRED IMPORTED_TARGET libfido2)
+pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
 set(CMAKE_C_FLAGS ${SECURITY_COMPILE_FLAGS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -32,11 +33,13 @@ target_include_directories(${SERVICE} PUBLIC
     ${PROJECT_SOURCE_DIR}/src/
     PkgConfig::GLIB
     PkgConfig::Fido
+    PkgConfig::OPENSSL
 )
 
 target_link_libraries(${SERVICE} PRIVATE
     PkgConfig::GLIB
     PkgConfig::Fido
+    PkgConfig::OPENSSL
     -lpthread
 )
 

@@ -132,13 +132,13 @@ end:
     return (ok);
 }
 
-char *normal_b64(const char *websafe_b64)
+char *normal_b64(const char *webSafeB64)
 {
     char *b64;
     char *p;
     size_t n;
 
-    n = strlen(websafe_b64);
+    n = strlen(webSafeB64);
     if (n > SIZE_MAX - 3) {
         return (NULL);
     }
@@ -148,7 +148,7 @@ char *normal_b64(const char *websafe_b64)
         return (NULL);
     }
 
-    memcpy(b64, websafe_b64, n);
+    memcpy(b64, webSafeB64, n);
     p = b64;
 
     while ((p = strpbrk(p, "-_")) != NULL) {

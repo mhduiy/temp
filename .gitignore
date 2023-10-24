@@ -9,4 +9,6 @@ debian/tmp/
 debian/.debhelper/
 debian/deepin-passkey
 debian/dcc-passkey-plugin
+debian/dde-passkey-environment/
+debian/dde-passkey-environment.substvars
 .cache
