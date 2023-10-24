@@ -842,3 +842,24 @@ TEST_F(TestServiceDecode, SM2SignTest1)
         testFunc(test);
     }
 }
+
+TEST_F(TestServiceDecode, GenSymKey16)
+{
+    auto testFunc = []() {
+        unsigned char *key = nullptr;
+        do {
+            key = dp_gen_symmetric_key_16();
+            EXPECT_EQ(strlen((char *)key), 16);
+            if (HasFailure()) {
+                break;
+            }
+        } while (0);
+        if (key != nullptr) {
+            free(key);
+        }
+    };
+
+    for (int i = 0; i < 10; i++) {
+        testFunc();
+    }
+}

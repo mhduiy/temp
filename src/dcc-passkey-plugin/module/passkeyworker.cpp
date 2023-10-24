@@ -222,7 +222,7 @@ void PasskeyWorker::handleResetPasskeyMonitor()
 void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &newPin)
 {
     QString publicKey;
-    unsigned char *genKey;
+    unsigned char *genKey = nullptr;
     EVP_PKEY *pubEvpPKey = nullptr;
     unsigned char *encData = nullptr;
     size_t encDataLen = 0;
@@ -231,13 +231,17 @@ void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &ne
     unsigned char *oldPinEcbData = nullptr;
     int oldPinEcbDataLen = 0;
     char *oldPinB64 = nullptr;
+    QString oldPinB64Str;
 
     unsigned char *newPinEcbData = nullptr;
     int newPinEcbDataLen = 0;
     char *newPinB64 = nullptr;
+    QString newPinB64Str;
 
     // PIN加密
     bool success = false;
+
+#ifndef NO_USE_ENCRYPT
     do {
         // 1. 获取服务器公钥
         publicKey = encryptKey(DP_SUPPORT_SM2_SM3);
@@ -248,6 +252,11 @@ void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &ne
 
         // 2. 生成DP_SUPPORT_SM4_ECB对称密钥
         genKey = dp_gen_symmetric_key_16();
+        if (genKey == nullptr) {
+            qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 1a";
+            break;
+        }
+
         if (dp_sm2_public_key_create_by_string((unsigned char *)publicKey.toStdString().c_str(), &pubEvpPKey) < 0) {
             qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 2";
             break;
@@ -292,14 +301,20 @@ void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &ne
             qCWarning(DCC_PASSKEY) << "Set passkey pin failed, error code: 9";
             break;
         }
-
+        oldPinB64Str = QString(oldPinB64);
+        newPinB64Str = QString(newPinB64);
         success = true;
 
     } while(0);
 
+#else
+    success = true;
+    oldPinB64Str = oldPin;
+    newPinB64Str = newPin;
+#endif
     // 加密成功则设置PIN，失败则提示
     if (success) {
-        setPin(QString(oldPinB64), QString(newPinB64));
+        setPin(oldPinB64Str, newPinB64Str);
     } else {
         m_model->setSetPinDialogStyle(SetPinDialogStyle::SetFailedStyle);
         Q_EMIT m_model->refreshSetPinDialogStyle();

@@ -172,6 +172,7 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
     }
     srv = (Service *)mc->serviceData;
 
+#ifndef NO_USE_ENCRYPT
     if (service_client_sym_key_get(srv, mc->sender, &symKeyType, &symKey) < 0) {
         LOG(LOG_ERR, "failed to get client(%s) sym key, and stop to set pin.", mc->sender);
         goto end;
@@ -217,6 +218,24 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
             goto end;
         }
     }
+#else
+    if (pin != NULL) {
+        int newPinLength = strlen(pin);
+        newPinDec = (unsigned char *)calloc(newPinLength + 1, sizeof(char));
+        if (newPinDec != NULL) {
+            strncpy(newPinDec, pin, newPinLength);
+            newPinDec[newPinLength] = 0;
+        }
+    }
+    if (oldPin != NULL) {
+        int oldPinLength = strlen(oldPin);
+        oldPinDec = (unsigned char *)calloc(oldPinLength + 1, sizeof(char));
+        if (oldPinDec != NULL) {
+            strncpy(oldPinDec, oldPin, oldPinLength);
+            oldPinDec[oldPinLength] = 0;
+        }
+    }
+#endif
 
     fido_init(0);
 
