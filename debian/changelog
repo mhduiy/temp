@@ -1,3 +1,10 @@
+deepin-passkey (1.0.2) unstable; urgency=medium
+
+  * 增加PIN码加密传输功能
+  * 控制中心插件在注册设备时，增加了polkit鉴权
+
+ -- Tan Feng <tanfeng@uniontech.com>  Wed, 25 Oct 2023 10:21:17 +0800
+
 deepin-passkey (1.0.1) unstable; urgency=medium
 
   * add dcc plugin for passkey
