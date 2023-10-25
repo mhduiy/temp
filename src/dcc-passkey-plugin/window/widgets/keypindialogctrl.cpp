@@ -113,6 +113,9 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
             if (!judgePinSize(newPwdEdit)) {
                 return;
             }
+            if (!judgePinSize(repeatPwdEdit)) {
+                return;
+            }
             if (!judgePinConsistent(newPwdEdit, repeatPwdEdit)) {
                 return;
             }
@@ -224,7 +227,8 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
             newPwdEdit->clear();
             repeatPwdEdit->clear();
         } else {
-            if (!judgePinSize(oldPwdEdit) || !judgePinSize(newPwdEdit) || !judgePinConsistent(newPwdEdit, repeatPwdEdit)) {
+            if (!judgePinSize(oldPwdEdit) || !judgePinSize(newPwdEdit) || !judgePinSize(repeatPwdEdit) 
+                || !judgePinConsistent(newPwdEdit, repeatPwdEdit)) {
                 return;
             }
             Q_EMIT requestSetPin(oldPwdEdit->text(), newPwdEdit->text());
