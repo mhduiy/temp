@@ -35,7 +35,7 @@ public:
     void active() override;
     void deactive() override;
     QString path() const override { return MAINWINDOW; }
-    QString follow() const override { return SYSTEMINFO; }
+    QString follow() const override { return "authentication"; }
     int load(const QString &path) override;
     void addChildPageTrans() const override;
     QString description() const { return tr("Sign in with a physical security key"); }
