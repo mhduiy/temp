@@ -78,7 +78,7 @@ const QString PasskeyModule::name() const
 
 const QString PasskeyModule::displayName() const
 {
-    return tr("Passkey");
+    return tr("Security Key");
 }
 
 QIcon PasskeyModule::icon() const

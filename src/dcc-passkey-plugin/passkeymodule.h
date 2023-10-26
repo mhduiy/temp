@@ -38,8 +38,7 @@ public:
     QString follow() const override { return SYSTEMINFO; }
     int load(const QString &path) override;
     void addChildPageTrans() const override;
-
-    QString description() const { return tr("使用物理安全密钥登录"); }
+    QString description() const { return tr("Sign in with a physical security key"); }
 
 private:
     void initSearchData() override;
@@ -50,5 +49,3 @@ private:
     QSharedPointer<PasskeyWorker> m_worker;
     QSharedPointer<QThread> m_workerThread;
 };
-
-
