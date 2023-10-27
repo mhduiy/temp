@@ -151,11 +151,11 @@ public Q_SLOTS: // METHODS
     }
 
 Q_SIGNALS: // SIGNALS
-    void DeviceDetectStatus(const QString &id, int finish, int result);
-    void DeviceSelectStatus(const QString &id, int finish, int result);
-    void GetAssertStatus(const QString &id, const QString &user, int finish, int result);
-    void MakeCredStatus(const QString &id, const QString &user, int finish, int result);
-    void ResetStatus(const QString &id, int finish, int result);
+    void DeviceDetectStatus(const QString &id, int finish, const QString &result);
+    void DeviceSelectStatus(const QString &id, int finish, const QString &result);
+    void GetAssertStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void MakeCredStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void ResetStatus(const QString &id, int finish, const QString &result);
 };
 
 namespace com {

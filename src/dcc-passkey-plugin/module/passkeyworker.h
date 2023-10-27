@@ -43,9 +43,9 @@ public Q_SLOTS:
     void handleSetPasskeyPin(const QString &oldPin, const QString &newPin);
 
 private Q_SLOTS:
-    void requestMakeCredStatus(const QString &id, const QString &user, int finish, int result);
-    void requestGetAssertStatus(const QString &id, const QString &user, int finish, int result);
-    void requestResetStatus(const QString &id, int finish, int result);
+    void requestMakeCredStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void requestGetAssertStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void requestResetStatus(const QString &id, int finish, const QString &result);
 
 private:
     QString getCurrentUser();

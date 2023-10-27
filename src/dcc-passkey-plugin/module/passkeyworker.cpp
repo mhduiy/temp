@@ -372,7 +372,7 @@ void PasskeyWorker::makeCredential()
 }
 
 // 注册设备信号处理
-void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user, int finish, int result)
+void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user, int finish, const QString &result)
 {
     qCDebug(DCC_PASSKEY) << "Request make cred status signal : id = " << id << ", user = " << user
                          << ", finish = " << finish << ", result = " << result;
@@ -383,16 +383,22 @@ void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user
         return;
     }
 
+    QJsonObject obj = QJsonDocument::fromJson(result.toUtf8()).object();
+    if (obj.isEmpty()) {
+        return;
+    }
+    const int code = obj["code"].toInt();
+
     // finish = 0，表示正在注册设备的流程中，比如需要触摸设备
     // finish = 1，表示注册设备流程结束
     if (finish == 0) {
-        if (result == FIDO_ERR_USER_ACTION_PENDING) {
+        if (code == FIDO_ERR_USER_ACTION_PENDING) {
             // 触碰设备
             updatePromptInfo(PromptType::Touch);
-        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+        } else if (code == DEEPIN_ERR_DEVICE_OPEN) {
             // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
             m_needCloseDevice = true;
-        } else if (result == FIDO_ERR_USER_ACTION_TIMEOUT) {
+        } else if (code == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 操作设备超时
             updatePromptInfo(PromptType::Timeout);
         } else {
@@ -401,10 +407,10 @@ void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user
         }
     } else {
         m_needCloseDevice = false;
-        if (result == FIDO_OK) {
+        if (code == FIDO_OK) {
             // 成功
             updateManageInfo();
-        } else if (result == FIDO_ERR_PIN_REQUIRED) {
+        } else if (code == FIDO_ERR_PIN_REQUIRED) {
             // 认证过程中，触摸超时，协议会让再用PIN试一次，此处直接当超时处理
             updatePromptInfo(PromptType::Timeout);
         } else {
@@ -497,7 +503,7 @@ void PasskeyWorker::getAssertion()
 }
 
 // 认证设备信号处理
-void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &user, int finish, int result)
+void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &user, int finish, const QString &result)
 {
     qCDebug(DCC_PASSKEY) << "Request get assert status signal : id = " << id << ", user = " << user
                          << ", finish = " << finish << ", result = " << result;
@@ -508,16 +514,22 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
         return;
     }
 
+    QJsonObject obj = QJsonDocument::fromJson(result.toUtf8()).object();
+    if (obj.isEmpty()) {
+        return;
+    }
+    const int code = obj["code"].toInt();
+
     // finish = 0，表示正在认证设备的流程中，比如需要触摸设备
     // finish = 1，表示认证设备流程结束
     if (finish == 0) {
-        if (result == FIDO_ERR_USER_ACTION_PENDING) {
+        if (code == FIDO_ERR_USER_ACTION_PENDING) {
             // 触碰设备
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FirstTouchStyle) : updatePromptInfo(PromptType::Touch);
-        } else if (result == FIDO_ERR_USER_ACTION_TIMEOUT) {
+        } else if (code == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 操作设备超时
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
-        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+        } else if (code == DEEPIN_ERR_DEVICE_OPEN) {
             // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
             m_needCloseDevice = true;
         } else {
@@ -526,10 +538,10 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
         }
     } else {
         m_needCloseDevice = false;
-        if (result == FIDO_OK) {
+        if (code == FIDO_OK) {
             // 成功
             m_resetAssertion ? reset() : updateManageInfo();
-        } else if (result == FIDO_ERR_PIN_REQUIRED) {
+        } else if (code == FIDO_ERR_PIN_REQUIRED) {
             // 认证过程中，触摸超时，协议会让再用PIN试一次，此处直接当超时处理
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
         } else {
@@ -555,7 +567,7 @@ void PasskeyWorker::reset()
     }
 }
 
-void PasskeyWorker::requestResetStatus(const QString &id, int finish, int result)
+void PasskeyWorker::requestResetStatus(const QString &id, int finish, const QString &result)
 {
     qCDebug(DCC_PASSKEY) << "Request reset status signal : id = " << id << ", finish = " << finish << ", result = " << result;
 
@@ -563,13 +575,19 @@ void PasskeyWorker::requestResetStatus(const QString &id, int finish, int result
         return;
     }
 
+    QJsonObject obj = QJsonDocument::fromJson(result.toUtf8()).object();
+    if (obj.isEmpty()) {
+        return;
+    }
+    const int code = obj["code"].toInt();
+
     // finish = 0，表示正在重置设备的流程中，比如需要触摸设备
     // finish = 1，表示重置设备流程结束
     if (finish == 0) {
-        if (result == FIDO_ERR_USER_ACTION_PENDING) {
+        if (code == FIDO_ERR_USER_ACTION_PENDING) {
             // 触碰设备
             m_model->setResetDialogStyle(ResetDialogStyle::SecondTouchStyle);
-        } else if (result == DEEPIN_ERR_DEVICE_OPEN) {
+        } else if (code == DEEPIN_ERR_DEVICE_OPEN) {
             // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
             m_needCloseDevice = true;
         } else {
@@ -578,7 +596,7 @@ void PasskeyWorker::requestResetStatus(const QString &id, int finish, int result
         }
     } else {
         m_needCloseDevice = false;
-        if (result == FIDO_OK) {
+        if (code == FIDO_OK) {
             // 成功
             m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, true);
         } else {
