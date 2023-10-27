@@ -55,7 +55,7 @@ int dp_evp_deal(const EVP_CIPHER *cip, int padding, int enc, const unsigned char
         }
     }
 
-    unsigned char *outBuf = (unsigned char *)calloc(sizeof(unsigned char), inLen + EVP_MAX_BLOCK_LENGTH);
+    unsigned char *outBuf = (unsigned char *)calloc(inLen + EVP_MAX_BLOCK_LENGTH, sizeof(unsigned char));
     int outBufLen, tmpLen;
     if (!EVP_CipherUpdate(ctx, outBuf, &outBufLen, in, inLen)) {
         LOG(LOG_WARNING, "failed to call EVP_CipherUpdate.");

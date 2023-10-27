@@ -3,3 +3,4 @@ usr/share/dbus-1/system-services/
 usr/lib/systemd/system/
 usr/share/deepin-passkey/cred/
 usr/bin/
+usr/share/locale/*/LC_MESSAGES/deepin-passkey-service.mo

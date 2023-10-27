@@ -5,11 +5,17 @@
 #include "common/log.h"
 #include "service.h"
 
+#include <libintl.h>
+
+#include <locale.h>
 #include <stdio.h>
 
 int main()
 {
     LOG(LOG_INFO, "deepin-passkey start.");
+
+    setlocale(LC_ALL, "");
+    textdomain("deepin-passkey-service");
 
     dpk_service_start();
 

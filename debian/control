@@ -10,6 +10,8 @@ Build-Depends:
  libssl-dev,
  libglib2.0-dev,
  libgtest-dev,
+ libjson-c-dev,
+ gettext,
  libdtkwidget-dev (>=5.4.19),
  libdtkcore-dev (>=5.4.14),
  libdtkcore5-bin (>=5.4.14),

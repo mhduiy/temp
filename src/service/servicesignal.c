@@ -5,6 +5,7 @@
 #include "servicesignal.h"
 
 #include "common/log.h"
+#include "err.h"
 
 #include <gio/gio.h>
 #include <glib.h>
@@ -12,6 +13,7 @@
 void emit_reset_status(MethodContext *mc, int finish, int status)
 {
     GError *error = NULL;
+    char *jsonData = NULL;
     if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
         LOG(LOG_WARNING, "emit 'ResetStatus' signal error: service-data is invalid.");
         goto end;
@@ -22,18 +24,27 @@ void emit_reset_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "ResetStatus", g_variant_new("(sii)", mc->callId, finish, status), &error);
+    if (dp_err_code_to_json(status, &jsonData) < 0) {
+        LOG(LOG_WARNING, "emit 'ResetStatus' signal error: can not get json data.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "ResetStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit 'ResetStatus' signal error: %s", error->message);
         g_error_free(error);
     }
+    if (jsonData != NULL) {
+        free(jsonData);
+    }
 }
 
 void emit_device_detect_status(MethodContext *mc, int finish, int status)
 {
     GError *error = NULL;
+    char *jsonData = NULL;
     if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
         LOG(LOG_WARNING, "emit 'ResetStatus' signal error: service-data is invalid.");
         goto end;
@@ -44,17 +55,26 @@ void emit_device_detect_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceDetectStatus", g_variant_new("(sii)", mc->callId, finish, status), &error);
+    if (dp_err_code_to_json(status, &jsonData) < 0) {
+        LOG(LOG_WARNING, "emit 'ResetStatus' signal error: can not get json data.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceDetectStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
         g_error_free(error);
+    }
+    if (jsonData != NULL) {
+        free(jsonData);
     }
 }
 
 void emit_make_cred_status(MethodContext *mc, const char *user, int finish, int status)
 {
     GError *error = NULL;
+    char *jsonData = NULL;
     if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
         LOG(LOG_WARNING, "emit 'ResetStatus' signal error: service-data is invalid.");
         goto end;
@@ -65,17 +85,26 @@ void emit_make_cred_status(MethodContext *mc, const char *user, int finish, int 
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "MakeCredStatus", g_variant_new("(ssii)", mc->callId, user, finish, status), &error);
+    if (dp_err_code_to_json(status, &jsonData) < 0) {
+        LOG(LOG_WARNING, "emit 'ResetStatus' signal error: can not get json data.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "MakeCredStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
         g_error_free(error);
+    }
+    if (jsonData != NULL) {
+        free(jsonData);
     }
 }
 
 void emit_get_assert_status(MethodContext *mc, const char *user, int finish, int status)
 {
     GError *error = NULL;
+    char *jsonData = NULL;
     if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
         LOG(LOG_WARNING, "emit 'ResetStatus' signal error: service-data is invalid.");
         goto end;
@@ -86,17 +115,26 @@ void emit_get_assert_status(MethodContext *mc, const char *user, int finish, int
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "GetAssertStatus", g_variant_new("(ssii)", mc->callId, user, finish, status), &error);
+    if (dp_err_code_to_json(status, &jsonData) < 0) {
+        LOG(LOG_WARNING, "emit 'ResetStatus' signal error: can not get json data.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "GetAssertStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
         g_error_free(error);
+    }
+    if (jsonData != NULL) {
+        free(jsonData);
     }
 }
 
 void emit_device_select_status(MethodContext *mc, int finish, int status)
 {
     GError *error = NULL;
+    char *jsonData = NULL;
     if (mc == NULL || mc->serviceData == NULL || mc->callId == NULL) {
         LOG(LOG_WARNING, "emit 'DeviceSelect' signal error: service-data is invalid.");
         goto end;
@@ -107,10 +145,18 @@ void emit_device_select_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceSelect", g_variant_new("(sii)", mc->callId, finish, status), &error);
+    if (dp_err_code_to_json(status, &jsonData) < 0) {
+        LOG(LOG_WARNING, "emit 'ResetStatus' signal error: can not get json data.");
+        goto end;
+    }
+
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceSelect", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
         g_error_free(error);
+    }
+    if (jsonData != NULL) {
+        free(jsonData);
     }
 }
