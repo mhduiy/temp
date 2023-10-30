@@ -80,7 +80,7 @@ file(GLOB_RECURSE PO_FILES
     "${PROJECT_SOURCE_DIR}/file/translate/service/*.po"
 )
 foreach(PO ${PO_FILES})
-    get_filename_component(PO_NAME ${PO} NAME_WLE)
+    get_filename_component(PO_NAME ${PO} NAME_WE)
     add_custom_command(
         TARGET ${SERVICE}
         COMMAND
