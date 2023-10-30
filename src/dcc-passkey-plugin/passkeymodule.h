@@ -38,7 +38,7 @@ public:
     QString follow() const override { return "authentication"; }
     int load(const QString &path) override;
     void addChildPageTrans() const override;
-    QString description() const { return tr("Sign in with a physical security key"); }
+    QString description() const;
 
 private:
     void initSearchData() override;

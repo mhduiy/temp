@@ -8,6 +8,7 @@
 
 #include <DDialog>
 #include <DPasswordEdit>
+#include <DLabel>
 
 DWIDGET_USE_NAMESPACE
 
@@ -39,5 +40,7 @@ private:
     DDialog *m_setPinDialog;
     DDialog *m_changePinDialog;
     DDialog *m_failedDialog;
+    bool m_setPinState;
+    DLabel *m_failedTipLabel;
 };
 

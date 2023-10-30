@@ -9,8 +9,8 @@
   <action id="com.deepin.dde.passkey.dcc-plugin.register">
     <description>Authentication policy for dcc-plugin-passkey registration</description>
     <description xml:lang="zh_CN">控制中心插件安全密钥的注册认证策略</description>
-    <message>Authentication is required to enable login authentication using a passkey</message>
-    <message xml:lang="zh_CN">开启登录认证使用安全密钥需要认证</message>
+    <message>Using the security key for login requires authentication</message>
+    <message xml:lang="zh_CN">将安全密钥用于登录需要认证</message>
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>

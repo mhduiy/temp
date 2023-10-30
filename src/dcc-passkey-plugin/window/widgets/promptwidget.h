@@ -26,7 +26,7 @@ public:
 
     void setPixmap(const QString &path);
     void setPromptInfo(const QString &text, const QString &tip, bool needSpinner = false);
-    void setOperateBtn(const QString &text, bool needBtn = false, bool showLink = false);
+    void setOperateBtn(const QString &text, bool needBtn = false);
 
 Q_SIGNALS:
     void operateBtnClicked(const QString &text);

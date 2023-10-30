@@ -28,13 +28,12 @@ const QString IdErrorFlag("ID_ERR");
 const QString PublicKeyErrorFlag("KEY_ERR");
 
 const QMap<PromptType, PromptInfo> AllPromptInfo {
-    { PromptType::Insert, {InsertPixmapPath, false, QObject::tr("请插入安全密钥"), "", "", false, false} },
-    { PromptType::Identifying, {IdentifyPixmapPath, true, QObject::tr("正在识别安全密钥"), "", "", false, false} },
-    { PromptType::Touch, {TouchPixmapPath, false, QObject::tr("请验证安全密钥，触摸或轻扫设备"), "", "", false, false} },
-    { PromptType::Timeout, {UnknownPixmapPath, false, QObject::tr("触摸超时"), "", QObject::tr("重试"), true, false} },
-    { PromptType::Unregistered, {UnregisteredPixmapPath, false, QObject::tr("识别到未添加的安全密钥，添加后可用于登录认证"), "", QObject::tr("添加密钥"), true, false} },
-    { PromptType::Uncertified, {UnknownPixmapPath, false, QObject::tr("设备未认证"), "", QObject::tr("去认证"), true, false} },
-    { PromptType::Unknown, {UnknownPixmapPath, false, QObject::tr("未知错误"), "", QObject::tr("重试"), true, false} }
+    { PromptType::Insert, {InsertPixmapPath, false, QObject::tr("Please plug in the security key"), "", "", false} },
+    { PromptType::Identifying, {IdentifyPixmapPath, true, QObject::tr("Identifying the security key"), "", "", false} },
+    { PromptType::Touch, {TouchPixmapPath, false, QObject::tr("Touch or swipe the security key"), "", "", false} },
+    { PromptType::Timeout, {UnknownPixmapPath, false, QObject::tr("Validation timed out"), "", QObject::tr("Retry"), true} },
+    { PromptType::Unregistered, {UnregisteredPixmapPath, false, QObject::tr("The security key is recognized, you can register it for login authentication."), "", QObject::tr("Register"), true} },
+    { PromptType::Unknown, {UnknownPixmapPath, false, QObject::tr("Unknown error"), "", QObject::tr("Retry"), true} }
 };
 
 PasskeyWorker::PasskeyWorker(PasskeyModel* model, QObject* parent)

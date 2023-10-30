@@ -16,8 +16,8 @@
 
 using namespace dcc::widgets;
 
-const QString ChangePinText = QObject::tr("更 改");
-const QString SetPinText = QObject::tr("设 置");
+const QString ChangePinText = QObject::tr("Change");
+const QString SetPinText = QObject::tr("Setting");
 
 ManageWidget::ManageWidget(QWidget *parent)
     : ContentWidget(parent)
@@ -25,8 +25,8 @@ ManageWidget::ManageWidget(QWidget *parent)
     TranslucentFrame* contentWidget = new TranslucentFrame(this);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
 
-    //~ contents_path /passkey/Passkey Manage
-    DLabel *keyManageLabel = new DLabel(tr("Passkey Manage"), this);
+    //~ contents_path /passkey/Manage Security Key
+    DLabel *keyManageLabel = new DLabel(tr("Manage Security Key"), this);
     DFontSizeManager::instance()->bind(keyManageLabel, DFontSizeManager::T5, QFont::DemiBold);
     keyManageLabel->setContentsMargins(10, 0, 0, 0);
     contentLayout->addWidget(keyManageLabel);
@@ -35,7 +35,7 @@ ManageWidget::ManageWidget(QWidget *parent)
     SettingsGroup *keyManageGroup = new SettingsGroup(contentWidget);
 
     TitleAuthorizedItem *pin = new TitleAuthorizedItem(keyManageGroup);
-    pin->setTitle(tr("安全密钥PIN"));
+    pin->setTitle(tr("PIN"));
     pin->setValueForegroundRole(QColor(255, 0, 0));
     pin->setButtonText(ChangePinText);
     connect(pin, &TitleAuthorizedItem::clicked, this, &ManageWidget::pinBtnClicked);
@@ -52,9 +52,9 @@ ManageWidget::ManageWidget(QWidget *parent)
     keyManageGroup->appendItem(pin);
 
     TitleAuthorizedItem *resetKey = new TitleAuthorizedItem(keyManageGroup);
-    resetKey->setTitle(tr("重置密钥"));
+    resetKey->setTitle(tr("Reset Security Key"));
     resetKey->setValueForegroundRole(QColor(255, 0, 0));
-    resetKey->setButtonText(tr("重 置"));
+    resetKey->setButtonText(tr("Reset"));
     connect(resetKey, &TitleAuthorizedItem::clicked, this, &ManageWidget::resetBtnClicked);
     keyManageGroup->appendItem(resetKey);
 

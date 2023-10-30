@@ -125,14 +125,14 @@ int PasskeyModule::load(const QString &path)
 void PasskeyModule::addChildPageTrans() const
 {
     if (m_frameProxy != nullptr) {
-        m_frameProxy->addChildPageTrans("Passkey Manage", tr("Passkey Manage"));
+        m_frameProxy->addChildPageTrans("Manage Security Key", tr("Manage Security Key"));
     }
 }
 
 void PasskeyModule::initSearchData()
 {
     const QString &module = displayName();
-    const QString &passkeyManage = tr("Passkey Manage");
+    const QString &passkeyManage = tr("Manage Security Key");
     const QString &hideModuleFlag = "hideModule";
     static bool visible = false;
 
@@ -153,7 +153,7 @@ void PasskeyModule::initSearchData()
             visible = show;
             m_frameProxy->setModuleVisible(module, visible);
             m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, tr("Passkey Manage"), visible);
+            m_frameProxy->setDetailVisible(module, passkeyManage, tr("Manage Security Key"), visible);
             m_frameProxy->updateSearchData(module);
         }
     });
@@ -162,10 +162,13 @@ void PasskeyModule::initSearchData()
         visible = func_is_visible(hideModuleFlag);
         m_frameProxy->setModuleVisible(module, visible);
         m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, tr("Passkey Manage"), visible);
+        m_frameProxy->setDetailVisible(module, passkeyManage, tr("Manage Security Key"), visible);
     };
 
     func_process_all();
 }
 
-
+QString PasskeyModule::description() const
+{
+    return tr("Sign in with a physical security key");
+}

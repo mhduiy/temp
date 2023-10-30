@@ -95,7 +95,7 @@ void PasskeyWidget::refreshUI()
         const QPair<PromptType, PromptInfo> &info = m_model->promptPageInfo();
         m_promptPage->setPixmap(info.second.iconPath);
         m_promptPage->setPromptInfo(info.second.promptMsg, info.second.tipMsg, info.second.needSpinner);
-        m_promptPage->setOperateBtn(info.second.operateBtnText, info.second.needBtn, info.second.showLink);
+        m_promptPage->setOperateBtn(info.second.operateBtnText, info.second.needBtn);
     } else if (pageIndex == StackedPageIndex::Manage) {
         // 停止提示监测
         if (m_promptMonitorTimer->isActive()) {

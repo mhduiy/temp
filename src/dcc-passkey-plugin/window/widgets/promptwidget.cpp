@@ -18,7 +18,6 @@ PromptWidget::PromptWidget(QWidget *parent)
     , m_promptLabel(new DLabel(this))
     , m_tipLabel(new DLabel(this))
     , m_operateBtn(new DPushButton(this))
-    , m_jumpLinkBtn(new DCommandLinkButton(tr("跳过"), this))
 {
     m_picLabel->setAlignment(Qt::AlignHCenter);
     m_picLabel->setFixedHeight(180);
@@ -58,16 +57,6 @@ PromptWidget::PromptWidget(QWidget *parent)
     btnLayout->addWidget(m_operateBtn);
     btnLayout->setAlignment(Qt::AlignHCenter);
 
-    DFontSizeManager::instance()->bind(m_jumpLinkBtn, DFontSizeManager::T7, QFont::Medium);
-    QFontMetrics fontMetrics(m_jumpLinkBtn->font());
-    m_jumpLinkBtn->setFixedWidth(fontMetrics.boundingRect(m_jumpLinkBtn->text()).width() + 20);
-    connect(m_jumpLinkBtn, &DCommandLinkButton::clicked, this, &PromptWidget::jumpLinkBtnClicked);
-    QHBoxLayout *jumpLinkLayout = new QHBoxLayout();
-    jumpLinkLayout->setMargin(0);
-    jumpLinkLayout->setSpacing(0);
-    jumpLinkLayout->addWidget(m_jumpLinkBtn);
-    jumpLinkLayout->setAlignment(Qt::AlignHCenter);
-
     m_mainLayout->setMargin(0);
     m_mainLayout->setSpacing(0);
 
@@ -80,7 +69,6 @@ PromptWidget::PromptWidget(QWidget *parent)
     m_mainLayout->addSpacing(20);
     m_mainLayout->addLayout(btnLayout, 0);
     m_mainLayout->addSpacing(10);
-    m_mainLayout->addLayout(jumpLinkLayout, 0);
     m_mainLayout->addStretch(1);
 
     setLayout(m_mainLayout);
@@ -116,9 +104,8 @@ void PromptWidget::setPromptInfo(const QString &text, const QString &tip, bool n
     }
 }
 
-void PromptWidget::setOperateBtn(const QString &text, bool needBtn, bool showLink)
+void PromptWidget::setOperateBtn(const QString &text, bool needBtn)
 {
     m_operateBtn->setText(text);
     needBtn ? m_operateBtn->setVisible(true) : m_operateBtn->setVisible(false);
-    showLink ? m_jumpLinkBtn->setVisible(true) : m_jumpLinkBtn->setVisible(false);
 }

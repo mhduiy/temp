@@ -12,14 +12,18 @@
 #include <DLabel>
 #include <DHiDPIHelper>
 
-const QString ChangeBtnText = QObject::tr("更 改");
-const QString SetBtnText = QObject::tr("设 置");
+const QString ChangeBtnText = QObject::tr("Change");
+const QString SetBtnText = QObject::tr("Setting");
+const QString SetFailedText = QObject::tr("Setting Failure");
+const QString ChangeFailedText = QObject::tr("Change Failed");
 
 KeyPinDialogCtrl::KeyPinDialogCtrl(QObject *parent)
     : QObject(parent)
     , m_setPinDialog(nullptr)
     , m_changePinDialog(nullptr)
     , m_failedDialog(nullptr)
+    , m_setPinState(true)
+    , m_failedTipLabel(nullptr)
 {
 
 }
@@ -45,6 +49,7 @@ void KeyPinDialogCtrl::showSetPinDialog()
     if (!m_setPinDialog) {
         initSetPinDialogUI();
     }
+    m_setPinState = true;
     m_setPinDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_setPinDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
     m_setPinDialog->setAttribute(Qt::WA_ShowModal, true);
@@ -55,10 +60,10 @@ void KeyPinDialogCtrl::showSetPinDialog()
 void KeyPinDialogCtrl::initSetPinDialogUI()
 {
     m_setPinDialog = new DDialog();
-    m_setPinDialog->setTitle(tr("设置安全密钥PIN"));
+    m_setPinDialog->setTitle(tr("Set PIN"));
     m_setPinDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_setPinDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
-    m_setPinDialog->addButton(tr("Set"), false, DDialog::ButtonRecommend);
+    m_setPinDialog->addButton(tr("Setting"), false, DDialog::ButtonRecommend);
 
     QWidget *widget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(widget);
@@ -74,11 +79,11 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
     layout->addWidget(picLabel);
 
     DLabel *newPwdLabel = new DLabel(widget);
-    newPwdLabel->setText(tr("新的PIN："));
+    newPwdLabel->setText(tr("New PIN"));
     newPwdLabel->setContentsMargins(10, 0, 0, 0);
     DFontSizeManager::instance()->bind(newPwdLabel, DFontSizeManager::T6, QFont::Normal);
     DPasswordEdit *newPwdEdit = new DPasswordEdit(widget);
-    newPwdEdit->setPlaceholderText(tr("必填"));
+    newPwdEdit->setPlaceholderText(tr("Required"));
     setPasswordEditAttribute(newPwdEdit);
     layout->addWidget(newPwdLabel);
     layout->addSpacing(4);
@@ -86,11 +91,11 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
     layout->addSpacing(10);
 
     DLabel *repeatPwdLabel = new DLabel(widget);
-    repeatPwdLabel->setText(tr("重复PIN："));
+    repeatPwdLabel->setText(tr("Repeat PIN"));
     repeatPwdLabel->setContentsMargins(10, 0, 0, 0);
     DFontSizeManager::instance()->bind(repeatPwdLabel, DFontSizeManager::T6, QFont::Normal);
     DPasswordEdit *repeatPwdEdit = new DPasswordEdit(widget);
-    repeatPwdEdit->setPlaceholderText(tr("必填"));
+    repeatPwdEdit->setPlaceholderText(tr("Required"));
     setPasswordEditAttribute(repeatPwdEdit);
     layout->addWidget(repeatPwdLabel);
     layout->addSpacing(4);
@@ -149,6 +154,7 @@ void KeyPinDialogCtrl::showChangePinDialog()
     if (!m_changePinDialog) {
         initChangePinDialogUI();
     }
+    m_setPinState = false;
     m_changePinDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_changePinDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
     m_changePinDialog->setAttribute(Qt::WA_ShowModal, true);
@@ -159,7 +165,7 @@ void KeyPinDialogCtrl::showChangePinDialog()
 void KeyPinDialogCtrl::initChangePinDialogUI()
 {
     m_changePinDialog = new DDialog();
-    m_changePinDialog->setTitle(tr("更改安全密钥PIN"));
+    m_changePinDialog->setTitle(tr("Change PIN"));
     m_changePinDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_changePinDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     m_changePinDialog->addButton(tr("Change"), false, DDialog::ButtonRecommend);
@@ -178,11 +184,11 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
     layout->addWidget(picLabel);
 
     DLabel *oldPwdLabel = new DLabel(widget);
-    oldPwdLabel->setText(tr("旧的PIN："));
+    oldPwdLabel->setText(tr("Old PIN"));
     oldPwdLabel->setContentsMargins(10, 0, 0, 0);
     DFontSizeManager::instance()->bind(oldPwdLabel, DFontSizeManager::T6, QFont::Normal);
     DPasswordEdit *oldPwdEdit = new DPasswordEdit(widget);
-    oldPwdEdit->setPlaceholderText(tr("必填"));
+    oldPwdEdit->setPlaceholderText(tr("Required"));
     setPasswordEditAttribute(oldPwdEdit);
     layout->addWidget(oldPwdLabel);
     layout->addSpacing(4);
@@ -190,11 +196,11 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
     layout->addSpacing(10);
 
     DLabel *newPwdLabel = new DLabel(widget);
-    newPwdLabel->setText(tr("新的PIN："));
+    newPwdLabel->setText(tr("New PIN"));
     newPwdLabel->setContentsMargins(10, 0, 0, 0);
     DFontSizeManager::instance()->bind(newPwdLabel, DFontSizeManager::T6, QFont::Normal);
     DPasswordEdit *newPwdEdit = new DPasswordEdit(widget);
-    newPwdEdit->setPlaceholderText(tr("必填"));
+    newPwdEdit->setPlaceholderText(tr("Required"));
     setPasswordEditAttribute(newPwdEdit);
     layout->addWidget(newPwdLabel);
     layout->addSpacing(4);
@@ -202,11 +208,11 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
     layout->addSpacing(10);
 
     DLabel *repeatPwdLabel = new DLabel(widget);
-    repeatPwdLabel->setText(tr("重复PIN："));
+    repeatPwdLabel->setText(tr("Repeat PIN"));
     repeatPwdLabel->setContentsMargins(10, 0, 0, 0);
     DFontSizeManager::instance()->bind(repeatPwdLabel, DFontSizeManager::T6, QFont::Normal);
     DPasswordEdit *repeatPwdEdit = new DPasswordEdit(widget);
-    repeatPwdEdit->setPlaceholderText(tr("必填"));
+    repeatPwdEdit->setPlaceholderText(tr("Required"));
     setPasswordEditAttribute(repeatPwdEdit);
     layout->addWidget(repeatPwdLabel);
     layout->addSpacing(4);
@@ -269,6 +275,8 @@ void KeyPinDialogCtrl::showFailedDialog()
     if (!m_failedDialog) {
         initFailedDialogUI();
     }
+
+    m_failedTipLabel->setText(m_setPinState ? SetFailedText : ChangeFailedText);
     m_failedDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_failedDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
     m_failedDialog->setAttribute(Qt::WA_ShowModal, true);
@@ -298,11 +306,11 @@ void KeyPinDialogCtrl::initFailedDialogUI()
     layout->addWidget(picLabel);
     layout->addSpacing(40);
 
-    DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(tr("操作失败！"));
-    tipLabel->setAlignment(Qt::AlignHCenter);
-    DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
-    layout->addWidget(tipLabel);
+    m_failedTipLabel = new DLabel(widget);
+    m_failedTipLabel->setText(SetFailedText);
+    m_failedTipLabel->setAlignment(Qt::AlignHCenter);
+    DFontSizeManager::instance()->bind(m_failedTipLabel, DFontSizeManager::T6, QFont::Normal);
+    layout->addWidget(m_failedTipLabel);
 
     layout->setAlignment(Qt::AlignTop);
     layout->setContentsMargins(10, 20, 10, 0);
@@ -327,13 +335,13 @@ bool KeyPinDialogCtrl::judgePinSize(DPasswordEdit *edit)
     const QString &pwd = edit->text();
     if (pwd.isEmpty()) {
         edit->setAlert(true);
-        edit->showAlertMessage(tr("PIN 不能为空"), edit, 2000);
+        edit->showAlertMessage(tr("PIN cannot be empty"), edit, 2000);
     } else if (pwd.size() < 4) {
         edit->setAlert(true);
-        edit->showAlertMessage(tr("PIN 长度不能少于4个字符"), edit, 2000);
+        edit->showAlertMessage(tr("PIN length must not be less than 4 characters"), edit, 2000);
     } else if (pwd.size() > 63) {
         edit->setAlert(true);
-        edit->showAlertMessage(tr("PIN 长度不能超过63个字符"), edit, 2000);
+        edit->showAlertMessage(tr("PIN length cannot be more than 63 characters"), edit, 2000);
     } else {
         result = true;
     }
@@ -349,7 +357,7 @@ bool KeyPinDialogCtrl::judgePinConsistent(DPasswordEdit *targetEdit, DPasswordEd
         result = true;
     } else {
         sourceEdit->setAlert(true);
-        sourceEdit->showAlertMessage(tr("PIN 不一致"), sourceEdit, 2000);
+        sourceEdit->showAlertMessage(tr("PIN inconsistency"), sourceEdit, 2000);
     }
     return result;
 }

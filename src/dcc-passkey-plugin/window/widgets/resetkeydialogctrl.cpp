@@ -15,22 +15,17 @@
 #include <DFontSizeManager>
 #include <DHiDPIHelper>
 
-const QString DialogTitle = QObject::tr("重置密钥");
+const QString DialogTitle = QObject::tr("Reset Security Key");
 
-const QString ResetTip1 = QObject::tr("吊销当前系统所生成证书");
-const QString ResetTip2 = QObject::tr("抹除所有用户存储的证书");
-const QString ResetTip3 = QObject::tr("删除生物认证的凭据数据");
-const QString ResetTip4 = QObject::tr("重设安全密钥的部分特性和设置");
+const QString CancelBtnText = QObject::tr("Cancel");
+const QString ResetBtnText = QObject::tr("Reset");
+const QString OkBtnText = QObject::tr("Done");
 
-const QString CancelBtnText = QObject::tr("取 消");
-const QString ResetBtnText = QObject::tr("重 置");
-const QString OkBtnText = QObject::tr("完 成");
+const QString FirstTouchTip = QObject::tr("Please touch or swipe the security key twice within 10 seconds");
+const QString SecondTouchTip = QObject::tr("Please touch or swipe the security key again");
 
-const QString FirstTouchTip = QObject::tr("请在10秒内，触摸或轻扫设备两次");
-const QString SecondTouchTip = QObject::tr("请再次触摸或轻扫设备");
-
-const QString ResetSuccessTip = QObject::tr("重置密钥成功!");
-const QString ResetFailedTip = QObject::tr("重置密钥失败");
+const QString ResetSuccessTip = QObject::tr("Reset complete");
+const QString ResetFailedTip = QObject::tr("Unable to complete the security key reset");
 
 const QIcon ResetSuccessIcon = DStyle().standardIcon(DStyle::SP_DialogYesButton);
 const QIcon ResetFailedIcon = QIcon::fromTheme("dialog-error");
@@ -104,6 +99,7 @@ void ResetKeyDialogCtrl::showDescriptionDialog()
 
     m_descriptionDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_descriptionDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
+    m_descriptionDialog->setWindowFlag(Qt::WindowMaximizeButtonHint, false);
     m_descriptionDialog->setAttribute(Qt::WA_ShowModal, true);
     m_descriptionDialog->show();
     m_descriptionDialog->activateWindow();
@@ -136,32 +132,21 @@ void ResetKeyDialogCtrl::initDescriptionDialogUI()
     QWidget *widget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
-    DLabel *picLabel = new DLabel(widget);
-    picLabel->setText(tr("重置安全密钥包含但不限以下处理，您确定要重置密钥嘛？"));
-    picLabel->setAlignment(Qt::AlignCenter);
-    picLabel->setWordWrap(true);
-    DFontSizeManager::instance()->bind(picLabel, DFontSizeManager::T6, QFont::Normal);
-    layout->addWidget(picLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(50);
-
-    QString info;
-    info.append("•" + ResetTip1 + "\n");
-    info.append("•" + ResetTip2 + "\n");
-    info.append("•" + ResetTip3 + "\n");
-    info.append("•" + ResetTip4 + "\n");
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(info);
-    tipLabel->setAlignment(Qt::AlignLeft);
+    QString tip = tr("Resetting the security key includes, but is not limited to, the following processes: Revoking the current system-generated certificate, erasing all stored certificates, deleting biometric authentication credentials record data, and resetting some of the features and settings of the security key.");
+    tipLabel->setText(tip);
+    tipLabel->setAlignment(Qt::AlignCenter);
+    tipLabel->setWordWrap(true);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Medium);
-    layout->addWidget(tipLabel, 1, Qt::AlignHCenter);
-
-    layout->setAlignment(Qt::AlignTop);
-    layout->setContentsMargins(40, 20, 40, 0);
-    widget->setMinimumHeight(400);
+ 
+    layout->addStretch();
+    layout->addWidget(tipLabel, 0, Qt::AlignCenter);
+    layout->addStretch();
+    layout->setContentsMargins(20, 0, 20, 0);
+    widget->setMinimumHeight(150);
 
     m_descriptionDialog->addContent(widget);
-
-    m_descriptionDialog->setFixedSize(410, 500);
+    m_descriptionDialog->setFixedWidth(410);
 
     connect(m_resetTimer, &QTimer::timeout, this, [this] {
         --m_resetTimerCount;
@@ -216,7 +201,7 @@ void ResetKeyDialogCtrl::initInsertDialogUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(tr("请重新插入安全密钥"));
+    tipLabel->setText(tr("Please plug in the security key again"));
     tipLabel->setAlignment(Qt::AlignHCenter);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(tipLabel);
@@ -270,7 +255,7 @@ void ResetKeyDialogCtrl::initIdentifyingDeviceUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(tr("正在识别安全密钥"));
+    tipLabel->setText(tr("Identifying the security key"));
     tipLabel->setAlignment(Qt::AlignHCenter);
     tipLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
@@ -342,6 +327,7 @@ void ResetKeyDialogCtrl::initFirstTouchDialogUI()
     DLabel *tipLabel = new DLabel(widget);
     tipLabel->setText(FirstTouchTip);
     tipLabel->setAlignment(Qt::AlignHCenter);
+    tipLabel->setWordWrap(true);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(tipLabel);
 
@@ -447,7 +433,7 @@ void ResetKeyDialogCtrl::initFailedDialogUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(tr("发生错误，重置失败！"));
+    tipLabel->setText(ResetFailedTip);
     tipLabel->setAlignment(Qt::AlignHCenter);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(tipLabel);

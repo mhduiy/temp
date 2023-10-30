@@ -21,7 +21,6 @@ enum PromptType {
     Touch,          // 触摸验证设备提示
     Timeout,        // 验证超时提示
     Unregistered,   // 未注册提示
-    Uncertified,    // 未认证提示
     Unknown,        // 未知错误提示
     Count
 };
@@ -33,7 +32,6 @@ struct PromptInfo {
     QString tipMsg;
     QString operateBtnText;
     bool needBtn;
-    bool showLink;
 };
 
 struct ManageInfo {
