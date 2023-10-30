@@ -1,0 +1,10 @@
+[main]
+host = https://www.transifex.com
+minimum_perc = 80
+mode = developer
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:deepin-passkey-service]
+file_filter = file/translate/service/<lang>.po
+source_file = file/translate/service/deepin-passkey-service.pot
+source_lang = en
+type = PO

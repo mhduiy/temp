@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-27 10:47+0800\n"
+"POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,109 +18,113 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: src/service/err.c:25
-msgid "成功"
+msgid "Success"
 msgstr ""
 
 #: src/service/err.c:27
-msgid "非法命令"
+msgid "Invalid command"
 msgstr ""
 
 #: src/service/err.c:29
-msgid "非法参数"
+msgid "Invalid parameter"
 msgstr ""
 
 #: src/service/err.c:31
-msgid "非法长度"
+msgid "Invalid length"
 msgstr ""
 
 #: src/service/err.c:33
-msgid "超时"
+msgid "Timeout"
 msgstr ""
 
 #: src/service/err.c:35
-msgid "设备通道忙"
+msgid "Channel busy"
 msgstr ""
 
 #: src/service/err.c:37
-msgid "请求锁"
+msgid "Lock required"
 msgstr ""
 
 #: src/service/err.c:39
-msgid "非法设备通道"
+msgid "Invalid channel"
 msgstr ""
 
 #: src/service/err.c:41
-msgid "不支持的拓展"
+msgid "Unsupported"
 msgstr ""
 
 #: src/service/err.c:43
-msgid "证书错误"
+msgid "Invalid credential"
 msgstr ""
 
 #: src/service/err.c:45
-msgid "请验证安全密钥，触摸或轻扫设备"
+msgid "Touch or swipe the security key"
 msgstr ""
 
 #: src/service/err.c:47
-msgid "不支持的算法"
+msgid "Unsupported algorithm"
 msgstr ""
 
 #: src/service/err.c:49
-msgid "操作拒绝"
+msgid "Operation denied"
 msgstr ""
 
 #: src/service/err.c:51
-msgid "不支持的操作"
+msgid "Unsupported option"
 msgstr ""
 
 #: src/service/err.c:53
-msgid "非法操作"
+msgid "Invalid option"
 msgstr ""
 
 #: src/service/err.c:55
-msgid "证书不存在"
+msgid "No credentials"
 msgstr ""
 
 #: src/service/err.c:57
-msgid "验证安全密钥超时"
+msgid "Validation timed out"
 msgstr ""
 
 #: src/service/err.c:59
-msgid "PIN错误"
+msgid "Pin invalid"
 msgstr ""
 
 #: src/service/err.c:61
-msgid "PIN校验失败"
+msgid "Pin auth invalid"
 msgstr ""
 
 #: src/service/err.c:63
-msgid "PIN未设置"
+msgid "Pin not set"
 msgstr ""
 
 #: src/service/err.c:65
-msgid "请求PIN"
+msgid "Pin required"
 msgstr ""
 
-#: src/service/err.c:67 src/service/err.c:69
-msgid "设备传输错误"
+#: src/service/err.c:67
+msgid "tx error"
+msgstr ""
+
+#: src/service/err.c:69
+msgid "rx error"
 msgstr ""
 
 #: src/service/err.c:71
-msgid "请求在场证明"
+msgid "User persence required"
 msgstr ""
 
 #: src/service/err.c:73
-msgid "设备被占用"
+msgid "Device claimed"
 msgstr ""
 
 #: src/service/err.c:75
-msgid "设备不存在"
+msgid "Device not fuound"
 msgstr ""
 
 #: src/service/err.c:77
-msgid "设备已连接"
+msgid "Device open"
 msgstr ""
 
 #: src/service/err.c:79
-msgid "未知错误"
+msgid "Unknow error"
 msgstr ""
