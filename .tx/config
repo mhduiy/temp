@@ -10,7 +10,7 @@ source_lang = en
 type = PO
 
 [o:linuxdeepin:p:deepin-desktop-environment:r:deepin-passkey-dcc-passkey-plugin]
-file_filter=translations/dcc-passkey-plugin_<lang>.ts
-source_file=translations/dcc-passkey-plugin.ts
+file_filter=file/translate/dcc-passkey-plugin/dcc-passkey-plugin_<lang>.ts
+source_file=file/translate/dcc-passkey-plugin/dcc-passkey-plugin.ts
 source_lang=en
 type=QT

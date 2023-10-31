@@ -52,7 +52,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     PkgConfig::OPENSSL
 )
 
-file(GLOB TS_FILES "trans/translations/*.ts")
+file(GLOB TS_FILES "${PROJECT_SOURCE_DIR}/file/translate/dcc-passkey-plugin/*.ts")
 qt5_add_translation(QM_FILES ${TS_FILES})
 add_custom_target(translations ALL DEPENDS ${QM_FILES})
 install(FILES ${QM_FILES} DESTINATION share/dcc-passkey-plugin/translations)
