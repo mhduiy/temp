@@ -6,6 +6,7 @@
 
 #include "decode/aes.h"
 #include "decode/b64.h"
+#include "decode/decode.h"
 #include "decode/evp.h"
 #include "decode/rsa.h"
 #include "decode/sm2.h"
@@ -865,5 +866,67 @@ TEST_F(TestServiceDecode, GenSymKey16)
 
     for (int i = 0; i < 10; i++) {
         testFunc();
+    }
+}
+
+TEST_F(TestServiceDecode, B64DecodeTest)
+{
+    using TestData = std::vector<std::tuple<std::string, std::string, std::string, std::string, bool>>;
+    TestData tests = {
+        { "test_b64_decode", "1907933719079337", "YuxDvuokA4Ix2cc7yrIVuA==", "1111", true },
+        { "test_b64_decode", "1907933719079337", "YuxDvuokA4Ix2cc7yrIVuA==", "2222", false },
+    };
+
+    auto testFunc = [](const auto &data) {
+        std::string key = std::get<1>(data);
+        std::string b64 = std::get<2>(data);
+        std::string pin = std::get<3>(data);
+        bool success = std::get<4>(data);
+        int ret = 0;
+
+        unsigned char *newPinB64Dec = nullptr;
+        size_t newPinB64DecLen = 0;
+        unsigned char *newPinDec = nullptr;
+        int newPinDecLen = 0;
+
+        do {
+            ret = b64_decode(b64.c_str(), (void **)&newPinB64Dec, &newPinB64DecLen);
+            EXPECT_EQ(ret, 0);
+            if (HasFailure()) {
+                break;
+            }
+
+            EXPECT_NE(newPinB64Dec, nullptr);
+            if (HasFailure()) {
+                break;
+            }
+
+            ret = dp_sym_key_decrypt(DP_SUPPORT_SM4_ECB, (const unsigned char *)key.c_str(), (unsigned char *)newPinB64Dec, newPinB64DecLen, &newPinDec, &newPinDecLen);
+            EXPECT_EQ(ret, 0);
+            if (HasFailure()) {
+                break;
+            }
+
+            EXPECT_NE(newPinDec, nullptr);
+            if (HasFailure()) {
+                break;
+            }
+            if (success) {
+                EXPECT_EQ(pin, std::string((char *)newPinDec));
+            } else {
+                EXPECT_NE(pin, std::string((char *)newPinDec));
+            }
+
+        } while (0);
+        if (newPinB64Dec != nullptr) {
+            free(newPinB64Dec);
+        }
+        if (newPinDec != nullptr) {
+            free(newPinDec);
+        }
+    };
+
+    for (const auto &test : tests) {
+        testFunc(test);
     }
 }

@@ -158,9 +158,9 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
     int symKeyType = 0;
     unsigned char *symKey = NULL;
     unsigned char *newPinB64Dec = NULL;
-    int newPinB64DecLen = 0;
+    size_t newPinB64DecLen = 0;
     unsigned char *oldPinB64Dec = NULL;
-    int oldPinB64DecLen = 0;
+    size_t oldPinB64DecLen = 0;
     unsigned char *newPinDec = NULL;
     int newPinDecLen = 0;
     unsigned char *oldPinDec = NULL;
@@ -183,7 +183,7 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
     }
 
     if (pin != NULL) {
-        if (b64_decode(pin, (void **)&newPinB64Dec, (size_t *)&newPinB64DecLen) < 0) {
+        if (b64_decode(pin, (void **)&newPinB64Dec, &newPinB64DecLen) < 0) {
             LOG(LOG_ERR, "fail to decode new pin by b64.");
             goto end;
         }
@@ -201,7 +201,7 @@ int dpk_manager_set_pin(MethodContext *mc, const char *pin, const char *oldPin)
         }
     }
     if (oldPin != NULL) {
-        if (b64_decode(oldPin, (void **)&oldPinB64Dec, (size_t *)&oldPinB64DecLen) < 0) {
+        if (b64_decode(oldPin, (void **)&oldPinB64Dec, &oldPinB64DecLen) < 0) {
             LOG(LOG_ERR, "fail to decode new pin by b64.");
             goto end;
         }
