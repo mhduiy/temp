@@ -24,6 +24,8 @@ public:
     void showChangePinDialog();
     void showFailedDialog();
 
+    void showChangePinDialogAlertMessage(const QString &msg);
+
 Q_SIGNALS:
     void requestSetPin(const QString &oldPin, const QString &newPin);
 
@@ -42,5 +44,6 @@ private:
     DDialog *m_failedDialog;
     bool m_setPinState;
     DLabel *m_failedTipLabel;
+    DPasswordEdit *m_oldPwdEdit;
 };
 

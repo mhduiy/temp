@@ -60,6 +60,22 @@ void PasskeyWidget::setModel(const PasskeyModel *model, const PasskeyWorker *wor
     connect(m_worker, &PasskeyWorker::resetPasskeyMonitorCompleted, this, [this] {
         m_resetPasskeyMonitorTimer->stop();
     });
+    connect(m_worker, &PasskeyWorker::setPinCompleted, this, [this] (bool success, bool pinErr, const QString &errMsg) {
+        if (!m_setPinDialogCtrl) {
+            return;
+        }
+
+        if (success) {
+            m_setPinDialogCtrl->hideAllDialog();
+        } else {
+            if (pinErr) {
+                m_setPinDialogCtrl->showChangePinDialogAlertMessage(errMsg);
+            } else {
+                m_setPinDialogCtrl->hideAllDialog();
+                showKeyPinDialog(SetPinDialogStyle::SetFailedStyle);
+            }
+        }
+    });
     connect(this, &PasskeyWidget::requestSetKeyPin, m_worker, &PasskeyWorker::handleSetPasskeyPin);
     connect(this, &PasskeyWidget::destroyed, m_worker, &PasskeyWorker::deactivate);
 

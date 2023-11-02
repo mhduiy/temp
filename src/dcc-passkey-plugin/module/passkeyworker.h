@@ -31,6 +31,7 @@ Q_SIGNALS:
     void requestActive();
     void requestDeactivate();
     void resetPasskeyMonitorCompleted();
+    void setPinCompleted(bool success, bool pinErr, const QString &errMsg);
 
 public Q_SLOTS:
     void init();

@@ -611,10 +611,38 @@ void PasskeyWorker::setPin(const QString &oldPin, const QString &newPin)
     QDBusPendingReply<> reply = m_passkeyInter->SetPin(oldPin, newPin);
     reply.waitForFinished();
     if (reply.isError()) {
-        m_model->setSetPinDialogStyle(SetPinDialogStyle::SetFailedStyle);
-        Q_EMIT m_model->refreshSetPinDialogStyle();
-        qCWarning(DCC_PASSKEY) << "Call method 'SetPin' failed, error message: " << reply.error().message();
+        qCWarning(DCC_PASSKEY) << "Call method 'SetPin' failed, error message: " << reply.error().name() << reply.error().message();
+
+        // 后端服务返回错误
+        if (reply.error().name().contains("com.deepin.Passkey")) {
+            QJsonObject obj = QJsonDocument::fromJson(reply.error().message().toUtf8()).object();
+            if (obj.isEmpty()) {
+                Q_EMIT setPinCompleted(false, false, QString());
+                return;
+            }
+            const int code = obj["code"].toInt();
+            switch (code) {
+            // PIN错误
+            case FIDO_ERR_PIN_INVALID:
+                Q_EMIT setPinCompleted(false, true, tr("PIN error"));
+                break;
+            // 3次PIN错误后，PIN认证锁定，需要重新拔插（上电）才可以再次使用PIN
+            case FIDO_ERR_PIN_AUTH_BLOCKED:
+                Q_EMIT setPinCompleted(false, true, tr("PIN locked, please replug"));
+                break;
+            // 错误超过8次之后就会彻底锁定，需要重置才可以使用PIN
+            case FIDO_ERR_PIN_BLOCKED:
+                Q_EMIT setPinCompleted(false, true, tr("PIN Blocked"));
+                break;
+            default:
+                Q_EMIT setPinCompleted(false, false, QString());
+                break;
+            }
+        } else {
+            Q_EMIT setPinCompleted(false, false, QString());
+        }
     } else {
+        Q_EMIT setPinCompleted(true, false, QString());
         updateManageInfo();
         qCDebug(DCC_PASSKEY) << "Passkey set pin completed .";
     }
