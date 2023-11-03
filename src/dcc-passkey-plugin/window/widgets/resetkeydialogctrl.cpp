@@ -15,18 +15,6 @@
 #include <DFontSizeManager>
 #include <DHiDPIHelper>
 
-const QString DialogTitle = QObject::tr("Reset Security Key");
-
-const QString CancelBtnText = QObject::tr("Cancel");
-const QString ResetBtnText = QObject::tr("Reset");
-const QString OkBtnText = QObject::tr("Done");
-
-const QString FirstTouchTip = QObject::tr("Please touch or swipe the security key twice within 10 seconds");
-const QString SecondTouchTip = QObject::tr("Please touch or swipe the security key again");
-
-const QString ResetSuccessTip = QObject::tr("Reset complete");
-const QString ResetFailedTip = QObject::tr("Unable to complete the security key reset");
-
 const QIcon ResetSuccessIcon = DStyle().standardIcon(DStyle::SP_DialogYesButton);
 const QIcon ResetFailedIcon = QIcon::fromTheme("dialog-error");
 
@@ -94,7 +82,7 @@ void ResetKeyDialogCtrl::showDescriptionDialog()
     }
     initResetTimer();
     hideAllDialog();
-    m_descriptionDialog->getButton(1)->setText(ResetBtnText + "(" + QString::number(m_resetTimerCount) + "s)");
+    m_descriptionDialog->getButton(1)->setText(tr("Reset") + "(" + QString::number(m_resetTimerCount) + "s)");
     m_descriptionDialog->getButton(1)->setEnabled(false);
 
     m_descriptionDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -109,10 +97,10 @@ void ResetKeyDialogCtrl::showDescriptionDialog()
 void ResetKeyDialogCtrl::initDescriptionDialogUI()
 {
     m_descriptionDialog = new DDialog();
-    m_descriptionDialog->setTitle(DialogTitle);
+    m_descriptionDialog->setTitle(tr("Reset Security Key"));
     m_descriptionDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_descriptionDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
-    m_descriptionDialog->addButton(ResetBtnText + QString("(5s)"), false, DDialog::ButtonWarning);
+    m_descriptionDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
+    m_descriptionDialog->addButton(tr("Reset") + QString("(5s)"), false, DDialog::ButtonWarning);
     m_descriptionDialog->getButton(1)->setEnabled(false);
     connect(m_descriptionDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         if (index == 1) {
@@ -152,10 +140,10 @@ void ResetKeyDialogCtrl::initDescriptionDialogUI()
         --m_resetTimerCount;
         if (m_resetTimerCount == 0) {
             initResetTimer();
-            m_descriptionDialog->getButton(1)->setText(ResetBtnText);
+            m_descriptionDialog->getButton(1)->setText(tr("Reset"));
             m_descriptionDialog->getButton(1)->setEnabled(true);
         } else {
-            m_descriptionDialog->getButton(1)->setText(ResetBtnText + "(" + QString::number(m_resetTimerCount) + "s)");
+            m_descriptionDialog->getButton(1)->setText(tr("Reset") + "(" + QString::number(m_resetTimerCount) + "s)");
         }
     });
 }
@@ -178,9 +166,9 @@ void ResetKeyDialogCtrl::showInsertDeviceDialog()
 void ResetKeyDialogCtrl::initInsertDialogUI()
 {
     m_insertDialog = new DDialog();
-    m_insertDialog->setTitle(DialogTitle);
+    m_insertDialog->setTitle(tr("Reset Security Key"));
     m_insertDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_insertDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
+    m_insertDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_insertDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         Q_EMIT requestStopReset(false);
         m_insertDialog->hide();
@@ -232,9 +220,9 @@ void ResetKeyDialogCtrl::showIdentifyingDeviceDialog()
 void ResetKeyDialogCtrl::initIdentifyingDeviceUI()
 {
     m_identifyingDialog = new DDialog();
-    m_identifyingDialog->setTitle(DialogTitle);
+    m_identifyingDialog->setTitle(tr("Reset Security Key"));
     m_identifyingDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_identifyingDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
+    m_identifyingDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_identifyingDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         Q_EMIT requestStopReset(false);
         m_identifyingDialog->hide();
@@ -302,9 +290,9 @@ void ResetKeyDialogCtrl::showFirstTouchDeviceDialog()
 void ResetKeyDialogCtrl::initFirstTouchDialogUI()
 {
     m_firstTouchDialog = new DDialog();
-    m_firstTouchDialog->setTitle(DialogTitle);
+    m_firstTouchDialog->setTitle(tr("Reset Security Key"));
     m_firstTouchDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_firstTouchDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
+    m_firstTouchDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_firstTouchDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         Q_EMIT requestStopReset(false);
         m_firstTouchDialog->hide();
@@ -325,7 +313,7 @@ void ResetKeyDialogCtrl::initFirstTouchDialogUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(FirstTouchTip);
+    tipLabel->setText(tr("Please touch or swipe the security key twice within 10 seconds"));
     tipLabel->setAlignment(Qt::AlignHCenter);
     tipLabel->setWordWrap(true);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
@@ -357,9 +345,9 @@ void ResetKeyDialogCtrl::showSecondTouchDeviceDialog()
 void ResetKeyDialogCtrl::initSecondTouchDialogUI()
 {
     m_secondTouchDialog = new DDialog();
-    m_secondTouchDialog->setTitle(DialogTitle);
+    m_secondTouchDialog->setTitle(tr("Reset Security Key"));
     m_secondTouchDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_secondTouchDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
+    m_secondTouchDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_secondTouchDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         Q_EMIT requestStopReset(false);
         m_secondTouchDialog->hide();
@@ -380,7 +368,7 @@ void ResetKeyDialogCtrl::initSecondTouchDialogUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(SecondTouchTip);
+    tipLabel->setText(tr("Please touch or swipe the security key again"));
     tipLabel->setAlignment(Qt::AlignHCenter);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(tipLabel);
@@ -410,9 +398,9 @@ void ResetKeyDialogCtrl::showFailedDialog()
 void ResetKeyDialogCtrl::initFailedDialogUI()
 {
     m_failedDialog = new DDialog();
-    m_failedDialog->setTitle(DialogTitle);
+    m_failedDialog->setTitle(tr("Reset Security Key"));
     m_failedDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_failedDialog->addButton(CancelBtnText, false, DDialog::ButtonNormal);
+    m_failedDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_failedDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         Q_EMIT requestStopReset(false);
         m_failedDialog->hide();
@@ -433,7 +421,7 @@ void ResetKeyDialogCtrl::initFailedDialogUI()
     layout->addSpacing(40);
 
     DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(ResetFailedTip);
+    tipLabel->setText(tr("Unable to complete the security key reset"));
     tipLabel->setAlignment(Qt::AlignHCenter);
     DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(tipLabel);
@@ -457,10 +445,10 @@ void ResetKeyDialogCtrl::showResultDialog(bool success)
 
     if (success) {
         m_resultPicLabel->setPixmap(ResetSuccessIcon.pixmap(128, 128));
-        m_resultTipLabel->setText(ResetSuccessTip);
+        m_resultTipLabel->setText(tr("Reset complete"));
     } else {
         m_resultPicLabel->setPixmap(ResetFailedIcon.pixmap(128, 128));
-        m_resultTipLabel->setText(ResetFailedTip);
+        m_resultTipLabel->setText(tr("Unable to complete the security key reset"));
     }
     m_resultDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_resultDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
@@ -472,12 +460,12 @@ void ResetKeyDialogCtrl::showResultDialog(bool success)
 void ResetKeyDialogCtrl::initResultDialogUI()
 {
     m_resultDialog = new DDialog();
-    m_resultDialog->setTitle(DialogTitle);
+    m_resultDialog->setTitle(tr("Reset Security Key"));
     m_resultDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_resultDialog->addButton(OkBtnText, false, DDialog::ButtonNormal);
+    m_resultDialog->addButton(tr("Done"), false, DDialog::ButtonNormal);
     connect(m_resultDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
         m_resultDialog->hide();
-        if (m_resultTipLabel && m_resultTipLabel->text().contains(ResetSuccessTip)) {
+        if (m_resultTipLabel && m_resultTipLabel->text().contains(tr("Reset complete"))) {
             Q_EMIT requestStopReset(true);
         } else {
             Q_EMIT requestStopReset(false);
@@ -485,7 +473,7 @@ void ResetKeyDialogCtrl::initResultDialogUI()
     });
     connect(m_resultDialog, &DDialog::closed, this, [this] {
         m_resultDialog->hide();
-        if (m_resultTipLabel && m_resultTipLabel->text().contains(ResetSuccessTip)) {
+        if (m_resultTipLabel && m_resultTipLabel->text().contains(tr("Reset complete"))) {
             Q_EMIT requestStopReset(true);
         } else {
             Q_EMIT requestStopReset(false);

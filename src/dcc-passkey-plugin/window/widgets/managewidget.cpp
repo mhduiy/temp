@@ -16,9 +16,6 @@
 
 using namespace dcc::widgets;
 
-const QString ChangePinText = QObject::tr("Change");
-const QString SetPinText = QObject::tr("Setting");
-
 ManageWidget::ManageWidget(QWidget *parent)
     : ContentWidget(parent)
 {
@@ -37,16 +34,16 @@ ManageWidget::ManageWidget(QWidget *parent)
     TitleAuthorizedItem *pin = new TitleAuthorizedItem(keyManageGroup);
     pin->setTitle(tr("PIN"));
     pin->setValueForegroundRole(QColor(255, 0, 0));
-    pin->setButtonText(ChangePinText);
+    pin->setButtonText(tr("Change"));
     connect(pin, &TitleAuthorizedItem::clicked, this, &ManageWidget::pinBtnClicked);
     connect(this, &ManageWidget::pinStatusChanged, pin, [pin] (bool support, bool exist) {
         const auto btn = qobject_cast<QPushButton *>(pin->getActivatorBtn());
         if (support) {
             btn->setEnabled(true);
-            exist ? btn->setText(ChangePinText) : btn->setText(SetPinText);
+            exist ? btn->setText(tr("Change")) : btn->setText(tr("Setting"));
         } else {
             btn->setEnabled(false);
-            btn->setText(SetPinText);
+            btn->setText(tr("Setting"));
         }
     });
     keyManageGroup->appendItem(pin);

@@ -12,11 +12,6 @@
 #include <DLabel>
 #include <DHiDPIHelper>
 
-const QString ChangeBtnText = QObject::tr("Change");
-const QString SetBtnText = QObject::tr("Setting");
-const QString SetFailedText = QObject::tr("Setting Failure");
-const QString ChangeFailedText = QObject::tr("Change Failed");
-
 KeyPinDialogCtrl::KeyPinDialogCtrl(QObject *parent)
     : QObject(parent)
     , m_setPinDialog(nullptr)
@@ -26,7 +21,6 @@ KeyPinDialogCtrl::KeyPinDialogCtrl(QObject *parent)
     , m_failedTipLabel(nullptr)
     , m_oldPwdEdit(nullptr)
 {
-
 }
 
 KeyPinDialogCtrl::~KeyPinDialogCtrl()
@@ -273,7 +267,7 @@ void KeyPinDialogCtrl::showFailedDialog()
         initFailedDialogUI();
     }
 
-    m_failedTipLabel->setText(m_setPinState ? SetFailedText : ChangeFailedText);
+    m_failedTipLabel->setText(m_setPinState ? tr("Setting Failure") : tr("Change Failed"));
     m_failedDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     m_failedDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
     m_failedDialog->setAttribute(Qt::WA_ShowModal, true);
@@ -304,7 +298,7 @@ void KeyPinDialogCtrl::initFailedDialogUI()
     layout->addSpacing(40);
 
     m_failedTipLabel = new DLabel(widget);
-    m_failedTipLabel->setText(SetFailedText);
+    m_failedTipLabel->setText(tr("Setting Failure"));
     m_failedTipLabel->setAlignment(Qt::AlignHCenter);
     DFontSizeManager::instance()->bind(m_failedTipLabel, DFontSizeManager::T6, QFont::Normal);
     layout->addWidget(m_failedTipLabel);

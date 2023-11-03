@@ -64,6 +64,8 @@ private:
 private:
     PasskeyModel *m_model;
 
+    QMap<PromptType, PromptInfo> m_allPromptInfo;
+
     PasskeyInter *m_passkeyInter;
     Login1SessionInter *m_login1Inter;
 

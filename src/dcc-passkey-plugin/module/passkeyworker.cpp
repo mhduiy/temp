@@ -27,15 +27,6 @@ const QString DisplayManagerService("org.freedesktop.DisplayManager");
 const QString IdErrorFlag("ID_ERR");
 const QString PublicKeyErrorFlag("KEY_ERR");
 
-const QMap<PromptType, PromptInfo> AllPromptInfo {
-    { PromptType::Insert, {InsertPixmapPath, false, QObject::tr("Please plug in the security key"), "", "", false} },
-    { PromptType::Identifying, {IdentifyPixmapPath, true, QObject::tr("Identifying the security key"), "", "", false} },
-    { PromptType::Touch, {TouchPixmapPath, false, QObject::tr("Touch or swipe the security key"), "", "", false} },
-    { PromptType::Timeout, {UnknownPixmapPath, false, QObject::tr("Validation timed out"), "", QObject::tr("Retry"), true} },
-    { PromptType::Unregistered, {UnregisteredPixmapPath, false, QObject::tr("The security key is recognized, you can register it for login authentication."), "", QObject::tr("Register"), true} },
-    { PromptType::Unknown, {UnknownPixmapPath, false, QObject::tr("Unknown error"), "", QObject::tr("Retry"), true} }
-};
-
 PasskeyWorker::PasskeyWorker(PasskeyModel* model, QObject* parent)
     : QObject(parent)
     , m_model(model)
@@ -47,6 +38,14 @@ PasskeyWorker::PasskeyWorker(PasskeyModel* model, QObject* parent)
     , m_currentId(IdErrorFlag)
     , m_needCloseDevice(false)
 {
+    m_allPromptInfo = {
+        {PromptType::Insert, {InsertPixmapPath, false, tr("Please plug in the security key"), "", "", false}},
+        {PromptType::Identifying, {IdentifyPixmapPath, true, tr("Identifying the security key"), "", "", false}},
+        {PromptType::Touch, {TouchPixmapPath, false, tr("Touch or swipe the security key"), "", "", false}},
+        {PromptType::Timeout, {UnknownPixmapPath, false, tr("Validation timed out"), "", tr("Retry"), true}},
+        {PromptType::Unregistered, {UnregisteredPixmapPath, false, tr("The security key is recognized, you can register it for login authentication."), "", tr("Register"), true}},
+        {PromptType::Unknown, {UnknownPixmapPath, false, tr("Unknown error"), "", tr("Retry"), true}}
+    };
 }
 
 PasskeyWorker::~PasskeyWorker()
@@ -423,7 +422,7 @@ void PasskeyWorker::updatePromptInfo(const PromptType &type)
 {
     m_currentType = type;
     m_model->setCurrentPage(StackedPageIndex::Prompt);
-    m_model->setPromptPageInfo(type, AllPromptInfo.value(type));
+    m_model->setPromptPageInfo(type, m_allPromptInfo.value(type));
 }
 
 void PasskeyWorker::updateManageInfo()
