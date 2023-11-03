@@ -3,9 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
-# Translators:
-# deepiner, 2023
-# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -13,13 +10,12 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
-"Last-Translator: deepiner, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/linuxdeepin/teams/3617/zh_TW/)\n"
+"Language-Team: Kazakh (https://app.transifex.com/linuxdeepin/teams/3617/kk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_TW\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: kk\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: src/service/err.c:25
 msgid "Success"
@@ -63,7 +59,7 @@ msgstr ""
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr "請驗證安全金鑰，觸摸或輕掃裝置"
+msgstr ""
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
@@ -87,7 +83,7 @@ msgstr ""
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr "驗證安全金鑰超時"
+msgstr ""
 
 #: src/service/err.c:59
 msgid "Pin invalid"

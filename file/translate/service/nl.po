@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# deepiner, 2023
+# Heimen Stoffels <vistausss@fastmail.com>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -13,122 +13,122 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
-"Last-Translator: deepiner, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/linuxdeepin/teams/3617/zh_TW/)\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>, 2023\n"
+"Language-Team: Dutch (https://app.transifex.com/linuxdeepin/teams/3617/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_TW\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: nl\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr ""
+msgstr "Voltooid"
 
 #: src/service/err.c:27
 msgid "Invalid command"
-msgstr ""
+msgstr "Ongeldige opdracht"
 
 #: src/service/err.c:29
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Ongeldige optie"
 
 #: src/service/err.c:31
 msgid "Invalid length"
-msgstr ""
+msgstr "Ongeldige lengte"
 
 #: src/service/err.c:33
 msgid "Timeout"
-msgstr ""
+msgstr "Verlopen"
 
 #: src/service/err.c:35
 msgid "Channel busy"
-msgstr ""
+msgstr "Kanaal is bezig"
 
 #: src/service/err.c:37
 msgid "Lock required"
-msgstr ""
+msgstr "Vergrendeling vereist"
 
 #: src/service/err.c:39
 msgid "Invalid channel"
-msgstr ""
+msgstr "Ongeldig kanaal"
 
 #: src/service/err.c:41
 msgid "Unsupported"
-msgstr ""
+msgstr "Niet-ondersteund"
 
 #: src/service/err.c:43
 msgid "Invalid credential"
-msgstr ""
+msgstr "Ongeldige inloggegevens"
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr "請驗證安全金鑰，觸摸或輕掃裝置"
+msgstr "Raak de beveiligingssleutel aan of veeg erover"
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
-msgstr ""
+msgstr "Niet-ondersteund algoritme"
 
 #: src/service/err.c:49
 msgid "Operation denied"
-msgstr ""
+msgstr "Actie geweigerd"
 
 #: src/service/err.c:51
 msgid "Unsupported option"
-msgstr ""
+msgstr "Niet-ondersteunde optie"
 
 #: src/service/err.c:53
 msgid "Invalid option"
-msgstr ""
+msgstr "Ongeldige optie"
 
 #: src/service/err.c:55
 msgid "No credentials"
-msgstr ""
+msgstr "Geen inloggegevens"
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr "驗證安全金鑰超時"
+msgstr "De goedkeuring is verlopen"
 
 #: src/service/err.c:59
 msgid "Pin invalid"
-msgstr ""
+msgstr "Ongeldige pincode"
 
 #: src/service/err.c:61
 msgid "Pin auth invalid"
-msgstr ""
+msgstr "Ongeldige pinauthenticatie"
 
 #: src/service/err.c:63
 msgid "Pin not set"
-msgstr ""
+msgstr "Geen pincode ingesteld"
 
 #: src/service/err.c:65
 msgid "Pin required"
-msgstr ""
+msgstr "Pincode vereist"
 
 #: src/service/err.c:67
 msgid "tx error"
-msgstr ""
+msgstr "tx-fout"
 
 #: src/service/err.c:69
 msgid "rx error"
-msgstr ""
+msgstr "rx-fout"
 
 #: src/service/err.c:71
 msgid "User persence required"
-msgstr ""
+msgstr "Gebruikerspresentie vereist"
 
 #: src/service/err.c:73
 msgid "Device claimed"
-msgstr ""
+msgstr "Apparaat is geclaimd"
 
 #: src/service/err.c:75
 msgid "Device not fuound"
-msgstr ""
+msgstr "Apparaat is niet aangetroffen"
 
 #: src/service/err.c:77
 msgid "Device open"
-msgstr ""
+msgstr "Apparaat is in gebruik"
 
 #: src/service/err.c:79
 msgid "Unknow error"
-msgstr ""
+msgstr "Onbekende foutmelding"

@@ -1,24 +1,29 @@
-# Chinese translations for PACKAGE package.
-# Copyright (C) 2023 THE PACKAGE'S COPYRIGHT HOLDER
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#  <EMAIL@ADDRESS>, 2023.
-#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# deepiner, 2023
+# 
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-27 10:47+0800\n"
-"PO-Revision-Date: 2023-10-27 10:48+0800\n"
-"Last-Translator:  <EMAIL@ADDRESS>\n"
-"Language-Team: Chinese (simplified)\n"
-"Language: zh_CN\n"
+"POT-Creation-Date: 2023-10-30 10:56+0800\n"
+"PO-Revision-Date: 2023-10-31 01:42+0000\n"
+"Last-Translator: deepiner, 2023\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/linuxdeepin/teams/3617/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr "成功"
+msgstr ""
 
 #: src/service/err.c:27
 msgid "Invalid command"

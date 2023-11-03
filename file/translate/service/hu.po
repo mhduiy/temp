@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# deepiner, 2023
+# Béla Bajza, 2023
 # 
 #, fuzzy
 msgid ""
@@ -13,122 +13,122 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
-"Last-Translator: deepiner, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/linuxdeepin/teams/3617/zh_TW/)\n"
+"Last-Translator: Béla Bajza, 2023\n"
+"Language-Team: Hungarian (https://app.transifex.com/linuxdeepin/teams/3617/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_TW\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: hu\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr ""
+msgstr "Sikeres"
 
 #: src/service/err.c:27
 msgid "Invalid command"
-msgstr ""
+msgstr "Érvénytelen parancs"
 
 #: src/service/err.c:29
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Érvénytelen paraméter"
 
 #: src/service/err.c:31
 msgid "Invalid length"
-msgstr ""
+msgstr "Érvénytelen útvonal"
 
 #: src/service/err.c:33
 msgid "Timeout"
-msgstr ""
+msgstr "Időtullépés"
 
 #: src/service/err.c:35
 msgid "Channel busy"
-msgstr ""
+msgstr "A csatorna foglalt"
 
 #: src/service/err.c:37
 msgid "Lock required"
-msgstr ""
+msgstr "Zárolás szükséges"
 
 #: src/service/err.c:39
 msgid "Invalid channel"
-msgstr ""
+msgstr "Érvénytelen csatorna"
 
 #: src/service/err.c:41
 msgid "Unsupported"
-msgstr ""
+msgstr "Nem támogatott "
 
 #: src/service/err.c:43
 msgid "Invalid credential"
-msgstr ""
+msgstr "Érvénytelen hitelesítő adat"
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr "請驗證安全金鑰，觸摸或輕掃裝置"
+msgstr "Érintse meg, vagy csúsztassa el a biztonsági kulcsot"
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
-msgstr ""
+msgstr "Nem támogatott algoritmus"
 
 #: src/service/err.c:49
 msgid "Operation denied"
-msgstr ""
+msgstr "A művelet megtagadva"
 
 #: src/service/err.c:51
 msgid "Unsupported option"
-msgstr ""
+msgstr "Nem támogatott opció"
 
 #: src/service/err.c:53
 msgid "Invalid option"
-msgstr ""
+msgstr "Érvénytelen opció"
 
 #: src/service/err.c:55
 msgid "No credentials"
-msgstr ""
+msgstr "Nincsenek hitelesítő adatok"
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr "驗證安全金鑰超時"
+msgstr "Az érvényesítés időtúllépés miatt sikertelen"
 
 #: src/service/err.c:59
 msgid "Pin invalid"
-msgstr ""
+msgstr "A PIN kód érvénytelen"
 
 #: src/service/err.c:61
 msgid "Pin auth invalid"
-msgstr ""
+msgstr "A PIN hitelesítése érvénytelen"
 
 #: src/service/err.c:63
 msgid "Pin not set"
-msgstr ""
+msgstr "A PIN kód nincs beállítva"
 
 #: src/service/err.c:65
 msgid "Pin required"
-msgstr ""
+msgstr "PIN kód szükséges"
 
 #: src/service/err.c:67
 msgid "tx error"
-msgstr ""
+msgstr "tx hiba"
 
 #: src/service/err.c:69
 msgid "rx error"
-msgstr ""
+msgstr "rx hiba"
 
 #: src/service/err.c:71
 msgid "User persence required"
-msgstr ""
+msgstr "Felhasználói jelenlét szükséges"
 
 #: src/service/err.c:73
 msgid "Device claimed"
-msgstr ""
+msgstr "Eszköz igényelve"
 
 #: src/service/err.c:75
 msgid "Device not fuound"
-msgstr ""
+msgstr "Nem található eszköz"
 
 #: src/service/err.c:77
 msgid "Device open"
-msgstr ""
+msgstr "Eszköz megnyitása"
 
 #: src/service/err.c:79
 msgid "Unknow error"
-msgstr ""
+msgstr "Ismeretlen hiba"

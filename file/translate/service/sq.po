@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# deepiner, 2023
+# Besnik Bleta <besnik@programeshqip.org>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -13,85 +13,85 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
-"Last-Translator: deepiner, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/linuxdeepin/teams/3617/zh_TW/)\n"
+"Last-Translator: Besnik Bleta <besnik@programeshqip.org>, 2023\n"
+"Language-Team: Albanian (https://app.transifex.com/linuxdeepin/teams/3617/sq/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_TW\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: sq\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr ""
+msgstr "Sukses"
 
 #: src/service/err.c:27
 msgid "Invalid command"
-msgstr ""
+msgstr "Urdhër i pavlefshëm"
 
 #: src/service/err.c:29
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Parametër i pavlefshëm"
 
 #: src/service/err.c:31
 msgid "Invalid length"
-msgstr ""
+msgstr "Gjatësi e pavlefshme"
 
 #: src/service/err.c:33
 msgid "Timeout"
-msgstr ""
+msgstr "Mbarim kohe"
 
 #: src/service/err.c:35
 msgid "Channel busy"
-msgstr ""
+msgstr "Kanal i zënë"
 
 #: src/service/err.c:37
 msgid "Lock required"
-msgstr ""
+msgstr "Kyçi është i domosdoshëm"
 
 #: src/service/err.c:39
 msgid "Invalid channel"
-msgstr ""
+msgstr "Kanal i pavlefshëm"
 
 #: src/service/err.c:41
 msgid "Unsupported"
-msgstr ""
+msgstr "Nuk mbulohet"
 
 #: src/service/err.c:43
 msgid "Invalid credential"
-msgstr ""
+msgstr "Kredencial i pavlefshëm"
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr "請驗證安全金鑰，觸摸或輕掃裝置"
+msgstr "Prekni, ose fërkoni me gisht kyçin e sigurisë"
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
-msgstr ""
+msgstr "Algoritëm i pambuluar"
 
 #: src/service/err.c:49
 msgid "Operation denied"
-msgstr ""
+msgstr "Veprimi u hodh poshtë"
 
 #: src/service/err.c:51
 msgid "Unsupported option"
-msgstr ""
+msgstr "Mundësi e pambuluar"
 
 #: src/service/err.c:53
 msgid "Invalid option"
-msgstr ""
+msgstr "Mundësi e pavlefshme"
 
 #: src/service/err.c:55
 msgid "No credentials"
-msgstr ""
+msgstr "Pa kredenciale"
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr "驗證安全金鑰超時"
+msgstr "Mbaroi koha për vlerësimin"
 
 #: src/service/err.c:59
 msgid "Pin invalid"
-msgstr ""
+msgstr "PIN i pavlefshëm"
 
 #: src/service/err.c:61
 msgid "Pin auth invalid"
@@ -99,23 +99,23 @@ msgstr ""
 
 #: src/service/err.c:63
 msgid "Pin not set"
-msgstr ""
+msgstr "S’është ujdisur PIN"
 
 #: src/service/err.c:65
 msgid "Pin required"
-msgstr ""
+msgstr "PIN-i është i domosdoshëm"
 
 #: src/service/err.c:67
 msgid "tx error"
-msgstr ""
+msgstr "gabim tx"
 
 #: src/service/err.c:69
 msgid "rx error"
-msgstr ""
+msgstr "gabim rx"
 
 #: src/service/err.c:71
 msgid "User persence required"
-msgstr ""
+msgstr "Prania e përdoruesit është e domosdoshme"
 
 #: src/service/err.c:73
 msgid "Device claimed"
@@ -123,12 +123,12 @@ msgstr ""
 
 #: src/service/err.c:75
 msgid "Device not fuound"
-msgstr ""
+msgstr "S’u gjet pajisje"
 
 #: src/service/err.c:77
 msgid "Device open"
-msgstr ""
+msgstr "Pajisje e hapur"
 
 #: src/service/err.c:79
 msgid "Unknow error"
-msgstr ""
+msgstr "Gabim i panjohur"

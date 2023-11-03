@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# deepiner, 2023
+# Manuela Silva <mmsrs@sky.com>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -13,37 +13,37 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
-"Last-Translator: deepiner, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/linuxdeepin/teams/3617/zh_TW/)\n"
+"Last-Translator: Manuela Silva <mmsrs@sky.com>, 2023\n"
+"Language-Team: Portuguese (https://app.transifex.com/linuxdeepin/teams/3617/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_TW\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: pt\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr ""
+msgstr "Sucecsso"
 
 #: src/service/err.c:27
 msgid "Invalid command"
-msgstr ""
+msgstr "Comando inválido"
 
 #: src/service/err.c:29
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Parâmetro inválido"
 
 #: src/service/err.c:31
 msgid "Invalid length"
-msgstr ""
+msgstr "Comprimento inválido"
 
 #: src/service/err.c:33
 msgid "Timeout"
-msgstr ""
+msgstr "Expirou"
 
 #: src/service/err.c:35
 msgid "Channel busy"
-msgstr ""
+msgstr "Canal ocupado"
 
 #: src/service/err.c:37
 msgid "Lock required"
@@ -51,67 +51,67 @@ msgstr ""
 
 #: src/service/err.c:39
 msgid "Invalid channel"
-msgstr ""
+msgstr "Canal inválido"
 
 #: src/service/err.c:41
 msgid "Unsupported"
-msgstr ""
+msgstr "Não suportado"
 
 #: src/service/err.c:43
 msgid "Invalid credential"
-msgstr ""
+msgstr "Credencial inválida"
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr "請驗證安全金鑰，觸摸或輕掃裝置"
+msgstr "Toque ou deslize a chave de segurança"
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
-msgstr ""
+msgstr "Algoritmo não suportado"
 
 #: src/service/err.c:49
 msgid "Operation denied"
-msgstr ""
+msgstr "Operação negada"
 
 #: src/service/err.c:51
 msgid "Unsupported option"
-msgstr ""
+msgstr "Opção não suportada"
 
 #: src/service/err.c:53
 msgid "Invalid option"
-msgstr ""
+msgstr "Opção inválida"
 
 #: src/service/err.c:55
 msgid "No credentials"
-msgstr ""
+msgstr "Sem credenciais"
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr "驗證安全金鑰超時"
+msgstr "Validação expirou"
 
 #: src/service/err.c:59
 msgid "Pin invalid"
-msgstr ""
+msgstr "Código inválido"
 
 #: src/service/err.c:61
 msgid "Pin auth invalid"
-msgstr ""
+msgstr "Autenticação de código inválida"
 
 #: src/service/err.c:63
 msgid "Pin not set"
-msgstr ""
+msgstr "Código não definido"
 
 #: src/service/err.c:65
 msgid "Pin required"
-msgstr ""
+msgstr "Código necessário"
 
 #: src/service/err.c:67
 msgid "tx error"
-msgstr ""
+msgstr "Erro tx"
 
 #: src/service/err.c:69
 msgid "rx error"
-msgstr ""
+msgstr "Erro rx"
 
 #: src/service/err.c:71
 msgid "User persence required"
@@ -123,12 +123,12 @@ msgstr ""
 
 #: src/service/err.c:75
 msgid "Device not fuound"
-msgstr ""
+msgstr "Dispositivo não encontrado"
 
 #: src/service/err.c:77
 msgid "Device open"
-msgstr ""
+msgstr "Dispositivo aberto"
 
 #: src/service/err.c:79
 msgid "Unknow error"
-msgstr ""
+msgstr "Erro desconhecido"
