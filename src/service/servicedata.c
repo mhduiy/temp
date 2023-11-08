@@ -210,7 +210,7 @@ int service_selected_device_delete_by_date(PasskeyServiceData *passkeyData, cons
 {
     int ret = -1;
     if (passkeyData || sender == NULL) {
-        LOG(LOG_ERR, "param invalid");
+        LOG(LOG_DEBUG, "param invalid");
         return ret;
     }
 

@@ -405,6 +405,9 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
     size_t nDevInfos = 0;
     CredArgs args = { 0 };
     int algorithm = 0;
+    int supportNoPinReq = 0;
+    char **versions = NULL;
+    int versionsCount = 0;
     int callRet = FIDO_ERR_INTERNAL;
     Service *srv = NULL;
 
@@ -459,12 +462,6 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
         goto end;
     }
     // 3 cred
-    if ((callRet = dpk_dev_get_support_algorithm(info, &algorithm)) != FIDO_OK) {
-        LOG(LOG_WARNING, "algorithm not support");
-        callRet = FIDO_ERR_UNSUPPORTED_ALGORITHM;
-        goto end;
-    }
-    args.type = algorithm;
     if ((callRet = dpk_rp_get_rp_id(&rpId)) != FIDO_OK) {
         LOG(LOG_WARNING, "failed to get rp-id");
         goto end;
@@ -472,12 +469,67 @@ int dpk_manager_make_cred(MethodContext *mc, const char *userName, const char *c
     args.origin = rpId;
     args.userName = userName;
     args.credName = credName;
+    if ((callRet = dpk_dev_get_version(info, &versions, &versionsCount)) != FIDO_OK) {
+        LOG(LOG_ERR, "prepare cred failed");
+        goto end;
+    }
+    if (versionsCount == 0 || versions == NULL) {
+        callRet = FIDO_ERR_INTERNAL;
+        LOG(LOG_ERR, "can not get dev versions");
+        goto end;
+    }
+    // 设置当前证书使用的版本, 优先设置能支持的最高版本
+    if (dpk_dev_check_version_exist((const char **)versions, versionsCount, INFO_VERSION_FIDO_2_1)) {
+        snprintf(args.version, INFO_VERSION_MAX_LEN, INFO_VERSION_FIDO_2_1);
+    } else if (dpk_dev_check_version_exist((const char **)versions, versionsCount, INFO_VERSION_FIDO_2_1_PRE)) {
+        snprintf(args.version, INFO_VERSION_MAX_LEN, INFO_VERSION_FIDO_2_1_PRE);
+    } else if (dpk_dev_check_version_exist((const char **)versions, versionsCount, INFO_VERSION_FIDO_2_0)) {
+        snprintf(args.version, INFO_VERSION_MAX_LEN, INFO_VERSION_FIDO_2_0);
+    } else if (dpk_dev_check_version_exist((const char **)versions, versionsCount, INFO_VERSION_U2F_V2)) {
+        snprintf(args.version, INFO_VERSION_MAX_LEN, INFO_VERSION_U2F_V2);
+    } else {
+        LOG(LOG_ERR, "version can not support!!");
+        callRet = FIDO_ERR_UNSUPPORTED_ALGORITHM;
+        goto end;
+    }
+
     // args.noUserPresence = 1;
     if (pin != NULL && strlen(pin) > 0) {
         args.pinVerification = 1;
     } else {
         args.pinVerification = 0;
+        // 设备可能会要求必须使用pin
+        if ((callRet = dpk_dev_check_fido2_support_no_pin_req(info, &supportNoPinReq)) != FIDO_OK) {
+            LOG(LOG_ERR, "check support no-pin-req failed");
+            goto end;
+        }
+        if (!supportNoPinReq) {
+            // 不支持no-pin-req的话，通过u2f去创建证书
+            LOG(LOG_INFO, "not support support no-pin-req, and to use u2f.");
+            if (!dpk_dev_check_version_exist((const char **)versions, versionsCount, INFO_VERSION_U2F_V2)) {
+                callRet = FIDO_ERR_PIN_REQUIRED;
+                LOG(LOG_ERR, "device not support no-pin-req and not support u2f");
+                goto end;
+            }
+            memset(args.version, 0, INFO_VERSION_MAX_LEN * sizeof(char));
+            snprintf(args.version, INFO_VERSION_MAX_LEN, INFO_VERSION_U2F_V2);
+        }
     }
+    if (strcmp(args.version, INFO_VERSION_U2F_V2) == 0) {
+        if ((callRet = dpk_dev_get_u2f_default_support_algorithm(info, &algorithm)) != FIDO_OK) {
+            LOG(LOG_WARNING, "algorithm not support");
+            callRet = FIDO_ERR_UNSUPPORTED_ALGORITHM;
+            goto end;
+        }
+    } else {
+        if ((callRet = dpk_dev_get_fido_default_support_algorithm(info, &algorithm)) != FIDO_OK) {
+            LOG(LOG_WARNING, "algorithm not support");
+            callRet = FIDO_ERR_UNSUPPORTED_ALGORITHM;
+            goto end;
+        }
+    }
+    args.type = algorithm;
+    args.resident = 0;         // 默认使用非可发现凭据
     args.userVerification = 0; // 目前不支持
 
     if ((callRet = dpk_dev_prepare_cred(&args, &cred)) != FIDO_OK) {

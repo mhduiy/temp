@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "info.h"
 #include "serviceframe/servicebase.h"
 
 #include <fido.h>
@@ -27,6 +28,7 @@ typedef struct _CredArgs
     int debug;
     int verbose;
     int nouser;
+    char version[INFO_VERSION_MAX_LEN];
 } CredArgs;
 
 typedef struct _CredInfo

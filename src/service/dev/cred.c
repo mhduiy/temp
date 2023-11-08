@@ -142,10 +142,11 @@ int dpk_dev_prepare_cred(const CredArgs *const args, fido_cred_t **credRes)
     // 指定认证时，是否需要pin和内置认证（指纹等）
     // 注意：CTAP2.1中不赞成使用此“uv”选项键。应该使用pinUvAuthParam，后续规划支持
     // 如果认证器不支持内置用户验证，则不得包含“uv”选项密钥
-    if ((callRet = fido_cred_set_uv(cred, FIDO_OPT_OMIT)) != FIDO_OK) {
-        LOG(LOG_ERR, "error: fido_cred_set_uv (%d) %s", callRet, fido_strerr(callRet));
+    if ((callRet = fido_cred_set_uv(cred, args->userVerification ? FIDO_OPT_TRUE : FIDO_OPT_OMIT)) != FIDO_OK) {
+        LOG(LOG_ERR, "fido_cred_set_uv: %s (%d)", fido_strerr(callRet), callRet);
         goto end;
     }
+
     LOG(LOG_INFO, "prepare cred success, rp:%s, user:%s.", origin, user);
     *credRes = cred;
     callRet = FIDO_OK;
@@ -166,38 +167,44 @@ int dpk_dev_make_cred(const CredArgs *args, fido_dev_t *dev, fido_cred_t *cred, 
         goto end;
     }
 
-    /* Some form of UV required; built-in UV is available. */
-    if (args->userVerification) {
-        if ((callRet = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK) {
-            LOG(LOG_ERR, "fido_cred_set_uv: %s (%d)", fido_strerr(callRet), callRet);
-            goto end;
-        }
-    }
-
-    /* Let built-in UV have precedence over PIN. No UV also handled here. */
-    if (args->userVerification || !args->pinVerification) {
-        LOG(LOG_INFO, "fido_dev_make_cred without pin.");
+    if (strcmp(args->version, INFO_VERSION_U2F_V2) == 0) {
+        // catp1.0
+        LOG(LOG_INFO, "to create 1.0 cred.");
+        fido_dev_force_u2f(dev);
         callRet = fido_dev_make_cred(dev, cred, NULL);
-    } else {
-        callRet = FIDO_ERR_PIN_REQUIRED;
-    }
-
-    /* Some form of UV required; built-in UV failed or is not available. */
-    if ((callRet == FIDO_ERR_PIN_REQUIRED || callRet == FIDO_ERR_UV_BLOCKED || callRet == FIDO_ERR_PIN_BLOCKED) && pin != NULL && strlen(pin) > 0) {
-        int pinSupport = INFO_OPTIONS_NOT_SUPPORT;
-        if ((callRet = dpk_dev_get_options_support_pin(info, &pinSupport)) != FIDO_OK) {
-            LOG(LOG_WARNING, "need pin, but device not support pin.");
+        if (callRet != FIDO_OK) {
+            LOG(LOG_WARNING, "error: fido_dev_make_cred (%d) %s", callRet, fido_strerr(callRet));
             goto end;
         }
-        if (pinSupport == INFO_OPTIONS_SET) {
-            LOG(LOG_INFO, "fido_dev_make_cred with pin.");
-            callRet = fido_dev_make_cred(dev, cred, pin);
+    } else {
+        // catp2.0
+        LOG(LOG_INFO, "to create 2.0 cred.");
+        /* Let built-in UV have precedence over PIN. No UV also handled here. */
+        if (args->userVerification || !args->pinVerification) {
+            LOG(LOG_INFO, "fido_dev_make_cred without pin.");
+            callRet = fido_dev_make_cred(dev, cred, NULL);
+        } else {
+            callRet = FIDO_ERR_PIN_REQUIRED;
+        }
+
+        /* Some form of UV required; built-in UV failed or is not available. */
+        if ((callRet == FIDO_ERR_PIN_REQUIRED || callRet == FIDO_ERR_UV_BLOCKED || callRet == FIDO_ERR_PIN_BLOCKED) && pin != NULL && strlen(pin) > 0) {
+            int pinSupport = INFO_OPTIONS_NOT_SUPPORT;
+            if ((callRet = dpk_dev_get_options_support_pin(info, &pinSupport)) != FIDO_OK) {
+                LOG(LOG_WARNING, "need pin, but device not support pin.");
+                goto end;
+            }
+            if (pinSupport == INFO_OPTIONS_SET) {
+                LOG(LOG_INFO, "fido_dev_make_cred with pin.");
+                callRet = fido_dev_make_cred(dev, cred, pin);
+            }
+        }
+        if (callRet != FIDO_OK) {
+            LOG(LOG_WARNING, "error: fido_dev_make_cred (%d) %s", callRet, fido_strerr(callRet));
+            goto end;
         }
     }
-    if (callRet != FIDO_OK) {
-        LOG(LOG_WARNING, "error: fido_dev_make_cred (%d) %s", callRet, fido_strerr(callRet));
-        goto end;
-    }
+
     LOG(LOG_INFO, "success to create cred.");
     callRet = FIDO_OK;
 end:
@@ -312,15 +319,21 @@ int dk_dev_save_cred(const CredArgs *const args, const fido_cred_t *const cred)
         }
     }
 
+    char credVersion[INFO_VERSION_MAX_LEN + 1] = { 0 };
+    if (strlen(args->version) > 0) {
+        snprintf(credVersion, INFO_VERSION_MAX_LEN + 1, "+%s", args->version);
+    }
+
     char buf[BUFSIZE] = { 0 };
     if (snprintf(buf,
                  BUFSIZE,
-                 "%s:%s:%s,%s,%s,%s%s%s",
+                 "%s:%s:%s,%s,%s,%s%s%s%s",
                  args->userName,
                  args->credName,
                  args->resident ? "*" : khB64,
                  pkB64,
                  cose_type_to_string(fido_cred_type(cred)),
+                 credVersion,
                  !args->noUserPresence ? "+presence" : "",
                  args->userVerification ? "+verification" : "",
                  args->pinVerification ? "+pin" : "")
@@ -597,6 +610,18 @@ static bool set_opts(const struct opts *opts, fido_assert_t *assert)
     }
     if (fido_assert_set_uv(assert, opts->uv) != FIDO_OK) {
         LOG(LOG_ERR, "Failed to set UV");
+        goto end;
+    }
+    success = true;
+end:
+    return success;
+}
+
+// 判断证书是否支持当前选项
+static bool check_cred_version(const char *attr, const char *version)
+{
+    bool success = false;
+    if (!strstr(attr, version)) {
         goto end;
     }
     success = true;
@@ -890,7 +915,23 @@ end:
     return success;
 }
 
-static int do_get_assert_check_cred_is_valid(fido_dev_t *dev, fido_assert_t *assert)
+static int do_get_assert_check_fido2_cred_is_valid(fido_dev_t *dev, fido_assert_t *assert)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    if (dev == NULL || assert == NULL) {
+        return callRet;
+    }
+
+    callRet = fido_dev_get_assert(dev, assert, NULL);
+    if ((!fido_dev_is_fido2(dev) && callRet == FIDO_ERR_USER_PRESENCE_REQUIRED) || (fido_dev_is_fido2(dev) && callRet == FIDO_OK)) {
+        LOG(LOG_DEBUG, "dev is valid by check cred");
+        callRet = FIDO_OK;
+    }
+
+    return callRet;
+}
+
+static int do_get_assert_check_u2f_cred_is_valid(fido_dev_t *dev, fido_assert_t *assert)
 {
     int callRet = FIDO_ERR_INTERNAL;
     if (dev == NULL || assert == NULL) {
@@ -949,74 +990,116 @@ int dk_dev_do_authentication(MethodContext *mc, const AssertArgs *args, const Cr
         }
 
         // 设备认证
-        do {
-            if (is_resident(creds[i].keyHandle) || args->noDetect) {
-                LOG(LOG_INFO, "resident credential or noDetect: try the device without check.");
-            } else {
-                if (do_get_assert_check_cred_is_valid(dev, assert) != FIDO_OK) {
+        if (check_cred_version(creds[i].attributes, INFO_VERSION_U2F_V2)) {
+            // catp1.0
+            LOG(LOG_INFO, "to get-assert 1.0 cred.");
+            do {
+                if (is_resident(creds[i].keyHandle) || args->noDetect) {
+                    LOG(LOG_INFO, "resident credential or noDetect: try the device without check.");
+                    break;
+                }
+
+                if (do_get_assert_check_u2f_cred_is_valid(dev, assert) != FIDO_OK) {
                     LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
                     break;
                 }
-            }
 
-            callRet = match_device_opts(dev, &opts);
-            if (callRet != FIDO_OK) {
-                LOG(LOG_INFO, "skipping authenticator, %s", fido_strerr(callRet));
-                break;
-            }
+                if (fido_assert_set_up(assert, opts.up) != FIDO_OK) {
+                    LOG(LOG_ERR, "Failed to set UP");
+                    goto end;
+                }
 
-            if (!set_opts(&opts, assert)) {
-                LOG(LOG_INFO, "authenticator error and try another, failed to set opts");
-                break;
-            }
-
-            if (!set_cdh(assert)) {
-                LOG(LOG_INFO, "authenticator error and try another, failed to set cdh.");
-                break;
-            }
-
-            if (opts.pin == FIDO_OPT_TRUE) {
-                pin = args->pin;
-                if (pin == NULL) {
-                    LOG(LOG_INFO, "cred error and try another, need pin, but input pin is null.");
+                if (!set_cdh(assert)) {
+                    LOG(LOG_INFO, "authenticator error and try another, failed to set cdh.");
                     break;
                 }
-                if (strlen(pin) == 0) {
-                    LOG(LOG_INFO, "cred error and try another, need pin, but input pin is emtpy");
-                    break;
-                }
-            }
-            if (opts.up == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
-                if (args->manual == 0 && args->cue && !cued) {
-                    cued = 1;
-                    // converse(pamh, PAM_TEXT_INFO, args->cuePrompt != NULL ? args->cuePrompt : "Please touch the device.");
-                }
-            }
 
-            emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
-            callRet = fido_dev_get_assert(dev, assert, pin);
-
-            if (pin) {
-                pin = NULL;
-            }
-            if (callRet != FIDO_OK) {
-                LOG(LOG_INFO, "authenticator error and try another, failed to get assert:%s", fido_strerr(callRet));
-                break;
-            }
-            if (opts.pin == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
-                callRet = fido_assert_set_uv(assert, FIDO_OPT_TRUE);
+                emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+                callRet = fido_dev_get_assert(dev, assert, NULL);
                 if (callRet != FIDO_OK) {
-                    LOG(LOG_INFO, "authenticator error and try another, failed to set uv:%s", fido_strerr(callRet));
+                    LOG(LOG_INFO, "authenticator error and try another, failed to get assert:%s", fido_strerr(callRet));
                     break;
                 }
-            }
-            callRet = fido_assert_verify(assert, 0, pk.type, pk.ptr);
-            if (callRet == FIDO_OK) {
-                // 只要有一个成功，跳过其他证书和认证器的认证，结束流程
-                goto end;
-            }
 
-        } while (0);
+                callRet = fido_assert_verify(assert, 0, pk.type, pk.ptr);
+                if (callRet == FIDO_OK) {
+                    // 只要有一个成功，跳过其他证书和认证器的认证，结束流程
+                    goto end;
+                }
+            } while (0);
+        } else {
+            // catp2.0
+            LOG(LOG_INFO, "to get-assert 2.0 cred.");
+            do {
+                if (is_resident(creds[i].keyHandle) || args->noDetect) {
+                    LOG(LOG_INFO, "resident credential or noDetect: try the device without check.");
+                    break;
+                } else {
+                    if (do_get_assert_check_fido2_cred_is_valid(dev, assert) != FIDO_OK) {
+                        LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
+                        break;
+                    }
+                }
+
+                callRet = match_device_opts(dev, &opts);
+                if (callRet != FIDO_OK) {
+                    LOG(LOG_INFO, "skipping authenticator, %s", fido_strerr(callRet));
+                    break;
+                }
+
+                if (!set_opts(&opts, assert)) {
+                    LOG(LOG_INFO, "authenticator error and try another, failed to set opts");
+                    break;
+                }
+
+                if (!set_cdh(assert)) {
+                    LOG(LOG_INFO, "authenticator error and try another, failed to set cdh.");
+                    break;
+                }
+
+                if (opts.pin == FIDO_OPT_TRUE) {
+                    pin = args->pin;
+                    if (pin == NULL) {
+                        LOG(LOG_INFO, "cred error and try another, need pin, but input pin is null.");
+                        break;
+                    }
+                    if (strlen(pin) == 0) {
+                        LOG(LOG_INFO, "cred error and try another, need pin, but input pin is emtpy");
+                        break;
+                    }
+                }
+                if (opts.up == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
+                    if (args->manual == 0 && args->cue && !cued) {
+                        cued = 1;
+                        // converse(pamh, PAM_TEXT_INFO, args->cuePrompt != NULL ? args->cuePrompt : "Please touch the device.");
+                    }
+                }
+
+                emit_get_assert_status(mc, args->userName, SIGNAL_NOT_FINISH, FIDO_ERR_USER_ACTION_PENDING);
+                callRet = fido_dev_get_assert(dev, assert, pin);
+
+                if (pin) {
+                    pin = NULL;
+                }
+                if (callRet != FIDO_OK) {
+                    LOG(LOG_INFO, "authenticator error and try another, failed to get assert:%s", fido_strerr(callRet));
+                    break;
+                }
+                if (opts.pin == FIDO_OPT_TRUE || opts.uv == FIDO_OPT_TRUE) {
+                    callRet = fido_assert_set_uv(assert, FIDO_OPT_TRUE);
+                    if (callRet != FIDO_OK) {
+                        LOG(LOG_INFO, "authenticator error and try another, failed to set uv:%s", fido_strerr(callRet));
+                        break;
+                    }
+                }
+                callRet = fido_assert_verify(assert, 0, pk.type, pk.ptr);
+                if (callRet == FIDO_OK) {
+                    // 只要有一个成功，跳过其他证书和认证器的认证，结束流程
+                    goto end;
+                }
+
+            } while (0);
+        }
 
         if (assert != NULL) {
             fido_assert_free(&assert);
@@ -1071,9 +1154,16 @@ int dk_dev_has_valid_cred_count(const AssertArgs *args, const CredInfo *creds, c
             goto end;
         }
 
-        if (do_get_assert_check_cred_is_valid(dev, assert) == FIDO_OK) {
-            validCred++;
-            LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
+        if (check_cred_version(creds[i].attributes, INFO_VERSION_U2F_V2)) {
+            if (do_get_assert_check_u2f_cred_is_valid(dev, assert) == FIDO_OK) {
+                validCred++;
+                LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
+            }
+        } else {
+            if (do_get_assert_check_fido2_cred_is_valid(dev, assert) == FIDO_OK) {
+                validCred++;
+                LOG(LOG_INFO, "check device by get-assert, cred is invalid and skip this device.");
+            }
         }
 
         if (assert != NULL) {
