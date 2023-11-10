@@ -658,7 +658,7 @@ static void parse_opts(const AssertArgs *args, struct opts *opts)
     if (args->userPresence == 1) {
         opts->up = FIDO_OPT_TRUE;
     } else if (args->userPresence == 0) {
-        opts->up = FIDO_OPT_FALSE;
+        opts->up = FIDO_OPT_OMIT;
     } else {
         opts->up = FIDO_OPT_OMIT;
     }
@@ -666,7 +666,7 @@ static void parse_opts(const AssertArgs *args, struct opts *opts)
     if (args->userVerification == 1) {
         opts->uv = FIDO_OPT_TRUE;
     } else if (args->userVerification == 0)
-        opts->uv = FIDO_OPT_FALSE;
+        opts->uv = FIDO_OPT_OMIT;
     else {
         opts->uv = FIDO_OPT_OMIT;
     }
@@ -674,7 +674,7 @@ static void parse_opts(const AssertArgs *args, struct opts *opts)
     if (args->pinVerification == 1) {
         opts->pin = FIDO_OPT_TRUE;
     } else if (args->pinVerification == 0) {
-        opts->pin = FIDO_OPT_FALSE;
+        opts->pin = FIDO_OPT_OMIT;
     } else {
         opts->pin = FIDO_OPT_OMIT;
     }
