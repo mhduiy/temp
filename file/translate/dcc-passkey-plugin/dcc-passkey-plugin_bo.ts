@@ -199,7 +199,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
         <source>PIN Blocked</source>
-        <translation type="unfinished"/>
+        <translation>PINནོར་བ།</translation>
     </message>
 </context>
 <context>

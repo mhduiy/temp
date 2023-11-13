@@ -58,12 +58,12 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="301"/>
         <source>Setting Failure</source>
-        <translation type="unfinished"/>
+        <translation>Beállítási hiba</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <source>Change Failed</source>
-        <translation type="unfinished"/>
+        <translation>A változtatás sikertelen</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="329"/>
@@ -103,13 +103,13 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <source>Change</source>
-        <translation type="unfinished"/>
+        <translation>Változtatás</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
         <source>Setting</source>
-        <translation type="unfinished"/>
+        <translation>Beállítások</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
@@ -148,43 +148,43 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
         <source>Please plug in the security key</source>
-        <translation type="unfinished"/>
+        <translation>Kérjük csatlakoztassa a biztonsági kulcsot</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Identifying the security key</source>
-        <translation type="unfinished"/>
+        <translation>A biztonsági kulcs azonosítása</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Touch or swipe the security key</source>
-        <translation type="unfinished"/>
+        <translation>Érintse meg, vagy csúsztassa el a biztonsági kulcsot</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Validation timed out</source>
-        <translation type="unfinished"/>
+        <translation>Az érvényesítés időtúllépés miatt sikertelen</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Retry</source>
-        <translation type="unfinished"/>
+        <translation>Újra</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
-        <translation type="unfinished"/>
+        <translation>A rendszer felismerte a biztonsági kulcsot, regisztrálhatja a bejelentkezési hitelesítéshez.</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Register</source>
-        <translation type="unfinished"/>
+        <translation>Regisztráció</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>Ismeretlen hiba</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
@@ -210,7 +210,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="143"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="146"/>
         <source>Reset</source>
-        <translation type="unfinished"/>
+        <translation>Visszaállítás</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="100"/>
@@ -221,7 +221,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="401"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="463"/>
         <source>Reset Security Key</source>
-        <translation type="unfinished"/>
+        <translation>Biztonsági kulcs visszaállítása</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="102"/>
@@ -231,7 +231,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="350"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="403"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>Mégsem</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="124"/>
@@ -251,30 +251,30 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="316"/>
         <source>Please touch or swipe the security key twice within 10 seconds</source>
-        <translation type="unfinished"/>
+        <translation>Kérjük 10 másodpercen belül kétszer érintse meg, vagy csúsztassa el a biztonsági kulcsot</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="371"/>
         <source>Please touch or swipe the security key again</source>
-        <translation type="unfinished"/>
+        <translation>Kérjük érintse meg, vagy csúsztassa újra a biztonsági kulcsot</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="424"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="451"/>
         <source>Unable to complete the security key reset</source>
-        <translation type="unfinished"/>
+        <translation>Nem sikerült befejezni a biztonsági kulcs visszaállítását</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="448"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="468"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="476"/>
         <source>Reset complete</source>
-        <translation type="unfinished"/>
+        <translation>A visszaállítás megtörtént</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="465"/>
         <source>Done</source>
-        <translation type="unfinished"/>
+        <translation>Kész</translation>
     </message>
 </context>
 </TS>

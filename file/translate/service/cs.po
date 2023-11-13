@@ -3,6 +3,9 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Pavel Borecki <pavel.borecki@gmail.com>, 2023
+# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -10,6 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 10:56+0800\n"
 "PO-Revision-Date: 2023-10-31 01:42+0000\n"
+"Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>, 2023\n"
 "Language-Team: Czech (https://app.transifex.com/linuxdeepin/teams/3617/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,112 +23,112 @@ msgstr ""
 
 #: src/service/err.c:25
 msgid "Success"
-msgstr ""
+msgstr "Úspěch"
 
 #: src/service/err.c:27
 msgid "Invalid command"
-msgstr ""
+msgstr "Neplatný příkaz"
 
 #: src/service/err.c:29
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Neplatný parametr"
 
 #: src/service/err.c:31
 msgid "Invalid length"
-msgstr ""
+msgstr "Neplatná délka"
 
 #: src/service/err.c:33
 msgid "Timeout"
-msgstr ""
+msgstr "Časový limit"
 
 #: src/service/err.c:35
 msgid "Channel busy"
-msgstr ""
+msgstr "Kanál zaneprázdněn"
 
 #: src/service/err.c:37
 msgid "Lock required"
-msgstr ""
+msgstr "Vyžadován zámek"
 
 #: src/service/err.c:39
 msgid "Invalid channel"
-msgstr ""
+msgstr "Neplatný kanál"
 
 #: src/service/err.c:41
 msgid "Unsupported"
-msgstr ""
+msgstr "Nepodporováno"
 
 #: src/service/err.c:43
 msgid "Invalid credential"
-msgstr ""
+msgstr "Neplatný přihlašovací údaj"
 
 #: src/service/err.c:45
 msgid "Touch or swipe the security key"
-msgstr ""
+msgstr "Dotkněte se nebo přejeďte prstem po klíči zabezpečen"
 
 #: src/service/err.c:47
 msgid "Unsupported algorithm"
-msgstr ""
+msgstr "Nepodporovaný algoritmus"
 
 #: src/service/err.c:49
 msgid "Operation denied"
-msgstr ""
+msgstr "Operace odepřena"
 
 #: src/service/err.c:51
 msgid "Unsupported option"
-msgstr ""
+msgstr "Nepodporovaná volba"
 
 #: src/service/err.c:53
 msgid "Invalid option"
-msgstr ""
+msgstr "Neplatná volba"
 
 #: src/service/err.c:55
 msgid "No credentials"
-msgstr ""
+msgstr "Žádné přihlašovací údaje"
 
 #: src/service/err.c:57
 msgid "Validation timed out"
-msgstr ""
+msgstr "Překročen časový limit pokusu o ověření"
 
 #: src/service/err.c:59
 msgid "Pin invalid"
-msgstr ""
+msgstr "PIN neplatný"
 
 #: src/service/err.c:61
 msgid "Pin auth invalid"
-msgstr ""
+msgstr "Neplatné ověření PIN kódem"
 
 #: src/service/err.c:63
 msgid "Pin not set"
-msgstr ""
+msgstr "PIN nenastaven"
 
 #: src/service/err.c:65
 msgid "Pin required"
-msgstr ""
+msgstr "PIN vyžadován"
 
 #: src/service/err.c:67
 msgid "tx error"
-msgstr ""
+msgstr "chyba odesílání"
 
 #: src/service/err.c:69
 msgid "rx error"
-msgstr ""
+msgstr "chyba příjmu"
 
 #: src/service/err.c:71
 msgid "User persence required"
-msgstr ""
+msgstr "Vyžadována přítomnost uživatele"
 
 #: src/service/err.c:73
 msgid "Device claimed"
-msgstr ""
+msgstr "Zařízení zabráno"
 
 #: src/service/err.c:75
 msgid "Device not fuound"
-msgstr ""
+msgstr "Zařízení nenalezeno"
 
 #: src/service/err.c:77
 msgid "Device open"
-msgstr ""
+msgstr "Zařízení otevřeno"
 
 #: src/service/err.c:79
 msgid "Unknow error"
-msgstr ""
+msgstr "Neznámá chyba"

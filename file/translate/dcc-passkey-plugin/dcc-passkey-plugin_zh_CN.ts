@@ -16,7 +16,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="61"/>
         <source>Setting</source>
-        <translation>设置</translation>
+        <translation>设 置</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="77"/>
@@ -47,7 +47,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="166"/>
         <source>Change</source>
-        <translation>更改</translation>
+        <translation>更 改</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="182"/>
@@ -58,12 +58,12 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="301"/>
         <source>Setting Failure</source>
-        <translation type="unfinished"/>
+        <translation>设置失败</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <source>Change Failed</source>
-        <translation type="unfinished"/>
+        <translation>更改失败</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="329"/>
@@ -103,13 +103,13 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <source>Change</source>
-        <translation type="unfinished"/>
+        <translation>更 改</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
         <source>Setting</source>
-        <translation type="unfinished"/>
+        <translation>设 置</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
@@ -148,43 +148,43 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
         <source>Please plug in the security key</source>
-        <translation type="unfinished"/>
+        <translation>请插入安全密钥</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Identifying the security key</source>
-        <translation type="unfinished"/>
+        <translation>正在识别安全密钥</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Touch or swipe the security key</source>
-        <translation type="unfinished"/>
+        <translation>请验证安全密钥，触摸或轻扫设备</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Validation timed out</source>
-        <translation type="unfinished"/>
+        <translation>验证安全密钥超时</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Retry</source>
-        <translation type="unfinished"/>
+        <translation>重 试</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
-        <translation type="unfinished"/>
+        <translation>识别到未添加的安全密钥，添加后可用于登录认证。</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Register</source>
-        <translation type="unfinished"/>
+        <translation>添加设备</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>未知错误</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
@@ -199,7 +199,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
         <source>PIN Blocked</source>
-        <translation>PIN 錯誤</translation>
+        <translation>PIN 锁定</translation>
     </message>
 </context>
 <context>
@@ -210,7 +210,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="143"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="146"/>
         <source>Reset</source>
-        <translation type="unfinished"/>
+        <translation>重 置</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="100"/>
@@ -221,7 +221,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="401"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="463"/>
         <source>Reset Security Key</source>
-        <translation type="unfinished"/>
+        <translation>重置安全密钥</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="102"/>
@@ -231,7 +231,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="350"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="403"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>取 消</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="124"/>
@@ -251,30 +251,30 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="316"/>
         <source>Please touch or swipe the security key twice within 10 seconds</source>
-        <translation type="unfinished"/>
+        <translation>请在10秒内，触摸或轻扫设备两次</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="371"/>
         <source>Please touch or swipe the security key again</source>
-        <translation type="unfinished"/>
+        <translation>请再次触摸或轻扫设备</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="424"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="451"/>
         <source>Unable to complete the security key reset</source>
-        <translation type="unfinished"/>
+        <translation>无法完成安全密钥重置</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="448"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="468"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="476"/>
         <source>Reset complete</source>
-        <translation type="unfinished"/>
+        <translation>重置完成</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="465"/>
         <source>Done</source>
-        <translation type="unfinished"/>
+        <translation>完成</translation>
     </message>
 </context>
 </TS>

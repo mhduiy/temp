@@ -58,12 +58,12 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="301"/>
         <source>Setting Failure</source>
-        <translation type="unfinished"/>
+        <translation>تەڭشىگىلى بولمىدى</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="270"/>
         <source>Change Failed</source>
-        <translation type="unfinished"/>
+        <translation>ئۆزگەرتكىلى بولمىدى</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/keypindialogctrl.cpp" line="329"/>
@@ -103,13 +103,13 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <source>Change</source>
-        <translation type="unfinished"/>
+        <translation>ئۆزگەرتىش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
         <source>Setting</source>
-        <translation type="unfinished"/>
+        <translation>تەڭشەك</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
@@ -148,43 +148,43 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
         <source>Please plug in the security key</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى كىرگۈزۈڭ</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Identifying the security key</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى تونۇۋاتىدۇ</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Touch or swipe the security key</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى دەلىللەڭ، ئۈسكۈنىنى چېكىڭ ياكى سىكانىرلاڭ</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Validation timed out</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى دەلىللەش ۋاقتى ئېشىپ كەتتى</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Retry</source>
-        <translation type="unfinished"/>
+        <translation>قايتا سىناش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
-        <translation type="unfinished"/>
+        <translation>قوشۇلمىغان بىخەتەرلىك ئاچقۇچىنى تونىدى، قوشقاندىن كېيىن تىزىملىتىپ دەلىللەش ئۈچۈن ئىشلىتىشكە بولىدۇ.</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Register</source>
-        <translation type="unfinished"/>
+        <translation>ئۈسكۈنە قوشۇش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>نامەلۇم خاتالىق</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
@@ -199,7 +199,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
         <source>PIN Blocked</source>
-        <translation>PIN خاتا</translation>
+        <translation>PIN قۇلۇپلاندى</translation>
     </message>
 </context>
 <context>
@@ -210,7 +210,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="143"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="146"/>
         <source>Reset</source>
-        <translation type="unfinished"/>
+        <translation>قايتا بېكىتىش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="100"/>
@@ -221,7 +221,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="401"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="463"/>
         <source>Reset Security Key</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى قايتا بېكىتىش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="102"/>
@@ -231,7 +231,7 @@
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="350"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="403"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>بىكار قىلىش</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="124"/>
@@ -251,30 +251,30 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="316"/>
         <source>Please touch or swipe the security key twice within 10 seconds</source>
-        <translation type="unfinished"/>
+        <translation>10 سېكۇنت ئىچىدە ئۈسكۈنىنى ئىككى قېتىم چېكىڭ ياكى سىكانىرلاڭ</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="371"/>
         <source>Please touch or swipe the security key again</source>
-        <translation type="unfinished"/>
+        <translation>ئۈسكۈنىنى يەنە بىر قېتىم چېكىڭ ياكى سىكانىرلاڭ</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="424"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="451"/>
         <source>Unable to complete the security key reset</source>
-        <translation type="unfinished"/>
+        <translation>بىخەتەرلىك ئاچقۇچىنى قايتا بېكىتكىلى بولمىدى</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="448"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="468"/>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="476"/>
         <source>Reset complete</source>
-        <translation type="unfinished"/>
+        <translation>قايتا بېكىتىلدى</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="465"/>
         <source>Done</source>
-        <translation type="unfinished"/>
+        <translation>تامام</translation>
     </message>
 </context>
 </TS>
