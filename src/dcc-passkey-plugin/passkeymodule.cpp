@@ -133,6 +133,8 @@ void PasskeyModule::initSearchData()
 {
     const QString &module = displayName();
     const QString &passkeyManage = tr("Manage Security Key");
+    const QString &passkeyPin = tr("PIN");
+    const QString &passkeyReset = tr("Reset Security Key");
     const QString &hideModuleFlag = "hideModule";
     static bool visible = false;
 
@@ -153,7 +155,8 @@ void PasskeyModule::initSearchData()
             visible = show;
             m_frameProxy->setModuleVisible(module, visible);
             m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, tr("Manage Security Key"), visible);
+            m_frameProxy->setDetailVisible(module, passkeyManage, passkeyPin, visible);
+            m_frameProxy->setDetailVisible(module, passkeyManage, passkeyReset, visible);
             m_frameProxy->updateSearchData(module);
         }
     });
@@ -162,7 +165,8 @@ void PasskeyModule::initSearchData()
         visible = func_is_visible(hideModuleFlag);
         m_frameProxy->setModuleVisible(module, visible);
         m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, tr("Manage Security Key"), visible);
+        m_frameProxy->setDetailVisible(module, passkeyManage, passkeyPin, visible);
+        m_frameProxy->setDetailVisible(module, passkeyManage, passkeyReset, visible);
     };
 
     func_process_all();
@@ -171,4 +175,9 @@ void PasskeyModule::initSearchData()
 QString PasskeyModule::description() const
 {
     return tr("Sign in with a physical security key");
+}
+
+QString PasskeyModule::translationPath() const
+{
+    return QString(":/translations/dcc-passkey-plugin_%1.ts");
 }

@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/translations">
+        <file>dcc-passkey-plugin.ts</file>
+        <file>dcc-passkey-plugin_bo.ts</file>
+        <file>dcc-passkey-plugin_az.ts</file>
+        <file>dcc-passkey-plugin_cs.ts</file>
+        <file>dcc-passkey-plugin_fi.ts</file>
+        <file>dcc-passkey-plugin_hu.ts</file>
+        <file>dcc-passkey-plugin_nl.ts</file>
+        <file>dcc-passkey-plugin_pt.ts</file>
+        <file>dcc-passkey-plugin_sq.ts</file>
+        <file>dcc-passkey-plugin_ug.ts</file>
+        <file>dcc-passkey-plugin_uk.ts</file>
+        <file>dcc-passkey-plugin_zh_CN.ts</file>
+        <file>dcc-passkey-plugin_zh_HK.ts</file>
+        <file>dcc-passkey-plugin_zh_TW.ts</file>
+        <file>dcc-passkey-plugin_de.ts</file>
+        <file>dcc-passkey-plugin_ca.ts</file>
+        <file>dcc-passkey-plugin_es.ts</file>
+        <file>dcc-passkey-plugin_hr.ts</file>
+        <file>dcc-passkey-plugin_it.ts</file>
+        <file>dcc-passkey-plugin_pl.ts</file>
+        <file>dcc-passkey-plugin_pt_BR.ts</file>
+        <file>dcc-passkey-plugin_ru.ts</file>
+        <file>dcc-passkey-plugin_en_US.ts</file>
+    </qresource>
+</RCC>

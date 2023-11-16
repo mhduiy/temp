@@ -39,6 +39,7 @@ public:
     int load(const QString &path) override;
     void addChildPageTrans() const override;
     QString description() const;
+    QString translationPath() const override;
 
 private:
     void initSearchData() override;

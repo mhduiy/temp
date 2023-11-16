@@ -7,6 +7,7 @@ file(GLOB_RECURSE SRCS
     "*.h"
     "*.cpp"
     "module/passkey.qrc"
+    "${PROJECT_SOURCE_DIR}/file/translate/dcc-passkey-plugin/dcc-passkey-plugin.qrc"
     "${PROJECT_SOURCE_DIR}/src/common/*.h"
     "${PROJECT_SOURCE_DIR}/src/common/*.c"
     "${PROJECT_SOURCE_DIR}/src/decode/*.h"
