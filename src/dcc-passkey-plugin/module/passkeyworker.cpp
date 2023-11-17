@@ -22,6 +22,7 @@ using namespace PolkitQt1;
 #define FIDO_ERR_USER_ACTION_PENDING    0x23    // 提示用户要操作设备了，比如触碰
 #define FIDO_ERR_USER_ACTION_TIMEOUT    0x2f    // 操作设备超时
 #define FIDO_ERR_PIN_REQUIRED           0x36    // 认证过程中，触摸超时，协议会让再用PIN试一次，此处直接当超时处理
+#define FIDO_ERR_ACTION_TIMEOUT         0x3a    // 操作设备超时
 
 const QString DisplayManagerService("org.freedesktop.DisplayManager");
 const QString IdErrorFlag("ID_ERR");
@@ -408,8 +409,8 @@ void PasskeyWorker::requestMakeCredStatus(const QString &id, const QString &user
         if (code == FIDO_OK) {
             // 成功
             updateManageInfo();
-        } else if (code == FIDO_ERR_PIN_REQUIRED) {
-            // 认证过程中，触摸超时，协议会让再用PIN试一次，此处直接当超时处理
+        } else if (code == FIDO_ERR_PIN_REQUIRED || code == FIDO_ERR_ACTION_TIMEOUT || code == FIDO_ERR_USER_ACTION_TIMEOUT) {
+            // 超时处理
             updatePromptInfo(PromptType::Timeout);
         } else {
             // 其余错误都按未知错误处理
@@ -539,8 +540,8 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
         if (code == FIDO_OK) {
             // 成功
             m_resetAssertion ? reset() : updateManageInfo();
-        } else if (code == FIDO_ERR_PIN_REQUIRED) {
-            // 认证过程中，触摸超时，协议会让再用PIN试一次，此处直接当超时处理
+        } else if (code == FIDO_ERR_PIN_REQUIRED || code == FIDO_ERR_ACTION_TIMEOUT || code == FIDO_ERR_USER_ACTION_TIMEOUT) {
+            // 超时处理
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
         } else {
             // 其余错误都按未知错误处理
