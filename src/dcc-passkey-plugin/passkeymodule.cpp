@@ -126,6 +126,8 @@ void PasskeyModule::addChildPageTrans() const
 {
     if (m_frameProxy != nullptr) {
         m_frameProxy->addChildPageTrans("Manage Security Key", tr("Manage Security Key"));
+        m_frameProxy->addChildPageTrans("PIN", tr("PIN"));
+        m_frameProxy->addChildPageTrans("Reset Security Key", tr("Reset Security Key"));
     }
 }
 
@@ -155,8 +157,8 @@ void PasskeyModule::initSearchData()
             visible = show;
             m_frameProxy->setModuleVisible(module, visible);
             m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, passkeyPin, visible);
-            m_frameProxy->setDetailVisible(module, passkeyManage, passkeyReset, visible);
+            m_frameProxy->setWidgetVisible(module, passkeyPin, visible);
+            m_frameProxy->setWidgetVisible(module, passkeyReset, visible);
             m_frameProxy->updateSearchData(module);
         }
     });
@@ -165,8 +167,8 @@ void PasskeyModule::initSearchData()
         visible = func_is_visible(hideModuleFlag);
         m_frameProxy->setModuleVisible(module, visible);
         m_frameProxy->setWidgetVisible(module, passkeyManage, visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, passkeyPin, visible);
-        m_frameProxy->setDetailVisible(module, passkeyManage, passkeyReset, visible);
+        m_frameProxy->setWidgetVisible(module, passkeyPin, visible);
+        m_frameProxy->setWidgetVisible(module, passkeyReset, visible);
     };
 
     func_process_all();

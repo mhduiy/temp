@@ -32,8 +32,7 @@ ManageWidget::ManageWidget(QWidget *parent)
     SettingsGroup *keyManageGroup = new SettingsGroup(contentWidget);
 
     TitleAuthorizedItem *pin = new TitleAuthorizedItem(keyManageGroup);
-    //~ contents_path /passkey/Manage Security Key
-    //~ child_page Manage Security Key
+    //~ contents_path /passkey/PIN
     pin->setTitle(tr("PIN"));
     pin->setValueForegroundRole(QColor(255, 0, 0));
     pin->setButtonText(tr("Change"));
@@ -51,8 +50,7 @@ ManageWidget::ManageWidget(QWidget *parent)
     keyManageGroup->appendItem(pin);
 
     TitleAuthorizedItem *resetKey = new TitleAuthorizedItem(keyManageGroup);
-    //~ contents_path /passkey/Manage Security Key
-    //~ child_page Manage Security Key
+    //~ contents_path /passkey/Reset Security Key
     resetKey->setTitle(tr("Reset Security Key"));
     resetKey->setValueForegroundRole(QColor(255, 0, 0));
     resetKey->setButtonText(tr("Reset"));
