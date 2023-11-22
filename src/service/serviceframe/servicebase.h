@@ -25,7 +25,9 @@ typedef struct _Service
     GMainLoop *loop;
     // 注册的方法
     GHashTable *methods;
+    GHashTable *propertys;
     // 空闲退出
+    gint timeoutSecond; // -1 不空闲退出
     guint timeoutSource;
     gint timeoutCallCount;
     mtx_t timeoutCallCountMtx;
@@ -53,6 +55,10 @@ int service_register_interface(Service *srv, const gchar *path, const gchar *int
 // 同步方法，使用GDBusMethodInvocation直接应答
 // 异步方法，无需应答，如果需要通过信号通知结果
 void service_register_method(Service *srv, const gchar *methodName, ServiceMethod cb, gboolean isAsync);
+// 注册属性, 参数propName、value外部自行free和unref
+void service_register_property(Service *srv, const gchar *propName, GVariant *value);
+int service_set_property(Service *srv, const gchar *propName, GVariant *value);
+int service_get_property(Service *srv, const gchar *propName, GVariant **value);
 // 启动服务，会阻塞直接结束
 void service_run(Service *srv);
 // 服务资源释放

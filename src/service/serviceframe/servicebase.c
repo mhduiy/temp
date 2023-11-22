@@ -30,8 +30,9 @@ static gboolean service_timeout_cb(gpointer serviceData)
     return TRUE;
 }
 
-static void service_timeout_method_called_end(gpointer serviceData)
+static void service_timeout_unref(gpointer serviceData)
 {
+    gint timeoutSecond = -1;
     gint count = 0;
     guint source = 0;
     Service *srv = (Service *)serviceData;
@@ -43,20 +44,24 @@ static void service_timeout_method_called_end(gpointer serviceData)
     srv->timeoutCallCount--;
     count = srv->timeoutCallCount;
     source = srv->timeoutSource;
+    timeoutSecond = srv->timeoutSecond;
     mtx_unlock(&(srv->timeoutCallCountMtx));
     LOG(LOG_DEBUG, "service-called end, try to exit? call count: %d", count);
     if (source != 0) {
         return;
     }
+    if (timeoutSecond == -1) {
+        return;
+    }
     if (count == 0) {
-        source = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, serviceData);
+        source = g_timeout_add_seconds(timeoutSecond, (GSourceFunc)service_timeout_cb, serviceData);
         mtx_lock(&(srv->timeoutCallCountMtx));
         srv->timeoutSource = source;
         mtx_unlock(&(srv->timeoutCallCountMtx));
     }
 }
 
-static void service_timeout_method_called(gpointer serviceData)
+static void service_timeout_ref(gpointer serviceData)
 {
     gint count = 0;
     guint source = 0;
@@ -86,7 +91,9 @@ static MethodContext *mehtod_context_new(const gchar *sender, ServiceMethod cb, 
     method->sender = g_strdup(sender);
     method->cb = cb;
 
-    method->parameters = g_variant_get_normal_form(param);
+    if (param != NULL) {
+        method->parameters = g_variant_get_normal_form(param);
+    }
     method->invocation = invocation;
     method->serviceData = serviceData;
     method->callId = g_uuid_string_random();
@@ -123,9 +130,9 @@ static int method_call(void *data)
     if (mc == NULL || mc->cb == NULL) {
         return -1;
     }
-    service_timeout_method_called(mc->serviceData);
+    service_timeout_ref(mc->serviceData);
     (*(mc->cb))(mc);
-    service_timeout_method_called_end(mc->serviceData);
+    service_timeout_unref(mc->serviceData);
 
     mehtod_context_delete(mc);
     return 0;
@@ -197,6 +204,73 @@ static void handle_method(GDBusConnection *connection,
     return;
 }
 
+static GVariant *handle_get_property(
+                    GDBusConnection *connection,
+                    const gchar *sender,
+                    const gchar *objectPath,
+                    const gchar *interfaceName,
+                    const gchar *propertyName,
+                    GError **error,
+                    gpointer serviceData)
+{
+    UNUSED_VALUE(connection);
+    UNUSED_VALUE(sender);
+    UNUSED_VALUE(objectPath);
+    UNUSED_VALUE(interfaceName);
+    UNUSED_VALUE(error);
+    LOG(LOG_INFO, "Received call get '%s' from %s", propertyName, sender);
+
+    Service *srv = (Service *)serviceData;
+    if (srv == NULL || srv->propertys == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return NULL;
+    }
+    service_timeout_ref(srv);
+    GVariant *val = NULL;
+    do {
+        if (service_get_property(srv, propertyName, &val) != 0) {
+            LOG(LOG_ERR, "insert prop map failed");
+            break;
+        }
+    } while (0);
+    service_timeout_unref(srv);
+
+    return val;
+}
+
+static gboolean handle_set_property(
+                GDBusConnection *connection,
+                const gchar *sender,
+                const gchar *objectPath,
+                const gchar *interfaceName,
+                const gchar *propertyName,
+                GVariant *value,
+                GError **error,
+                gpointer serviceData)
+{
+    UNUSED_VALUE(connection);
+    UNUSED_VALUE(sender);
+    UNUSED_VALUE(objectPath);
+    UNUSED_VALUE(interfaceName);
+    UNUSED_VALUE(error);
+    Service *srv = (Service *)serviceData;
+    if (srv == NULL || srv->propertys == NULL) {
+        LOG(LOG_ERR, "param invalid");
+        return TRUE;
+    }
+
+    service_timeout_ref(srv);
+    do {
+        if (service_set_property(srv, propertyName, value) != 0) {
+            LOG(LOG_ERR, "insert prop map failed");
+            break;
+        }
+    } while (0);
+    service_timeout_unref(srv);
+
+    return TRUE;
+}
+
 static void free_methods_key(gpointer data)
 {
     if (data == NULL) {
@@ -218,30 +292,48 @@ static void free_methods_value(gpointer data)
     free(info);
 }
 
+static void free_propertys_key(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_free(data);
+}
+
+static void free_propertys_value(gpointer data)
+{
+    if (data == NULL) {
+        return;
+    }
+    g_variant_unref(data);
+}
+
 int service_register_interface(Service *srv, const gchar *path, const gchar *interface, const gchar *interfaceXml)
 {
     GError *error = NULL;
-    GDBusNodeInfo *introspection_data;
-    GDBusInterfaceInfo *interface_info;
+    GDBusNodeInfo *introspectionData;
+    GDBusInterfaceInfo *interfaceInfo;
     int ret = -1;
 
-    GDBusInterfaceVTable interface_vtable = {
+    GDBusInterfaceVTable interfaceVtable = {
         .method_call = handle_method,
+        .get_property = handle_get_property,
+        .set_property = handle_set_property,
     };
 
-    introspection_data = g_dbus_node_info_new_for_xml(interfaceXml, &error);
+    introspectionData = g_dbus_node_info_new_for_xml(interfaceXml, &error);
     if (error != NULL) {
         LOG(LOG_ERR, "Unable to create introspection data: %s", error->message);
         goto end;
     }
 
-    interface_info = g_dbus_node_info_lookup_interface(introspection_data, interface);
-    if (interface_info == NULL) {
+    interfaceInfo = g_dbus_node_info_lookup_interface(introspectionData, interface);
+    if (interfaceInfo == NULL) {
         LOG(LOG_ERR, "Unable to lookup interface info");
         goto end;
     }
 
-    guint registration_id = g_dbus_connection_register_object(srv->connection, path, interface_info, &interface_vtable, (gpointer)srv, NULL, NULL);
+    guint registration_id = g_dbus_connection_register_object(srv->connection, path, interfaceInfo, &interfaceVtable, (gpointer)srv, NULL, NULL);
     if (registration_id == 0) {
         LOG(LOG_ERR, "Unable to register object");
         goto end;
@@ -251,8 +343,8 @@ int service_register_interface(Service *srv, const gchar *path, const gchar *int
 end:
     if (error != NULL) {
         g_error_free(error);
-        if (introspection_data != NULL) {
-            g_dbus_node_info_unref(introspection_data);
+        if (introspectionData != NULL) {
+            g_dbus_node_info_unref(introspectionData);
         }
     }
     return ret;
@@ -271,11 +363,15 @@ int service_init(Service *srv, const gchar *busName, gpointer customData)
     srv->timeoutSource = 0;
     srv->timeoutCallCount = 0;
     srv->customData = customData;
+    srv->timeoutSecond = SERVICE_TIMEOUT;
 
     srv->methods = g_hash_table_new_full(g_str_hash, g_str_equal, free_methods_key, free_methods_value);
+    srv->propertys = g_hash_table_new_full(g_str_hash, g_str_equal, free_propertys_key, free_propertys_value);
 
     mtx_init(&(srv->timeoutCallCountMtx), mtx_plain);
-    srv->timeoutSource = g_timeout_add_seconds(SERVICE_TIMEOUT, (GSourceFunc)service_timeout_cb, (gpointer)srv);
+    if (srv->timeoutSecond > 0) {
+        srv->timeoutSource = g_timeout_add_seconds(srv->timeoutSecond, (GSourceFunc)service_timeout_cb, (gpointer)srv);
+    }
 
     srv->connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
     if (error != NULL) {
@@ -312,6 +408,9 @@ void service_unref(Service *srv)
     if (srv->methods != NULL) {
         g_hash_table_destroy(srv->methods);
     }
+    if (srv->propertys != NULL) {
+        g_hash_table_destroy(srv->propertys);
+    }
 
     if (srv->busOwnId > 0) {
         g_bus_unown_name(srv->busOwnId);
@@ -341,4 +440,61 @@ void service_register_method(Service *srv, const gchar *methodName, ServiceMetho
     info->cb = cb;
     info->isAsync = isAsync;
     g_hash_table_insert(srv->methods, g_strdup(methodName), info);
+}
+
+void service_register_property(Service *srv, const gchar *propName, GVariant *value)
+{
+    if (srv == NULL || srv->propertys == NULL || propName == NULL || value == NULL) {
+        LOG(LOG_WARNING, "param is invalid.");
+        return;
+    }
+
+    g_hash_table_insert(srv->propertys, g_strdup(propName), g_variant_ref(value));
+}
+
+int service_get_property(Service *srv, const gchar *propName, GVariant **value)
+{
+    int ret = -1;
+    GVariant *val = NULL;
+
+    if (srv == NULL || srv->propertys == NULL || propName == NULL || value == NULL) {
+        LOG(LOG_WARNING, "param is invalid.");
+        goto end;
+    }
+
+    val = (GVariant *)g_hash_table_lookup(srv->propertys, propName);
+    if (val == NULL) {
+        LOG(LOG_ERR, "property is not registered");
+        goto end;
+    }
+    *value = g_variant_ref(val);
+    ret = 0;
+end:
+    return ret;
+}
+
+int service_set_property(Service *srv, const gchar *propName, GVariant *value)
+{
+    int ret = -1;
+    if (srv == NULL || srv->propertys == NULL || propName == NULL || value == NULL) {
+        LOG(LOG_WARNING, "param is invalid.");
+        goto end;
+    }
+
+    GVariant *val = NULL;
+    val = (GVariant *)g_hash_table_lookup(srv->propertys, propName);
+    if (val == NULL) {
+        LOG(LOG_ERR, "property is not registered");
+        goto end;
+    }
+    if (!g_hash_table_insert(srv->propertys, g_strdup(propName), g_variant_ref(value))) {
+        LOG(LOG_ERR, "insert prop map failed");
+        goto end;
+    }
+
+    // if need, to send signal property change notifications
+
+    ret = 0;
+end:
+    return ret;
 }

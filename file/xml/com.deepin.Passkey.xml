@@ -59,6 +59,7 @@
             <arg name='keyType' direction='in' type='i'/>
             <arg name='key' direction='in' type='s'/>
         </method>
+        <property name='Version' type='s' access='read'></property>
         <signal name='ResetStatus'>
             <arg name='id' type='s'></arg>
             <arg name='finish' type='i'></arg>

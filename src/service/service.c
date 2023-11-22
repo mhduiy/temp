@@ -10,6 +10,7 @@
 #include "err.h"
 #include "manager.h"
 #include "servicedata.h"
+#include "serviceproperty.h"
 #include "servicesignal.h"
 
 #include <fido.h>
@@ -737,6 +738,8 @@ void dpk_service_start()
     service_register_method(&srv, "DeviceClose", dpk_service_api_device_close, false);
     service_register_method(&srv, "EncryptKey", dpk_service_api_encrypt_key, false);
     service_register_method(&srv, "SetSymmetricKey", dpk_service_api_set_symmetric_key, false);
+
+    service_property_version_init(&srv);
 
     service_run(&srv); // in loop, and end when exit
 
