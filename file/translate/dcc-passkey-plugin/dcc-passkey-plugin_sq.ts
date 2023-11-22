@@ -95,29 +95,31 @@
         <extra-contents_path>/passkey/Manage Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="35"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="36"/>
         <source>PIN</source>
         <translation>PIN</translation>
+        <extra-contents_path>/passkey/PIN</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="38"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
         <source>Change</source>
         <translation>Ndryshoje</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="47"/>
         <source>Setting</source>
         <translation>Rregullim</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
         <source>Reset Security Key</source>
         <translation>Riujdisni Kyç Sigurie</translation>
+        <extra-contents_path>/passkey/Reset Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="56"/>
         <source>Reset</source>
         <translation>Ricaktojeni</translation>
     </message>
@@ -131,14 +133,24 @@
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="128"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="135"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="156"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="165"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="137"/>
         <source>Manage Security Key</source>
         <translation>Administroni Kyç Sigurie</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="173"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="129"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="138"/>
+        <source>PIN</source>
+        <translation>PIN</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="130"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="139"/>
+        <source>Reset Security Key</source>
+        <translation>Ricaktoni Kyç Sigurie</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="179"/>
         <source>Sign in with a physical security key</source>
         <translation>Bëni hyrjen me një kyç material sigurie</translation>
     </message>
@@ -146,58 +158,58 @@
 <context>
     <name>PasskeyWorker</name>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Please plug in the security key</source>
         <translation>Ju lutemi, futni kyçin e sigurisë</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Identifying the security key</source>
         <translation>Po identifikohet kyç sigurie</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Touch or swipe the security key</source>
         <translation>Prekni ose fërkoni me gisht kyçin e sigurisë</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Validation timed out</source>
         <translation>Mbaroi koha për vlerësimin</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Retry</source>
         <translation>Riprovoni</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
         <translation>Kyçi i sigurisë është i pranueshëm, mund ta regjistroni për mirëfilltësim hyrjesh.</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Register</source>
         <translation>Regjistroje</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Unknown error</source>
         <translation>Gabim i panjohur</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="627"/>
         <source>PIN error</source>
         <translation>Gabim PIN-i</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="630"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="631"/>
         <source>PIN locked, please replug</source>
         <translation>PIN-i u kyç, ju lutemi, rivendosni pajisjen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="635"/>
         <source>PIN Blocked</source>
         <translation>PIN i Bllokuar</translation>
     </message>

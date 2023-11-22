@@ -95,29 +95,31 @@
         <extra-contents_path>/passkey/Manage Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="35"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="36"/>
         <source>PIN</source>
         <translation>Pincode</translation>
+        <extra-contents_path>/passkey/PIN</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="38"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
         <source>Change</source>
         <translation>Wĳzigen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="47"/>
         <source>Setting</source>
         <translation>Instellen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
         <source>Reset Security Key</source>
         <translation>Beveiligingssleutel herstellen</translation>
+        <extra-contents_path>/passkey/Reset Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="56"/>
         <source>Reset</source>
         <translation>Herstellen</translation>
     </message>
@@ -131,14 +133,24 @@
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="128"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="135"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="156"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="165"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="137"/>
         <source>Manage Security Key</source>
         <translation>Beveiligingssleutel beheren</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="173"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="129"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="138"/>
+        <source>PIN</source>
+        <translation>Pincode</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="130"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="139"/>
+        <source>Reset Security Key</source>
+        <translation>Beveiligingssleutel herstellen</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="179"/>
         <source>Sign in with a physical security key</source>
         <translation>Inloggen met fysieke beveiligingssleutel</translation>
     </message>
@@ -146,58 +158,58 @@
 <context>
     <name>PasskeyWorker</name>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Please plug in the security key</source>
         <translation>Plug de beveiligingssleutel in</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Identifying the security key</source>
         <translation>Bezig met identificeren van sleutel…</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Touch or swipe the security key</source>
         <translation>Raak de beveiligingssleutel aan of veeg erover</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Validation timed out</source>
         <translation>De goedkeuring is verlopen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Retry</source>
         <translation>Opnieuw proberen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
         <translation>De beveiligingssleutel is herkend. Je kunt de sleutel nu instellen als inlogmethode.</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Register</source>
         <translation>Instellen</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Unknown error</source>
         <translation>Onbekende foutmelding</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="627"/>
         <source>PIN error</source>
         <translation>Pincodefout</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="630"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="631"/>
         <source>PIN locked, please replug</source>
         <translation>De pincode is vergrendeld - plug opnieuw in</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="635"/>
         <source>PIN Blocked</source>
         <translation>De pincode is geblokkeerd</translation>
     </message>
@@ -236,7 +248,7 @@
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="124"/>
         <source>Resetting the security key includes, but is not limited to, the following processes: Revoking the current system-generated certificate, erasing all stored certificates, deleting biometric authentication credentials record data, and resetting some of the features and settings of the security key.</source>
-        <translation type="unfinished"/>
+        <translation>Door de beveiligingssleutel te herstellen gebeurt het volgende: de huidige systeemcertificaten worden ingetrokken, alle bewaarde certificaten worden gewist, evenals alle biometrische gegevens, en enkele functies en instellingen van de sleutel worden teruggezet op de standaardwaarden.</translation>
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/window/widgets/resetkeydialogctrl.cpp" line="192"/>

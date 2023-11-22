@@ -95,29 +95,31 @@
         <extra-contents_path>/passkey/Manage Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="35"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="36"/>
         <source>PIN</source>
         <translation>安全密钥 PIN</translation>
+        <extra-contents_path>/passkey/PIN</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="38"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
         <source>Change</source>
         <translation>更 改</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="47"/>
         <source>Setting</source>
         <translation>设 置</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
         <source>Reset Security Key</source>
         <translation>重置安全密钥</translation>
+        <extra-contents_path>/passkey/Reset Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="56"/>
         <source>Reset</source>
         <translation>重 置</translation>
     </message>
@@ -131,14 +133,24 @@
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="128"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="135"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="156"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="165"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="137"/>
         <source>Manage Security Key</source>
         <translation>管理安全密钥</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="173"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="129"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="138"/>
+        <source>PIN</source>
+        <translation>安全密钥 PIN</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="130"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="139"/>
+        <source>Reset Security Key</source>
+        <translation>重置安全密钥</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="179"/>
         <source>Sign in with a physical security key</source>
         <translation>使用物理安全密钥登录</translation>
     </message>
@@ -146,58 +158,58 @@
 <context>
     <name>PasskeyWorker</name>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Please plug in the security key</source>
         <translation>请插入安全密钥</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Identifying the security key</source>
         <translation>正在识别安全密钥</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Touch or swipe the security key</source>
         <translation>请验证安全密钥，触摸或轻扫设备</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Validation timed out</source>
         <translation>验证安全密钥超时</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Retry</source>
         <translation>重 试</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
         <translation>识别到未添加的安全密钥，添加后可用于登录认证。</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Register</source>
         <translation>添加设备</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Unknown error</source>
         <translation>未知错误</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="627"/>
         <source>PIN error</source>
         <translation>PIN 错误</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="630"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="631"/>
         <source>PIN locked, please replug</source>
         <translation>PIN 锁定，请重新插入</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="635"/>
         <source>PIN Blocked</source>
         <translation>PIN 锁定</translation>
     </message>

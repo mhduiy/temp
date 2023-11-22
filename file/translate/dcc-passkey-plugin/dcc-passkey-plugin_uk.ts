@@ -95,29 +95,31 @@
         <extra-contents_path>/passkey/Manage Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="35"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="36"/>
         <source>PIN</source>
         <translation>PIN</translation>
+        <extra-contents_path>/passkey/PIN</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="37"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="38"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
         <source>Change</source>
         <translation>Змінити</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="43"/>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="47"/>
         <source>Setting</source>
         <translation>Встановлення</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="52"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
         <source>Reset Security Key</source>
         <translation>Скинути ключ захисту</translation>
+        <extra-contents_path>/passkey/Reset Security Key</extra-contents_path>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="54"/>
+        <location filename="../../../src/dcc-passkey-plugin/window/widgets/managewidget.cpp" line="56"/>
         <source>Reset</source>
         <translation>Скинути</translation>
     </message>
@@ -131,14 +133,24 @@
     </message>
     <message>
         <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="128"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="135"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="156"/>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="165"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="137"/>
         <source>Manage Security Key</source>
         <translation>Керування ключами захисту</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="173"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="129"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="138"/>
+        <source>PIN</source>
+        <translation>PIN</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="130"/>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="139"/>
+        <source>Reset Security Key</source>
+        <translation>Скинути ключ захисту</translation>
+    </message>
+    <message>
+        <location filename="../../../src/dcc-passkey-plugin/passkeymodule.cpp" line="179"/>
         <source>Sign in with a physical security key</source>
         <translation>Входити за допомогою фізичного ключа захисту</translation>
     </message>
@@ -146,58 +158,58 @@
 <context>
     <name>PasskeyWorker</name>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="42"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
         <source>Please plug in the security key</source>
         <translation>Будь ласка, вставте ключ захисту</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="43"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
         <source>Identifying the security key</source>
         <translation>Ідентифікуємо ключ захисту</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="44"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
         <source>Touch or swipe the security key</source>
         <translation>Торкніться або проведіть пальцем на ключі захисту</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
         <source>Validation timed out</source>
         <translation>Перевищено строк перевірки</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="45"/>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Retry</source>
         <translation>Спробувати ще раз</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>The security key is recognized, you can register it for login authentication.</source>
         <translation>Ключ захисту розпізнано. Ви можете зареєструвати його для входу  до системи</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="46"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
         <source>Register</source>
         <translation>Зареєструвати</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="47"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="48"/>
         <source>Unknown error</source>
         <translation>Невідома помилка</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="626"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="627"/>
         <source>PIN error</source>
         <translation>Помилка PIN</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="630"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="631"/>
         <source>PIN locked, please replug</source>
         <translation>PIN заблоковано. Будь ласка, вставте ще раз</translation>
     </message>
     <message>
-        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="634"/>
+        <location filename="../../../src/dcc-passkey-plugin/module/passkeyworker.cpp" line="635"/>
         <source>PIN Blocked</source>
         <translation>PIN заблоковано</translation>
     </message>
