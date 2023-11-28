@@ -9,8 +9,6 @@
 #include "module/common.h"
 #include "gsettingwatcher.h"
 
-#include <DConfig>
-
 DCORE_USE_NAMESPACE
 
 Q_LOGGING_CATEGORY(DCC_PASSKEY, "dcc.passkey")
@@ -21,6 +19,7 @@ PasskeyModule::PasskeyModule(QObject *parent)
     , m_model(nullptr)
     , m_worker(nullptr)
     , m_workerThread(nullptr)
+    , m_dconfig(nullptr)
 {
     QTranslator *translator = new QTranslator(this);
     translator->load(QString("/usr/share/dcc-passkey-plugin/translations/dcc-passkey-plugin_%1.qm").arg(QLocale::system().name()));
@@ -38,12 +37,24 @@ PasskeyModule::~PasskeyModule()
 void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pushtype)
 {
     bool hide = true;
-    DConfig *config = DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin");
-    if ((config && config->isValid())) {
-        hide = config->value("dccPasskeyPluginHideStatus", true).toBool();
+    m_dconfig = Dtk::Core::DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin", QString(), this);
+    if ((m_dconfig && m_dconfig->isValid())) {
+        hide = m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
+
+        connect(m_dconfig, &DConfig::valueChanged, this, [this](const QString &key) {
+            if (key != "dccPasskeyPluginHideStatus") {
+                return;
+            }
+
+            const bool show = !m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
+            setAvailable(show);
+            m_frameProxy->setModuleVisible(this, show);
+        });
     }
+
     if (hide) {
         qCInfo(DCC_PASSKEY) << displayName() << " is disabled";
+        m_frameProxy->setModuleVisible(this, false);
         setAvailable(false);
         return;
     }
@@ -152,7 +163,7 @@ void PasskeyModule::initSearchData()
             return;
         }
 
-        bool show = !GSettingWatcher::instance()->get(gsetting).toString().contains("passkey");
+        const bool show = !GSettingWatcher::instance()->get(gsetting).toString().contains("passkey");
         if (show != visible) {
             visible = show;
             m_frameProxy->setModuleVisible(module, visible);
@@ -162,6 +173,21 @@ void PasskeyModule::initSearchData()
             m_frameProxy->updateSearchData(module);
         }
     });
+
+    if ((m_dconfig && m_dconfig->isValid())) {
+        connect(m_dconfig, &DConfig::valueChanged, this, [=](const QString &key) {
+            if (key != "dccPasskeyPluginHideStatus") {
+                return;
+            }
+
+            const bool show = !m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
+            m_frameProxy->setModuleVisible(module, show);
+            m_frameProxy->setWidgetVisible(module, passkeyManage, show);
+            m_frameProxy->setWidgetVisible(module, passkeyPin, show);
+            m_frameProxy->setWidgetVisible(module, passkeyReset, show);
+            m_frameProxy->updateSearchData(module);
+        });
+    }
 
     auto func_process_all = [ = ] {
         visible = func_is_visible(hideModuleFlag);

@@ -12,6 +12,8 @@
 #include "window/passkeywidget.h"
 #include "module/passkeyworker.h"
 
+#include <DConfig>
+
 using namespace DCC_NAMESPACE;
 
 class PasskeyWidget;
@@ -49,4 +51,5 @@ private:
     PasskeyModel *m_model;
     QSharedPointer<PasskeyWorker> m_worker;
     QSharedPointer<QThread> m_workerThread;
+    Dtk::Core::DConfig *m_dconfig;
 };
