@@ -45,11 +45,8 @@ void KeyPinDialogCtrl::showSetPinDialog()
         initSetPinDialogUI();
     }
     m_setPinState = true;
-    m_setPinDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_setPinDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_setPinDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_setPinDialog->setModal(true);
     m_setPinDialog->show();
-    m_setPinDialog->activateWindow();
 }
 
 void KeyPinDialogCtrl::initSetPinDialogUI()
@@ -150,11 +147,8 @@ void KeyPinDialogCtrl::showChangePinDialog()
         initChangePinDialogUI();
     }
     m_setPinState = false;
-    m_changePinDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_changePinDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_changePinDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_changePinDialog->setModal(true);
     m_changePinDialog->show();
-    m_changePinDialog->activateWindow();
 }
 
 void KeyPinDialogCtrl::initChangePinDialogUI()
@@ -268,11 +262,8 @@ void KeyPinDialogCtrl::showFailedDialog()
     }
 
     m_failedTipLabel->setText(m_setPinState ? tr("Setting Failure") : tr("Change Failed"));
-    m_failedDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_failedDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_failedDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_failedDialog->setModal(true);
     m_failedDialog->show();
-    m_failedDialog->activateWindow();
 }
 
 void KeyPinDialogCtrl::initFailedDialogUI()

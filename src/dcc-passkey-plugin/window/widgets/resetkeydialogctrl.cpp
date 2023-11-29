@@ -85,12 +85,9 @@ void ResetKeyDialogCtrl::showDescriptionDialog()
     m_descriptionDialog->getButton(1)->setText(tr("Reset") + "(" + QString::number(m_resetTimerCount) + "s)");
     m_descriptionDialog->getButton(1)->setEnabled(false);
 
-    m_descriptionDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_descriptionDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_descriptionDialog->setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-    m_descriptionDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_descriptionDialog->setModal(true);
     m_descriptionDialog->show();
-    m_descriptionDialog->activateWindow();
+
     m_resetTimer->start();
 }
 
@@ -156,11 +153,8 @@ void ResetKeyDialogCtrl::showInsertDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
-    m_insertDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_insertDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_insertDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_insertDialog->setModal(true);
     m_insertDialog->show();
-    m_insertDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initInsertDialogUI()
@@ -210,11 +204,8 @@ void ResetKeyDialogCtrl::showIdentifyingDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
-    m_identifyingDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_identifyingDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_identifyingDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_identifyingDialog->setModal(true);
     m_identifyingDialog->show();
-    m_identifyingDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initIdentifyingDeviceUI()
@@ -280,11 +271,8 @@ void ResetKeyDialogCtrl::showFirstTouchDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
-    m_firstTouchDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_firstTouchDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_firstTouchDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_firstTouchDialog->setModal(true);
     m_firstTouchDialog->show();
-    m_firstTouchDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initFirstTouchDialogUI()
@@ -335,11 +323,8 @@ void ResetKeyDialogCtrl::showSecondTouchDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
-    m_secondTouchDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_secondTouchDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_secondTouchDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_secondTouchDialog->setModal(true);
     m_secondTouchDialog->show();
-    m_secondTouchDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initSecondTouchDialogUI()
@@ -389,10 +374,8 @@ void ResetKeyDialogCtrl::showFailedDialog()
 
     initResetTimer();
     hideAllDialog();
-    m_failedDialog->setAttribute(Qt::WA_ShowModal, true);
-    m_failedDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
+    m_failedDialog->setModal(true);
     m_failedDialog->show();
-    m_failedDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initFailedDialogUI()
@@ -450,11 +433,8 @@ void ResetKeyDialogCtrl::showResultDialog(bool success)
         m_resultPicLabel->setPixmap(ResetFailedIcon.pixmap(128, 128));
         m_resultTipLabel->setText(tr("Unable to complete the security key reset"));
     }
-    m_resultDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-    m_resultDialog->setWindowFlag(Qt::WindowMinimizeButtonHint, false);
-    m_resultDialog->setAttribute(Qt::WA_ShowModal, true);
+    m_resultDialog->setModal(true);
     m_resultDialog->show();
-    m_resultDialog->activateWindow();
 }
 
 void ResetKeyDialogCtrl::initResultDialogUI()
