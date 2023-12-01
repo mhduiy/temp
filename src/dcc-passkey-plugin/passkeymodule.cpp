@@ -36,29 +36,6 @@ PasskeyModule::~PasskeyModule()
 
 void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pushtype)
 {
-    bool hide = true;
-    m_dconfig = Dtk::Core::DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin", QString(), this);
-    if ((m_dconfig && m_dconfig->isValid())) {
-        hide = m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
-
-        connect(m_dconfig, &DConfig::valueChanged, this, [this](const QString &key) {
-            if (key != "dccPasskeyPluginHideStatus") {
-                return;
-            }
-
-            const bool show = !m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
-            setAvailable(show);
-            m_frameProxy->setModuleVisible(this, show);
-        });
-    }
-
-    if (hide) {
-        qCInfo(DCC_PASSKEY) << displayName() << " is disabled";
-        m_frameProxy->setModuleVisible(this, false);
-        setAvailable(false);
-        return;
-    }
-
     Q_UNUSED(sync);
     Q_UNUSED(pushtype);
 
@@ -75,6 +52,26 @@ void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pusht
 
     addChildPageTrans();
     initSearchData();
+
+    bool hide = true;
+    m_dconfig = Dtk::Core::DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin", QString(), this);
+    if ((m_dconfig && m_dconfig->isValid())) {
+        hide = m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
+        connect(m_dconfig, &DConfig::valueChanged, this, [this](const QString &key) {
+            if (key != "dccPasskeyPluginHideStatus") {
+                return;
+            }
+
+            const bool show = !m_dconfig->value("dccPasskeyPluginHideStatus", true).toBool();
+            setAvailable(show);
+            m_frameProxy->setModuleVisible(this, show);
+        });
+    }
+    if (hide) {
+        qCInfo(DCC_PASSKEY) << displayName() << " is disabled";
+        m_frameProxy->setModuleVisible(this, false);
+        setAvailable(false);
+    }
 }
 
 void PasskeyModule::initialize()
