@@ -51,7 +51,6 @@ void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pusht
     Q_EMIT m_worker->requestInit();
 
     addChildPageTrans();
-    initSearchData();
 
     bool hide = true;
     m_dconfig = Dtk::Core::DConfig::create("org.deepin.dde.passkey", "org.deepin.dde.passkey.dcc-plugin", QString(), this);
@@ -69,9 +68,12 @@ void PasskeyModule::preInitialize(bool sync, FrameProxyInterface::PushType pusht
     }
     if (hide) {
         qCInfo(DCC_PASSKEY) << displayName() << " is disabled";
-        m_frameProxy->setModuleVisible(this, false);
         setAvailable(false);
+        m_frameProxy->setModuleVisible(this, false);
     }
+
+    // 函数内部需要用到m_dconfig，需要先create
+    initSearchData();
 }
 
 void PasskeyModule::initialize()
