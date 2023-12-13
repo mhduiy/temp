@@ -34,8 +34,6 @@ TEST_F(DISABLED_TestServiceDevInfo, DevInfo)
     int versionsCount;
     char **versions = nullptr;
 
-    fido_init(FIDO_DEBUG);
-
     auto printInfoOptSupport = [](const char *param, int type) {
         // 0 1 2 不支持、支持且已有设置、支持但未设置
         if (type == 0) {
@@ -48,6 +46,8 @@ TEST_F(DISABLED_TestServiceDevInfo, DevInfo)
             printf("[DEV-INFO]opt-param:%s, invalid type:%d.\n", param, type);
         }
     };
+
+    fido_init(FIDO_DEBUG);
 
     if ((callRet = dpk_dev_info_find_existed(&devInfoList, &nDevInfos)) != FIDO_OK) {
         printf("Unable to discover device(s)\n");

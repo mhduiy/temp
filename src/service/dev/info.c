@@ -17,10 +17,14 @@
 // 从设备获取info信息
 int dpk_dev_get_info(fido_dev_t *dev, fido_cbor_info_t **info)
 {
-    fido_cbor_info_t *infoRes;
+    fido_cbor_info_t *infoRes = NULL;
     int ret = 0;
     int callRet = FIDO_ERR_INTERNAL;
 
+    if (dev == NULL) {
+        LOG(LOG_ERR, "device is null.");
+        goto end;
+    }
     if (!fido_dev_is_fido2(dev)) {
         LOG(LOG_ERR, "device is not fido2");
         goto end;
@@ -276,4 +280,17 @@ bool dpk_dev_check_version_exist(const char **versions, int versionsCount, const
         }
     }
     return false;
+}
+
+int dpk_dev_get_uv_modality(fido_cbor_info_t *info, uint64_t *modality)
+{
+    int callRet = FIDO_ERR_INTERNAL;
+    if (info == NULL || modality == NULL) {
+        LOG(LOG_ERR, "param invalid.");
+        goto end;
+    }
+    *modality = fido_cbor_info_uv_modality(info);
+    callRet = FIDO_OK;
+end:
+    return callRet;
 }

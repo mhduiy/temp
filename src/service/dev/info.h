@@ -47,6 +47,9 @@ int dpk_dev_check_fido2_support_no_pin_req(fido_cbor_info_t *info, int *support)
 // 检查version是否存在versions列表
 bool dpk_dev_check_version_exist(const char **versions, int versionsCount, const char *version);
 
+// 生物认证
+int dpk_dev_get_uv_modality(fido_cbor_info_t *info, uint64_t *modality);
+
 #ifdef __cplusplus
 }
 #endif

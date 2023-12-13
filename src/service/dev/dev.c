@@ -215,7 +215,7 @@ int dpk_dev_open_all_dev(fido_dev_info_t *devInfoList, size_t nDevInfos, fido_de
 // 该方式只支持已插入的设备
 int dpk_dev_select_dev(fido_dev_info_t *devList, size_t nDevs, fido_dev_t **dev)
 {
-    fido_dev_t **devTab; // 识别到的设备都创建对象
+    fido_dev_t **devTab = NULL; // 识别到的设备都创建对象
     size_t nOpen = 0;
     struct timespec tsStart;
     struct timespec tsNow;

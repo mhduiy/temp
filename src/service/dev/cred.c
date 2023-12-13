@@ -412,7 +412,10 @@ void dk_dev_reset_cred(CredInfo *cred)
 static int parse_native_credential(char *s, CredInfo *cred)
 {
     const char *delim = ",";
-    const char *kh, *pk, *type, *attr;
+    const char *kh = NULL;
+    const char *pk = NULL;
+    const char *type = NULL;
+    const char *attr = NULL;
     char *saveptr = NULL;
 
     memset(cred, 0, sizeof(*cred));
@@ -682,7 +685,8 @@ static void parse_opts(const AssertArgs *args, struct opts *opts)
 
 static int match_device_opts(fido_dev_t *dev, struct opts *opts)
 {
-    int pin, uv;
+    int pin = 0;
+    int uv = 0;
     int callRet = FIDO_ERR_INTERNAL;
 
     /* FIXME: fido_dev_{supports,has}_{pin,uv} (1.7.0) */
@@ -845,7 +849,7 @@ end:
 static bool parse_pk(int old, const char *type, const char *pk, struct pk *out)
 {
     unsigned char *buf = NULL;
-    size_t buf_len;
+    size_t buf_len = 0;
     int ret = 0;
     bool success = false;
 
