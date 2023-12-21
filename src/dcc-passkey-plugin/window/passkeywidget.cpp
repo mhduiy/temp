@@ -170,7 +170,7 @@ void PasskeyWidget::initUI()
 void PasskeyWidget::showKeyPinDialog(const SetPinDialogStyle &style)
 {
     if (!m_setPinDialogCtrl) {
-        m_setPinDialogCtrl = new KeyPinDialogCtrl();
+        m_setPinDialogCtrl = new KeyPinDialogCtrl(this);
         connect(m_setPinDialogCtrl, &KeyPinDialogCtrl::requestSetPin, this, &PasskeyWidget::requestSetKeyPin);
     }
 
@@ -193,7 +193,7 @@ void PasskeyWidget::showKeyPinDialog(const SetPinDialogStyle &style)
 void PasskeyWidget::showResetKeyDialog(const ResetDialogStyle &style, bool status)
 {
     if (!m_resetKeyDialogCtrl) {
-        m_resetKeyDialogCtrl = new ResetKeyDialogCtrl();
+        m_resetKeyDialogCtrl = new ResetKeyDialogCtrl(this);
         connect(m_resetKeyDialogCtrl, &ResetKeyDialogCtrl::resetBtnClicked, this, [this] {
             if (!m_worker->existDevice()) {
                 m_resetPasskeyMonitorTimer->stop();

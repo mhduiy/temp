@@ -16,7 +16,7 @@ class KeyPinDialogCtrl : public QObject
 {
     Q_OBJECT
 public:
-    explicit KeyPinDialogCtrl(QObject *parent = nullptr);
+    explicit KeyPinDialogCtrl(QWidget *parent, QObject *obj = nullptr);
     ~KeyPinDialogCtrl() override;
 
     void hideAllDialog();
@@ -39,6 +39,7 @@ private:
     bool judgePinConsistent(DPasswordEdit *targetEdit, DPasswordEdit *sourceEdit);
 
 private:
+    QWidget *m_parentWidget;
     DDialog *m_setPinDialog;
     DDialog *m_changePinDialog;
     DDialog *m_failedDialog;

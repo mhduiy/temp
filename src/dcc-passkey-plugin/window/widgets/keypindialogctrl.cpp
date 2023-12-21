@@ -12,8 +12,9 @@
 #include <DLabel>
 #include <DHiDPIHelper>
 
-KeyPinDialogCtrl::KeyPinDialogCtrl(QObject *parent)
-    : QObject(parent)
+KeyPinDialogCtrl::KeyPinDialogCtrl(QWidget *parent, QObject *obj)
+    : QObject(obj)
+    , m_parentWidget(parent)
     , m_setPinDialog(nullptr)
     , m_changePinDialog(nullptr)
     , m_failedDialog(nullptr)
@@ -25,18 +26,6 @@ KeyPinDialogCtrl::KeyPinDialogCtrl(QObject *parent)
 
 KeyPinDialogCtrl::~KeyPinDialogCtrl()
 {
-    if (m_setPinDialog) {
-        m_setPinDialog->deleteLater();
-        m_setPinDialog = nullptr;
-    }
-    if (m_changePinDialog) {
-        m_changePinDialog->deleteLater();
-        m_changePinDialog = nullptr;
-    }
-    if (m_failedDialog) {
-        m_failedDialog->deleteLater();
-        m_failedDialog = nullptr;
-    }
 }
 
 void KeyPinDialogCtrl::showSetPinDialog()
@@ -51,7 +40,7 @@ void KeyPinDialogCtrl::showSetPinDialog()
 
 void KeyPinDialogCtrl::initSetPinDialogUI()
 {
-    m_setPinDialog = new DDialog();
+    m_setPinDialog = new DDialog(m_parentWidget);
     m_setPinDialog->setTitle(tr("Set PIN"));
     m_setPinDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_setPinDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -153,7 +142,7 @@ void KeyPinDialogCtrl::showChangePinDialog()
 
 void KeyPinDialogCtrl::initChangePinDialogUI()
 {
-    m_changePinDialog = new DDialog();
+    m_changePinDialog = new DDialog(m_parentWidget);
     m_changePinDialog->setTitle(tr("Change PIN"));
     m_changePinDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_changePinDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -268,7 +257,7 @@ void KeyPinDialogCtrl::showFailedDialog()
 
 void KeyPinDialogCtrl::initFailedDialogUI()
 {
-    m_failedDialog = new DDialog();
+    m_failedDialog = new DDialog(m_parentWidget);
     m_failedDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_failedDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(m_failedDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){

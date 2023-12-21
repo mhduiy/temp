@@ -18,8 +18,9 @@
 const QIcon ResetSuccessIcon = DStyle().standardIcon(DStyle::SP_DialogYesButton);
 const QIcon ResetFailedIcon = QIcon::fromTheme("dialog-error");
 
-ResetKeyDialogCtrl::ResetKeyDialogCtrl(QObject *parent)
-    : QObject(parent)
+ResetKeyDialogCtrl::ResetKeyDialogCtrl(QWidget *parent, QObject *obj)
+    : QObject(obj)
+    , m_parentWidget(parent)
     , m_descriptionDialog(nullptr)
     , m_insertDialog(nullptr)
     , m_identifyingDialog(nullptr)
@@ -40,34 +41,6 @@ ResetKeyDialogCtrl::ResetKeyDialogCtrl(QObject *parent)
 
 ResetKeyDialogCtrl::~ResetKeyDialogCtrl()
 {
-    if (m_descriptionDialog) {
-        m_descriptionDialog->deleteLater();
-        m_descriptionDialog = nullptr;
-    }
-    if (m_insertDialog) {
-        m_insertDialog->deleteLater();
-        m_insertDialog = nullptr;
-    }
-    if (m_identifyingDialog) {
-        m_identifyingDialog->deleteLater();
-        m_identifyingDialog = nullptr;
-    }
-    if (m_firstTouchDialog) {
-        m_firstTouchDialog->deleteLater();
-        m_firstTouchDialog = nullptr;
-    }
-    if (m_secondTouchDialog) {
-        m_secondTouchDialog->deleteLater();
-        m_secondTouchDialog = nullptr;
-    }
-    if (m_failedDialog) {
-        m_failedDialog->deleteLater();
-        m_failedDialog = nullptr;
-    }
-    if (m_resultDialog) {
-        m_resultDialog->deleteLater();
-        m_resultDialog = nullptr;
-    }
     if (m_resetTimer) {
         m_resetTimer->stop();
         m_resetTimer->deleteLater();
@@ -93,7 +66,7 @@ void ResetKeyDialogCtrl::showDescriptionDialog()
 
 void ResetKeyDialogCtrl::initDescriptionDialogUI()
 {
-    m_descriptionDialog = new DDialog();
+    m_descriptionDialog = new DDialog(m_parentWidget);
     m_descriptionDialog->setTitle(tr("Reset Security Key"));
     m_descriptionDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_descriptionDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -153,13 +126,14 @@ void ResetKeyDialogCtrl::showInsertDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
+
     m_insertDialog->setModal(true);
     m_insertDialog->show();
 }
 
 void ResetKeyDialogCtrl::initInsertDialogUI()
 {
-    m_insertDialog = new DDialog();
+    m_insertDialog = new DDialog(m_parentWidget);
     m_insertDialog->setTitle(tr("Reset Security Key"));
     m_insertDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_insertDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -204,13 +178,14 @@ void ResetKeyDialogCtrl::showIdentifyingDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
+
     m_identifyingDialog->setModal(true);
     m_identifyingDialog->show();
 }
 
 void ResetKeyDialogCtrl::initIdentifyingDeviceUI()
 {
-    m_identifyingDialog = new DDialog();
+    m_identifyingDialog = new DDialog(m_parentWidget);
     m_identifyingDialog->setTitle(tr("Reset Security Key"));
     m_identifyingDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_identifyingDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -271,13 +246,14 @@ void ResetKeyDialogCtrl::showFirstTouchDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
+
     m_firstTouchDialog->setModal(true);
     m_firstTouchDialog->show();
 }
 
 void ResetKeyDialogCtrl::initFirstTouchDialogUI()
 {
-    m_firstTouchDialog = new DDialog();
+    m_firstTouchDialog = new DDialog(m_parentWidget);
     m_firstTouchDialog->setTitle(tr("Reset Security Key"));
     m_firstTouchDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_firstTouchDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -323,13 +299,14 @@ void ResetKeyDialogCtrl::showSecondTouchDeviceDialog()
 
     initResetTimer();
     hideAllDialog();
+
     m_secondTouchDialog->setModal(true);
     m_secondTouchDialog->show();
 }
 
 void ResetKeyDialogCtrl::initSecondTouchDialogUI()
 {
-    m_secondTouchDialog = new DDialog();
+    m_secondTouchDialog = new DDialog(m_parentWidget);
     m_secondTouchDialog->setTitle(tr("Reset Security Key"));
     m_secondTouchDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_secondTouchDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -374,13 +351,14 @@ void ResetKeyDialogCtrl::showFailedDialog()
 
     initResetTimer();
     hideAllDialog();
+
     m_failedDialog->setModal(true);
     m_failedDialog->show();
 }
 
 void ResetKeyDialogCtrl::initFailedDialogUI()
 {
-    m_failedDialog = new DDialog();
+    m_failedDialog = new DDialog(m_parentWidget);
     m_failedDialog->setTitle(tr("Reset Security Key"));
     m_failedDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_failedDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
@@ -433,13 +411,14 @@ void ResetKeyDialogCtrl::showResultDialog(bool success)
         m_resultPicLabel->setPixmap(ResetFailedIcon.pixmap(128, 128));
         m_resultTipLabel->setText(tr("Unable to complete the security key reset"));
     }
+
     m_resultDialog->setModal(true);
     m_resultDialog->show();
 }
 
 void ResetKeyDialogCtrl::initResultDialogUI()
 {
-    m_resultDialog = new DDialog();
+    m_resultDialog = new DDialog(m_parentWidget);
     m_resultDialog->setTitle(tr("Reset Security Key"));
     m_resultDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
     m_resultDialog->addButton(tr("Done"), false, DDialog::ButtonNormal);

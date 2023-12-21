@@ -18,7 +18,7 @@ class ResetKeyDialogCtrl : public QObject
 {
     Q_OBJECT
 public:
-    explicit ResetKeyDialogCtrl(QObject *parent = nullptr);
+    explicit ResetKeyDialogCtrl(QWidget *parent, QObject *obj = nullptr);
     ~ResetKeyDialogCtrl() override;
 
     void hideAllDialog();
@@ -45,6 +45,7 @@ private:
     void initResultDialogUI();
 
 private:
+    QWidget *m_parentWidget;
     DDialog *m_descriptionDialog;
     DDialog *m_insertDialog;
     DDialog *m_identifyingDialog;
