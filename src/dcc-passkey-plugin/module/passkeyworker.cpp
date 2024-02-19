@@ -38,6 +38,7 @@ PasskeyWorker::PasskeyWorker(PasskeyModel* model, QObject* parent)
     , m_resetAssertion(false)
     , m_currentId(IdErrorFlag)
     , m_needCloseDevice(false)
+    , m_makingCredential(false)
 {
     m_allPromptInfo = {
         {PromptType::Insert, {InsertPixmapPath, false, tr("Please plug in the security key"), "", "", false}},
@@ -158,7 +159,9 @@ void PasskeyWorker::handlePromptOperate(const QString &operate)
     {
     // 未注册，注册设备，生成证书
     case PromptType::Unregistered:
-        makeCredential();
+        if (!m_makingCredential) {
+            makeCredential();
+        }
         break;
     // 验证超时，重新走流程
     case PromptType::Timeout:
@@ -347,10 +350,13 @@ void PasskeyWorker::handleSetPasskeyPin(const QString &oldPin, const QString &ne
 
 void PasskeyWorker::makeCredential()
 {
+    m_makingCredential = true;
+
     // 鉴权后才允许注册设备
     connect(Authority::instance(), &Authority::checkAuthorizationFinished, this, [this](Authority::Result authenticationResult) {
         disconnect(Authority::instance(), nullptr, this, nullptr);
         if (Authority::Result::Yes != authenticationResult) {
+            m_makingCredential = false;
             return;
         }
 
@@ -366,6 +372,8 @@ void PasskeyWorker::makeCredential()
             m_currentId = IdErrorFlag;
             qCWarning(DCC_PASSKEY) << "Call method 'MakeCredential' failed, error message: " << reply.error().message();
         }
+
+        m_makingCredential = false;
     });
     Authority::instance()->checkAuthorization("com.deepin.dde.passkey.dcc-plugin.register", UnixProcessSubject(getpid()), Authority::AllowUserInteraction);
 }

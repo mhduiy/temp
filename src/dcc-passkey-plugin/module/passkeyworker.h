@@ -75,4 +75,6 @@ private:
     bool m_resetAssertion; // 区分正常认证和重置认证
     QString m_currentId; // 异步通信中确定id
     bool m_needCloseDevice; // 需要关闭设备
+
+    bool m_makingCredential;
 };
