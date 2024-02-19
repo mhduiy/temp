@@ -15,9 +15,6 @@
 #include <DFontSizeManager>
 #include <DHiDPIHelper>
 
-const QIcon ResetSuccessIcon = DStyle().standardIcon(DStyle::SP_DialogYesButton);
-const QIcon ResetFailedIcon = QIcon::fromTheme("dialog-error");
-
 ResetKeyDialogCtrl::ResetKeyDialogCtrl(QWidget *parent, QObject *obj)
     : QObject(obj)
     , m_parentWidget(parent)
@@ -405,10 +402,10 @@ void ResetKeyDialogCtrl::showResultDialog(bool success)
     hideAllDialog();
 
     if (success) {
-        m_resultPicLabel->setPixmap(ResetSuccessIcon.pixmap(128, 128));
+        m_resultPicLabel->setPixmap(QIcon::fromTheme("icon_success").pixmap(128, 128));
         m_resultTipLabel->setText(tr("Reset complete"));
     } else {
-        m_resultPicLabel->setPixmap(ResetFailedIcon.pixmap(128, 128));
+        m_resultPicLabel->setPixmap(QIcon::fromTheme("icon_fail").pixmap(128, 128));
         m_resultTipLabel->setText(tr("Unable to complete the security key reset"));
     }
 
@@ -444,7 +441,7 @@ void ResetKeyDialogCtrl::initResultDialogUI()
 
     DLabel *picLabel = new DLabel(widget);
     m_resultPicLabel = picLabel;
-    picLabel->setPixmap(ResetFailedIcon.pixmap(128, 128));
+    picLabel->setPixmap(QIcon::fromTheme("icon_fail").pixmap(128, 128));
     picLabel->setFixedHeight(128);
     picLabel->setAlignment(Qt::AlignHCenter);
     layout->addWidget(picLabel);
