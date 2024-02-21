@@ -226,9 +226,6 @@ void PasskeyWidget::showResetKeyDialog(const ResetDialogStyle &style, bool statu
     case ResetDialogStyle::SecondTouchStyle:
         m_resetKeyDialogCtrl->showSecondTouchDeviceDialog();
         break;
-    case ResetDialogStyle::FailedStyle:
-        m_resetKeyDialogCtrl->showFailedDialog();
-        break;
     case ResetDialogStyle::ResultStyle:
         m_resetKeyDialogCtrl->showResultDialog(status);
         break;

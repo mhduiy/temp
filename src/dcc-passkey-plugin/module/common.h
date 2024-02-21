@@ -45,7 +45,6 @@ enum ResetDialogStyle {
     IdentifyingStyle,
     FirstTouchStyle,
     SecondTouchStyle,
-    FailedStyle,
     ResultStyle
 };
 

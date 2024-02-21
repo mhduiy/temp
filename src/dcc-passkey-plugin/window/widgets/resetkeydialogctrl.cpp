@@ -23,7 +23,6 @@ ResetKeyDialogCtrl::ResetKeyDialogCtrl(QWidget *parent, QObject *obj)
     , m_identifyingDialog(nullptr)
     , m_firstTouchDialog(nullptr)
     , m_secondTouchDialog(nullptr)
-    , m_failedDialog(nullptr)
     , m_resultDialog(nullptr)
     , m_resetTimer(new QTimer())
     , m_resetTimerCount(5)
@@ -340,58 +339,6 @@ void ResetKeyDialogCtrl::initSecondTouchDialogUI()
     m_secondTouchDialog->setFixedSize(410, 500);
 }
 
-void ResetKeyDialogCtrl::showFailedDialog()
-{
-    if (!m_failedDialog) {
-        initFailedDialogUI();
-    }
-
-    initResetTimer();
-    hideAllDialog();
-
-    m_failedDialog->setModal(true);
-    m_failedDialog->show();
-}
-
-void ResetKeyDialogCtrl::initFailedDialogUI()
-{
-    m_failedDialog = new DDialog(m_parentWidget);
-    m_failedDialog->setTitle(tr("Reset Security Key"));
-    m_failedDialog->setIcon(DStyle().standardIcon(DStyle::SP_MessageBoxWarning));
-    m_failedDialog->addButton(tr("Cancel"), false, DDialog::ButtonNormal);
-    connect(m_failedDialog, &DDialog::buttonClicked, this, [this](int index, const QString &text){
-        Q_EMIT requestStopReset(false);
-        m_failedDialog->hide();
-    });
-    connect(m_failedDialog, &DDialog::closed, this, [this] {
-        Q_EMIT requestStopReset(false);
-        m_failedDialog->hide();
-    });
-
-    QWidget *widget = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(widget);
-
-    DLabel *picLabel = new DLabel(widget);
-    picLabel->setPixmap(DHiDPIHelper::loadNxPixmap(UnknownPixmapPath));
-    picLabel->setFixedHeight(180);
-    picLabel->setAlignment(Qt::AlignHCenter);
-    layout->addWidget(picLabel);
-    layout->addSpacing(40);
-
-    DLabel *tipLabel = new DLabel(widget);
-    tipLabel->setText(tr("Unable to complete the security key reset"));
-    tipLabel->setAlignment(Qt::AlignHCenter);
-    DFontSizeManager::instance()->bind(tipLabel, DFontSizeManager::T6, QFont::Normal);
-    layout->addWidget(tipLabel);
-
-    layout->setAlignment(Qt::AlignTop);
-    layout->setContentsMargins(10, 20, 10, 0);
-    widget->setMinimumHeight(400);
-
-    m_failedDialog->addContent(widget);
-    m_failedDialog->setFixedSize(410, 500);
-}
-
 void ResetKeyDialogCtrl::showResultDialog(bool success)
 {
     if (!m_resultDialog) {
@@ -477,9 +424,6 @@ void ResetKeyDialogCtrl::hideAllDialog()
     }
     if (m_secondTouchDialog) {
         m_secondTouchDialog->hide();
-    }
-    if (m_failedDialog) {
-        m_failedDialog->hide();
     }
     if (m_resultDialog) {
         m_resultDialog->hide();

@@ -27,7 +27,6 @@ public:
     void showIdentifyingDeviceDialog();
     void showFirstTouchDeviceDialog();
     void showSecondTouchDeviceDialog();
-    void showFailedDialog();
     void showResultDialog(bool success = false);
 
 Q_SIGNALS:
@@ -41,7 +40,6 @@ private:
     void initIdentifyingDeviceUI();
     void initFirstTouchDialogUI();
     void initSecondTouchDialogUI();
-    void initFailedDialogUI();
     void initResultDialogUI();
 
 private:
@@ -51,7 +49,6 @@ private:
     DDialog *m_identifyingDialog;
     DDialog *m_firstTouchDialog;
     DDialog *m_secondTouchDialog;
-    DDialog *m_failedDialog;
     DDialog *m_resultDialog;
 
     QTimer *m_resetTimer;

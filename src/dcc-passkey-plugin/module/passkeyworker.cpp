@@ -535,13 +535,13 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
             m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FirstTouchStyle) : updatePromptInfo(PromptType::Touch);
         } else if (code == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 操作设备超时
-            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
+            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, false) : updatePromptInfo(PromptType::Timeout);
         } else if (code == DEEPIN_ERR_DEVICE_OPEN) {
             // 设备开启，开始闪烁，此时如果切到控制中心其它模块或关闭控制中心，需要通知后端关闭设备
             m_needCloseDevice = true;
         } else {
             // 其余错误都按未知错误处理
-            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Unknown);
+            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, false) : updatePromptInfo(PromptType::Unknown);
         }
     } else {
         m_needCloseDevice = false;
@@ -550,10 +550,10 @@ void PasskeyWorker::requestGetAssertStatus(const QString &id, const QString &use
             m_resetAssertion ? reset() : updateManageInfo();
         } else if (code == FIDO_ERR_PIN_REQUIRED || code == FIDO_ERR_ACTION_TIMEOUT || code == FIDO_ERR_USER_ACTION_TIMEOUT) {
             // 超时处理
-            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Timeout);
+            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, false) : updatePromptInfo(PromptType::Timeout);
         } else {
             // 其余错误都按未知错误处理
-            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false) : updatePromptInfo(PromptType::Unknown);
+            m_resetAssertion ? m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, false) : updatePromptInfo(PromptType::Unknown);
         }
     }
 }
@@ -599,7 +599,7 @@ void PasskeyWorker::requestResetStatus(const QString &id, int finish, const QStr
             m_needCloseDevice = true;
         } else {
             // 其余错误都按未知错误处理
-            m_model->setResetDialogStyle(ResetDialogStyle::FailedStyle, false);
+            m_model->setResetDialogStyle(ResetDialogStyle::ResultStyle, false);
         }
     } else {
         m_needCloseDevice = false;
