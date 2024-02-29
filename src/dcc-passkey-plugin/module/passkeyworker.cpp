@@ -120,6 +120,9 @@ bool PasskeyWorker::existDevice()
 
 void PasskeyWorker::activate()
 {
+    // 判断是否需要关闭设备
+    deactivate();
+
     m_needPromptMonitor = true;
     m_currentId = IdErrorFlag;
 
