@@ -35,6 +35,7 @@ private:
     void initFailedDialogUI();
 
     void setPasswordEditAttribute(DPasswordEdit *edit);
+    void clearEdit(DPasswordEdit *edit);
     bool judgePinSize(DPasswordEdit *edit);
     bool judgePinConsistent(DPasswordEdit *targetEdit, DPasswordEdit *sourceEdit);
 

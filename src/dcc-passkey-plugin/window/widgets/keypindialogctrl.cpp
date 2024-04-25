@@ -93,8 +93,8 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
     connect(m_setPinDialog, &DDialog::buttonClicked, this, [this, newPwdEdit, repeatPwdEdit](int index, const QString &text) {
         if (index == 0) {
             m_setPinDialog->hide();
-            newPwdEdit->clear();
-            repeatPwdEdit->clear();
+            clearEdit(newPwdEdit);
+            clearEdit(repeatPwdEdit);
         } else {
             if (!judgePinSize(newPwdEdit)) {
                 return;
@@ -107,14 +107,14 @@ void KeyPinDialogCtrl::initSetPinDialogUI()
             }
             Q_EMIT requestSetPin("", newPwdEdit->text());
             m_setPinDialog->hide();
-            newPwdEdit->clear();
-            repeatPwdEdit->clear();
+            clearEdit(newPwdEdit);
+            clearEdit(repeatPwdEdit);
         }
     });
     connect(m_setPinDialog, &DDialog::closed, this, [this, newPwdEdit, repeatPwdEdit] {
         m_setPinDialog->hide();
-        newPwdEdit->clear();
-        repeatPwdEdit->clear();
+        clearEdit(newPwdEdit);
+        clearEdit(repeatPwdEdit);
     });
     connect(newPwdEdit, &DPasswordEdit::textChanged, this, [newPwdEdit](const QString &text){
         if (newPwdEdit->isAlert()) {
@@ -207,22 +207,25 @@ void KeyPinDialogCtrl::initChangePinDialogUI()
     connect(m_changePinDialog, &DDialog::buttonClicked, this, [this, newPwdEdit, repeatPwdEdit](int index, const QString &text) {
         if (index == 0) {
             m_changePinDialog->hide();
-            m_oldPwdEdit->clear();
-            newPwdEdit->clear();
-            repeatPwdEdit->clear();
+            clearEdit(m_oldPwdEdit);
+            clearEdit(newPwdEdit);
+            clearEdit(repeatPwdEdit);
         } else {
             if (!judgePinSize(m_oldPwdEdit) || !judgePinSize(newPwdEdit) || !judgePinSize(repeatPwdEdit) 
                 || !judgePinConsistent(newPwdEdit, repeatPwdEdit)) {
                 return;
             }
             Q_EMIT requestSetPin(m_oldPwdEdit->text(), newPwdEdit->text());
+            clearEdit(m_oldPwdEdit);
+            clearEdit(newPwdEdit);
+            clearEdit(repeatPwdEdit);
         }
     });
     connect(m_changePinDialog, &DDialog::closed, this, [this, newPwdEdit, repeatPwdEdit] {
         m_changePinDialog->hide();
-        m_oldPwdEdit->clear();
-        newPwdEdit->clear();
-        repeatPwdEdit->clear();
+        clearEdit(m_oldPwdEdit);
+        clearEdit(newPwdEdit);
+        clearEdit(repeatPwdEdit);
     });
     connect(m_oldPwdEdit, &DPasswordEdit::textChanged, this, [this] (const QString &text){
         if (m_oldPwdEdit->isAlert()) {
@@ -294,10 +297,22 @@ void KeyPinDialogCtrl::initFailedDialogUI()
 
 void KeyPinDialogCtrl::setPasswordEditAttribute(DPasswordEdit *edit)
 {
+    if (!edit) {
+        return;
+    }
     edit->setAttribute(Qt::WA_InputMethodEnabled, false);
     edit->lineEdit()->setValidator(new QRegExpValidator(QRegExp("[^\\x4e00-\\x9fa5]+")));
     edit->setCopyEnabled(false);
     edit->setCutEnabled(false);
+}
+
+void KeyPinDialogCtrl::clearEdit(DPasswordEdit *edit)
+{
+    if (!edit) {
+        return;
+    }
+    edit->clear();
+    edit->setAlert(false);
 }
 
 bool KeyPinDialogCtrl::judgePinSize(DPasswordEdit *edit)
