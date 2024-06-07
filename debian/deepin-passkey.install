@@ -4,3 +4,4 @@ usr/lib/systemd/system/
 usr/share/deepin-passkey/cred/
 usr/bin/
 usr/share/locale/*/LC_MESSAGES/deepin-passkey-service.mo
+usr/share/polkit-1/actions/com.deepin.Passkey.policy

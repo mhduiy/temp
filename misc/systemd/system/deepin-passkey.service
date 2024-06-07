@@ -9,3 +9,6 @@ Description=Deepin passkey service
 Type=dbus
 BusName=com.deepin.Passkey
 ExecStart=/usr/bin/deepin-passkey
+CapabilityBoundingSet=~CAP_AUDIT_CONTROL
+NoNewPrivileges=true
+MemoryLimit=8G
