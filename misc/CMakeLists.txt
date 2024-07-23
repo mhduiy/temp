@@ -11,7 +11,7 @@ install(FILES ${DBUS_SYSTEM_SERVICE} DESTINATION share/dbus-1/system-services/)
 file(GLOB_RECURSE SYSTEMD_SERVICE
     "systemd/system/*.service"
 )
-install(FILES ${SYSTEMD_SERVICE} DESTINATION lib/systemd/system/)
+install(FILES ${SYSTEMD_SERVICE} DESTINATION /lib/systemd/system/)
 
 file(GLOB DCONFIG_FILES
     "dsg-configs/org.deepin.dde.passkey.dcc-plugin.json"
