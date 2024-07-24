@@ -38,6 +38,3 @@ RestrictRealtime=yes
 RemoveIPC=yes
 MemoryDenyWriteExecute=yes
 MemoryLimit=100M
-
-[Install]
-Alias=dbus-com.deepin.Passkey.service

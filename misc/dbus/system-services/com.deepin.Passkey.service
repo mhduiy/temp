@@ -5,4 +5,4 @@
 [D-BUS Service]
 Name=com.deepin.Passkey
 Exec=/usr/bin/false
-SystemdService=dbus-com.deepin.Passkey.service
+SystemdService=deepin-passkey.service
