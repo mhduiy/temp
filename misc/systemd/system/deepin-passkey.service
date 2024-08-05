@@ -37,4 +37,3 @@ LockPersonality=yes
 RestrictRealtime=yes
 RemoveIPC=yes
 MemoryDenyWriteExecute=yes
-MemoryLimit=100M
