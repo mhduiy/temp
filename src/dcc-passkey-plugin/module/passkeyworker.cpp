@@ -72,7 +72,7 @@ void PasskeyWorker::init()
                                            QDBusConnection::systemBus(),
                                            this);
 
-    m_passkeyInter = new PasskeyInter("com.deepin.Passkey", "/com/deepin/Passkey", QDBusConnection::systemBus(), this);
+    m_passkeyInter = new PasskeyInter("org.deepin.Passkey1", "/org/deepin/Passkey1", QDBusConnection::systemBus(), this);
     connect(m_passkeyInter, &PasskeyInter::MakeCredStatus, this, &PasskeyWorker::requestMakeCredStatus);
     connect(m_passkeyInter, &PasskeyInter::GetAssertStatus, this, &PasskeyWorker::requestGetAssertStatus);
     connect(m_passkeyInter, &PasskeyInter::ResetStatus, this, &PasskeyWorker::requestResetStatus);
@@ -638,7 +638,7 @@ void PasskeyWorker::setPin(const QString &oldPin, const QString &newPin)
         qCWarning(DCC_PASSKEY) << "Call method 'SetPin' failed, error message: " << reply.error().name() << reply.error().message();
 
         // 后端服务返回错误
-        if (reply.error().name().contains("com.deepin.Passkey")) {
+        if (reply.error().name().contains("org.deepin.Passkey1")) {
             QJsonObject obj = QJsonDocument::fromJson(reply.error().message().toUtf8()).object();
             if (obj.isEmpty()) {
                 Q_EMIT setPinCompleted(false, false, QString());

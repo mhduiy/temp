@@ -1,3 +1,9 @@
+deepin-passkey (1.1.0) unstable; urgency=medium
+
+  * 支持openssl3.2
+
+ -- fuleyi <fuleyi@uniontech.com>  Wed, 23 Jul 2025 16:06:27 +0800
+
 deepin-passkey (1.0.2) unstable; urgency=medium
 
   * 增加PIN码加密传输功能

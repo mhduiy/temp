@@ -19,9 +19,9 @@
 
 #include <stdio.h>
 
-const gchar *PASSKEY_SERVICE_DBUS_NAME = "com.deepin.Passkey";
-const gchar *PASSKEY_SERVICE_DBUS_PATH = "/com/deepin/Passkey";
-const gchar *PASSKEY_SERVICE_DBUS_INTERFACE = "com.deepin.Passkey";
+const gchar *PASSKEY_SERVICE_DBUS_NAME = "org.deepin.Passkey1";
+const gchar *PASSKEY_SERVICE_DBUS_PATH = "/org/deepin/Passkey1";
+const gchar *PASSKEY_SERVICE_DBUS_INTERFACE = "org.deepin.Passkey1";
 // 源自xml生成的文件
 extern const gchar *PASSKEY_SERVICE_DBUS_XML_DATA;
 
@@ -127,9 +127,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -150,9 +150,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -191,9 +191,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -236,9 +236,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -370,9 +370,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -422,9 +422,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -455,9 +455,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -568,9 +568,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -607,9 +607,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -649,9 +649,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);
@@ -691,9 +691,9 @@ end:
     if (callRet != FIDO_OK) {
         char *retStr = NULL;
         if (dp_err_code_to_json(callRet, &retStr) < 0) {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", "");
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", "");
         } else {
-            g_dbus_method_invocation_return_dbus_error(mc->invocation, "com.deepin.Passkey.Error", retStr);
+            g_dbus_method_invocation_return_dbus_error(mc->invocation, "org.deepin.Passkey1.Error", retStr);
         }
         if (retStr != NULL) {
             free(retStr);

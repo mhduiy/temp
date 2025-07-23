@@ -29,7 +29,7 @@ void emit_reset_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "ResetStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/org/deepin/Passkey1", "org.deepin.Passkey1", "ResetStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 
 end:
     if (error != NULL) {
@@ -60,7 +60,7 @@ void emit_device_detect_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceDetectStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/org/deepin/Passkey1", "org.deepin.Passkey1", "DeviceDetectStatus", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
@@ -90,7 +90,7 @@ void emit_make_cred_status(MethodContext *mc, const char *user, int finish, int 
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "MakeCredStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/org/deepin/Passkey1", "org.deepin.Passkey1", "MakeCredStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
@@ -120,7 +120,7 @@ void emit_get_assert_status(MethodContext *mc, const char *user, int finish, int
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "GetAssertStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/org/deepin/Passkey1", "org.deepin.Passkey1", "GetAssertStatus", g_variant_new("(ssis)", mc->callId, user, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);
@@ -150,7 +150,7 @@ void emit_device_select_status(MethodContext *mc, int finish, int status)
         goto end;
     }
 
-    g_dbus_connection_emit_signal(srv->connection, NULL, "/com/deepin/Passkey", "com.deepin.Passkey", "DeviceSelect", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
+    g_dbus_connection_emit_signal(srv->connection, NULL, "/org/deepin/Passkey1", "org.deepin.Passkey1", "DeviceSelect", g_variant_new("(sis)", mc->callId, finish, jsonData), &error);
 end:
     if (error != NULL) {
         LOG(LOG_WARNING, "emit signal error: %s", error->message);

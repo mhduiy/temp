@@ -403,7 +403,7 @@ int dp_rsa_decrypt_ex(EVP_PKEY *key, int padding, const unsigned char *in, size_
         goto end;
     }
 
-    outData = OPENSSL_malloc(outDataLen);
+    outData = OPENSSL_zalloc(outDataLen+1);
     if (outData == NULL) {
         LOG(LOG_WARNING, "failed to call OPENSSL_malloc.");
         goto end;

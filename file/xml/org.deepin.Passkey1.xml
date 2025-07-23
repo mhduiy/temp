@@ -1,5 +1,5 @@
 <node>
-    <interface name='com.deepin.Passkey'>
+    <interface name='org.deepin.Passkey1'>
         <method name='Claim'>
         </method>
         <method name='UnClaim'>

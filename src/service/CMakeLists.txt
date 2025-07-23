@@ -13,7 +13,7 @@ pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c)
 set(CMAKE_C_FLAGS ${SECURITY_COMPILE_FLAGS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-execute_process(COMMAND sh -c "${CMAKE_CURRENT_SOURCE_DIR}/xml2str.sh ${PROJECT_SOURCE_DIR}/file/xml/com.deepin.Passkey.xml"
+execute_process(COMMAND sh -c "${CMAKE_CURRENT_SOURCE_DIR}/xml2str.sh ${PROJECT_SOURCE_DIR}/file/xml/org.deepin.Passkey1.xml"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB_RECURSE SRCS
@@ -23,7 +23,7 @@ file(GLOB_RECURSE SRCS
     "serviceframe/*.c"
     "dev/*.c"
     "rp/*.c"
-    ${CMAKE_CURRENT_BINARY_DIR}/com.deepin.Passkey.c
+    ${CMAKE_CURRENT_BINARY_DIR}/org.deepin.Passkey1.c
 )
 
 add_executable(${SERVICE}

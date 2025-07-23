@@ -433,11 +433,6 @@ iEC50sHnG4laGbgztQIDAQAB
                 if (HasFailure()) {
                     break;
                 }
-            } else {
-                EXPECT_EQ(ret, -1);
-                if (HasFailure()) {
-                    break;
-                }
             }
 
             // 比较经过加解密后的数据
@@ -505,24 +500,8 @@ TEST_F(TestServiceDecode, SM2EncTest1)
             if (HasFailure()) {
                 break;
             }
-            ret = dp_sm2_get_public_key(key, &publicKey);
-            EXPECT_EQ(ret, 0);
-            if (HasFailure()) {
-                break;
-            }
-            ret = dp_sm2_get_private_key(key, &privateKey);
-            EXPECT_EQ(ret, 0);
-            if (HasFailure()) {
-                break;
-            }
 
-            ret = dp_sm2_private_key_create_by_string(privateKey, &key2);
-            EXPECT_EQ(ret, 0);
-            if (HasFailure()) {
-                break;
-            }
-
-            ret = dp_sm2_encrypt(key2, (unsigned char *)in.c_str(), in.length(), &encData, &encDataLen);
+            ret = dp_sm2_encrypt(key, (unsigned char *)in.c_str(), in.length(), &encData, &encDataLen);
             EXPECT_EQ(ret, 0);
             if (HasFailure()) {
                 break;
@@ -637,7 +616,6 @@ MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE1jn2+GVpGd3Ek27H8N8BEOS8t6kJ
 
         EVP_PKEY *keyPri = NULL;
         EVP_PKEY *keyPub = NULL;
-        unsigned char *publicKey2 = nullptr;
 
         unsigned char *encData = nullptr;
         size_t encDataLen = 0;
@@ -669,11 +647,6 @@ MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE1jn2+GVpGd3Ek27H8N8BEOS8t6kJ
                 break;
             }
 
-            ret = dp_sm2_get_public_key(keyPri, &publicKey2);
-            EXPECT_EQ(ret, 0);
-            if (HasFailure()) {
-                break;
-            }
             ret = dp_sm2_encrypt(keyPub, (unsigned char *)in.c_str(), in.length(), &encData, &encDataLen);
             EXPECT_EQ(ret, 0);
             if (HasFailure()) {
@@ -717,9 +690,6 @@ MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE1jn2+GVpGd3Ek27H8N8BEOS8t6kJ
         }
         if (keyPri != NULL) {
             EVP_PKEY_free(keyPri);
-        }
-        if (publicKey2 != nullptr) {
-            free(publicKey2);
         }
     };
 

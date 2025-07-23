@@ -7,7 +7,7 @@ Description=Deepin passkey service
 
 [Service]
 Type=dbus
-BusName=com.deepin.Passkey
+BusName=org.deepin.Passkey1
 User=root
 # TODO 验证tss组是否可以处理fido
 #SupplementaryGroups=tss

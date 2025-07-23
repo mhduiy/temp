@@ -5,7 +5,7 @@
 <policyconfig>
         <vendor />
         <vendor_url />
-        <action id="com.deepin.Passkey.doAction">
+        <action id="org.deepin.Passkey1.doAction">
                 <description>Check Authentication</description>
                 <message>Authentication is required to perform this action</message>
                 <defaults>

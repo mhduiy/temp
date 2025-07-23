@@ -3,6 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 [D-BUS Service]
-Name=com.deepin.Passkey
+Name=org.deepin.Passkey1
 Exec=/usr/bin/false
 SystemdService=deepin-passkey.service
