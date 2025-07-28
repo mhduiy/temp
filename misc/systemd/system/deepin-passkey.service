@@ -18,7 +18,7 @@ InaccessiblePaths=-/etc/shadow
 InaccessiblePaths=-/etc/NetworkManager/system-connections
 InaccessiblePaths=-/etc/pam.d
 InaccessiblePaths=-/usr/share/uadp/
-ReadWritePaths=-/usr/share/deepin-passkey/
+ReadWritePaths=-/var/lib/deepin-passkey/
 
 NoNewPrivileges=yes
 ProtectHome=yes

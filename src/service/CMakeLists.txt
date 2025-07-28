@@ -94,6 +94,6 @@ endforeach()
 
 install(TARGETS ${SERVICE} DESTINATION bin)
 
-install(DIRECTORY DESTINATION share/deepin-passkey/cred/)
+install(DIRECTORY DESTINATION /var/lib/deepin-passkey/cred/)
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mo/ DESTINATION share/locale)

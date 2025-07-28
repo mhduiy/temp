@@ -34,6 +34,15 @@ Depends:
 Description: dde passkey.
  This is a package used to install the passkey environment for dde.
 
+Package: dcc-passkey-plugin
+Architecture: any
+Depends:
+ deepin-passkey,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: dde passkey.
+ This is a package used to install the passkey environment for dde.
+
 Package: deepin-passkey
 Architecture: any
 Depends:

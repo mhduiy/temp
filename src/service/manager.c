@@ -1236,22 +1236,29 @@ int dpk_manager_encrypt_get_public(MethodContext *mc, int type, char **publicKey
         goto end;
     }
     if (priKey == NULL) {
+        LOG(LOG_ERR, "priKey is null");
         // 不存在则新建
         if (dp_asym_key_create_private(type, &priKey) < 0) {
+            LOG(LOG_ERR, "create priKey failed");
             goto end;
         }
         if (priKey == NULL) {
+            LOG(LOG_ERR, "priKey is null");
             goto end;
         }
         if (service_service_asym_key_set(srv, type, priKey) < 0) {
+            LOG(LOG_ERR, "set priKey failed");
             goto end;
         }
     }
 
+    //1
     if (dp_asym_key_private_to_public(type, priKey, &pubKey) < 0) {
+        LOG(LOG_ERR, "private to public failed");
         goto end;
     }
     if (pubKey == NULL) {
+        LOG(LOG_ERR, "pubKey is null");
         goto end;
     }
 

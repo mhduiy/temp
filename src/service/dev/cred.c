@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-const char *PASSKEY_CRED_DIR = "/usr/share/deepin-passkey/cred/";
+const char *PASSKEY_CRED_DIR = "/var/lib/deepin-passkey/cred/";
 
 struct opts
 {
@@ -359,7 +359,7 @@ int dk_dev_save_cred(const CredArgs *const args, const fido_cred_t *const cred)
 
     credFile = fopen(credFilePath, "a+");
     if (credFile == NULL) {
-        LOG(LOG_ERR, "fopen error");
+        LOG(LOG_ERR, "fopen error === %s", credFilePath);
         goto end;
     }
 

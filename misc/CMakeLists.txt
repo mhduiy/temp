@@ -13,11 +13,6 @@ file(GLOB_RECURSE SYSTEMD_SERVICE
 )
 install(FILES ${SYSTEMD_SERVICE} DESTINATION /lib/systemd/system/)
 
-file(GLOB DCONFIG_FILES
-    "dsg-configs/org.deepin.dde.passkey.dcc-plugin.json"
-)
-install(FILES ${DCONFIG_FILES} DESTINATION share/dsg/configs/org.deepin.dde.passkey/)
-
 file(GLOB POLKIT_FILES
     "polkit/com.deepin.dde.passkey.dcc-plugin.policy",
     "polkit/org.deepin.Passkey1.policy"

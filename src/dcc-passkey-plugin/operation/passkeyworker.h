@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+#pragma once
+
+#include <QObject>
+#include <QDBusInterface>
+
+#include "passkeymodel.h"
+#include "dbus/dbuspasskey.h"
+
+using PasskeyInter = com::deepin::Passkey;
+
+class PasskeyWorker : public QObject {
+    Q_OBJECT
+public:
+    explicit PasskeyWorker(PasskeyModel* model, QObject* parent = nullptr);
+    ~PasskeyWorker();
+
+    bool existDevice();
+    void updatePromptInfo(const PromptType &type);
+    void updateManageInfo();
+
+Q_SIGNALS:
+    void requestInit();
+    void requestActive();
+    void requestDeactivate();
+    void resetPasskeyMonitorCompleted();
+    void setPinCompleted(bool success, bool pinErr, const QString &errMsg);
+
+public Q_SLOTS:
+    void init();
+    void activate();
+    void deactivate();
+    void handlePromptOperate(const PromptType &type);
+    void handleJump();
+    void handlePromptMonitor();
+    void handleResetPasskeyMonitor();
+    void handleSetPasskeyPin(const QString &oldPin, const QString &newPin);
+
+    void requestReset();
+    void requestStopReset();
+
+private Q_SLOTS:
+    void requestMakeCredStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void requestGetAssertStatus(const QString &id, const QString &user, int finish, const QString &result);
+    void requestResetStatus(const QString &id, int finish, const QString &result);
+
+private:
+    QString getCurrentUser();
+    int getDeviceCount();
+    int getUserValidCredentialCount();
+    QDBusPendingReply<int, int> getPinStatus();
+    void makeCredential();
+    void getAssertion();
+    void reset();
+    void setPin(const QString &oldPin, const QString &newPin);
+    void deviceClose(const QString &id);
+    QString encryptKey(int keyType);
+    bool setSymmetricKey(int encryptType, int keyType, const QString &key);
+
+private:
+    PasskeyModel *m_model;
+
+    PasskeyInter *m_passkeyInter;
+
+    bool m_needPromptMonitor; // 在注册和认证过程中不需要监控设备
+    PromptType m_currentType;
+
+    bool m_resetAssertion; // 区分正常认证和重置认证
+    QString m_currentId; // 异步通信中确定id
+    bool m_needCloseDevice; // 需要关闭设备
+
+    bool m_makingCredential;
+
+    QTimer *m_promptMonitorTimer = nullptr;
+    QTimer *m_resetPasskeyMonitorTimer = nullptr;
+};

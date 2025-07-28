@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/icons/deepin/builtin">
+        <file>texts/icon_passkey_42px.svg</file>
+        <file>texts/page_identify_180px.svg</file>
+        <file>texts/page_insert_180px.svg</file>
+        <file>texts/page_touch_180px.svg</file>
+        <file>texts/page_unknown_180px.svg</file>
+        <file>texts/page_unregistered_180px.svg</file>
+        <file>texts/set_password_180px.svg</file>
+    </qresource>
+</RCC>

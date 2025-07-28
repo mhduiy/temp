@@ -1,0 +1,3 @@
+usr/lib/*/dde-control-center/*
+usr/share/dsg/configs/org.deepin.dde.control-center/*.json
+usr/share/polkit-1/actions/com.deepin.dde.passkey.dcc-plugin.policy
