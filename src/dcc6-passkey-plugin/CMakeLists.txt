@@ -17,6 +17,7 @@ find_package(PkgConfig REQUIRED)
 find_package(DdeControlCenter REQUIRED)
 find_package(Qt6 COMPONENTS Core Gui Widgets DBus Network LinguistTools Concurrent REQUIRED)
 find_package(Dtk6 COMPONENTS Core Gui REQUIRED)
+find_package(PolkitQt6-1 REQUIRED)
 
 message(STATUS "dde-control-center version:" ${DdeControlCenter_VERSION})
 
@@ -50,6 +51,7 @@ set(Passkey_Libraries
         Dtk6::Core
         Dtk6::Gui
         Dde::Control-Center
+        PolkitQt6-1::Agent
 )
 
 target_link_libraries(${Passkey_Name} PRIVATE

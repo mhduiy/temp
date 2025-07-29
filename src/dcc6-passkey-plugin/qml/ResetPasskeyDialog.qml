@@ -10,6 +10,7 @@ import QtQuick.Effects
 import org.deepin.dtk 1.0 as D
 import org.deepin.dtk.style 1.0 as DS
 import org.deepin.dcc 1.0
+import org.deepin.dcc.passkey 1.0
 
 D.DialogWindow {
     id: dialog
@@ -35,11 +36,49 @@ D.DialogWindow {
                 id: stackLayout
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: 0
+
+                /*
+                0. 提示
+                1. 重新插入安全密钥
+                2. 正在识别
+                3. 触摸两次提示
+                4. 触摸第二次
+                5. 成功
+                6. 失败
+                */
+
+                /*
+                    DescriptionStyle = 0,
+                    InsertStyle,
+                    IdentifyingStyle,
+                    FirstTouchStyle,
+                    SecondTouchStyle,
+                    ResultSuccessStyle,
+                    ResultFailedStyle
+                */
+
+                currentIndex: {
+                    switch (dccData.model.resetDialogStyle) {
+                        case Common.DescriptionStyle:
+                            return 0
+                        case Common.InsertStyle:
+                            return 1
+                        case Common.IdentifyingStyle:
+                            return 2
+                        case Common.FirstTouchStyle:
+                            return 3
+                        case Common.SecondTouchStyle:
+                            return 4
+                        case Common.ResultSuccessStyle:
+                            return 5
+                        case Common.ResultFailedStyle:
+                            return 6
+                        default:
+                            return 6
+                    }
+                }
 
                 ColumnLayout {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
 
                     D.Label {
                         Layout.fillWidth: true
@@ -71,15 +110,35 @@ D.DialogWindow {
                             text: qsTr("取消")
                             Layout.fillWidth: true
                             onClicked: {
+                                dccData.worker.deactivate()
                                 close()
                             }
                         }
 
                         D.Button {
-                            text: qsTr("重置")
+                            id: resetButton
+                            // enabled: false
                             Layout.fillWidth: true
+                            text: qsTr("重置") + "(5)"
                             onClicked: {
-                                stackLayout.currentIndex = 1
+                                dccData.worker.requestReset()
+                            }
+
+                            Timer {
+                                interval: 1000
+                                property int count: 4
+                                repeat: true
+                                running: true
+                                onTriggered: {
+                                    if (count <= 0) {
+                                        resetButton.enabled = true
+                                        resetButton.text = qsTr("重置")
+                                        running = false
+                                    } else {
+                                        resetButton.text = qsTr("重置(%1)").arg(count)
+                                        count--
+                                    }
+                                }
                             }
                         }
                     }
@@ -108,16 +167,59 @@ D.DialogWindow {
                         Layout.fillHeight: true
                     }
 
-                    RowLayout {
+                        
+                    D.Button {
+                        text: qsTr("取消")
                         Layout.fillWidth: true
                         Layout.bottomMargin: 10
-                        D.Button {
-                            text: qsTr("取消")
-                            Layout.fillWidth: true
-                            onClicked: {
-                                // close()
-                                stackLayout.currentIndex = 2
-                            }
+                        onClicked: {
+                            dccData.worker.requestStopReset()
+                            close()
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: 30
+
+                    Image {
+                        fillMode: Image.Pad
+                        Layout.alignment: Qt.AlignHCenter
+                        clip: true
+                        width: 180
+                        height: 180
+                        source: "qrc:/icons/deepin/builtin/texts/page_identify_180px.svg"
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 10
+                        
+                        D.BusyIndicator {
+                            running: visible
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                        }
+
+                        Label {
+                            text: qsTr("正在识别安全密钥")
+                            font.bold: true
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+
+                    D.Button {
+                        text: qsTr("取消")
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 10
+                        onClicked: {
+                            dccData.worker.requestStopReset()
+                            close()
                         }
                     }
                 }
@@ -152,8 +254,8 @@ D.DialogWindow {
                             text: qsTr("取消")
                             Layout.fillWidth: true
                             onClicked: {
-                                stackLayout.currentIndex = 3
-                                // close()
+                                dccData.worker.requestStopReset()
+                                close()
                             }
                         }
                     }
@@ -164,8 +266,49 @@ D.DialogWindow {
                     Layout.fillHeight: true
                     spacing: 30
 
+                    Image {
+                        source: "qrc:/icons/deepin/builtin/texts/page_touch_180px.svg"
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: 180
+                        Layout.preferredHeight: 180
+                    }
+
+                    D.Label {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        text: qsTr("请再次触摸或轻扫设备")
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 10
+                        D.Button {
+                            text: qsTr("取消")
+                            Layout.fillWidth: true
+                            onClicked: {
+                                dccData.worker.requestStopReset()
+                                close()
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: 30
+
+                    Item {
+                        Layout.preferredHeight: 50
+                    }
+
                     D.DciIcon {
-                        name: "sp_ok"
+                        name: "icon_success"
                         sourceSize: Qt.size(96, 96)
                         Layout.alignment: Qt.AlignHCenter
                     }
@@ -185,9 +328,50 @@ D.DialogWindow {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 10
                         D.Button {
-                            text: qsTr("取消")
+                            text: qsTr("完成")
                             Layout.fillWidth: true
                             onClicked: {
+                                dccData.worker.activate()
+                                close()
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: 30
+
+                    Item {
+                        Layout.preferredHeight: 50
+                    }
+
+                    D.DciIcon {
+                        name: "icon_fail"
+                        sourceSize: Qt.size(96, 96)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    D.Label {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        text: qsTr("无法完成安全密钥重置")
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 10
+                        D.Button {
+                            text: qsTr("完成")
+                            Layout.fillWidth: true
+                            onClicked: {
+                                dccData.worker.activate()
                                 close()
                             }
                         }

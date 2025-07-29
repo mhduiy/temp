@@ -10,12 +10,14 @@ import org.deepin.dcc 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.dtk.style 1.0 as DS
 
+import org.deepin.dcc.passkey 1.0
+
 DccObject {
     PassKeyPrepare {
-        visible: false
+        visible: dccData.model.currentStage === Common.Prompt
     }
 
     PassKeyManager {
-
+        visible: dccData.model.currentStage === Common.Manage
     }
 }

@@ -9,6 +9,7 @@ import QtQuick.Layouts
 import org.deepin.dcc 1.0
 import org.deepin.dtk as D
 import org.deepin.dtk.style as DS
+import org.deepin.dcc.passkey 1.0
 
 DccObject {
     id: root
@@ -33,7 +34,7 @@ DccObject {
         pageType: DccObject.Editor
         backgroundType: DccObject.Normal
         page: D.Button {
-            text: qsTr("更改")
+            text: dccData.model.existPin ? qsTr("更改") : qsTr("设置")
             onClicked: {
                 setPinDialogLoader.active = true
             }
@@ -45,6 +46,10 @@ DccObject {
         active: false
         sourceComponent: SetPinDialog {
             onClosing: {
+                console.warn("SetPinDialog ===== onClosing", oldPin, newPin);
+                if (oldPin.length > 0 && newPin.length > 0) {
+                    dccData.worker.handleSetPasskeyPin(oldPin, newPin)
+                }
                 setPinDialogLoader.active = false
             }
         }
@@ -63,6 +68,7 @@ DccObject {
         page: D.Button {
             text: qsTr("重置")
             onClicked: {
+                dccData.model.resetDialogStyle = Common.DescriptionStyle
                 resetPasskeyDialogLoader.active = true
             }
         }
